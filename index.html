@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>新HSK1級 スピードマスター | 完全版(450語)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .chinese-text { font-family: 'Noto Sans SC', sans-serif; }
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Colors */
+        :root {
+            --primary: #f59e0b; /* Amber 500 */
+            --primary-dark: #d97706;
+            --secondary: #3b82f6; /* Blue 500 */
+            --success: #22c55e;
+            --danger: #ef4444;
+            --surface: #ffffff;
+            --bg: #f8fafc;
+        }
+
+        .text-primary { color: var(--primary); }
+        .bg-primary { background-color: var(--primary); }
+        
+        /* Custom Buttons */
+        .btn-3d {
+            transition: all 0.1s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            position: relative;
+            top: 0;
+        }
+        .btn-3d:active {
+            top: 4px;
+            box-shadow: 0 0 0 rgba(0,0,0,0);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        
+        @keyframes pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* Scrollbar hide */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Progress Bar */
+        .progress-fill { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Header -->
+    <header id="app-header" class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-20 shrink-0">
+        <button id="back-btn" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 invisible transition">
+            <i class="fas fa-chevron-left text-xl"></i>
+        </button>
+        <h1 id="header-title" class="font-bold text-lg text-gray-700 tracking-wide">新HSK1級</h1>
+        <div id="header-stats" class="text-sm font-bold text-gray-400 flex items-center gap-1">
+            <!-- Stats injected here -->
+        </div>
+        <button id="settings-btn" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition" onclick="app.showSettings()">
+            <i class="fas fa-cog text-lg"></i>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-view" class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
+        <!-- Views will be injected here -->
+    </main>
+
+    <!-- Bottom Navigation (Contextual) -->
+    <div id="bottom-nav" class="p-4 bg-white border-t border-gray-100 shrink-0 hidden z-20">
+        <!-- Buttons injected here -->
+    </div>
+
+    <!-- Overlay & Modals -->
+    <div id="overlay" class="absolute inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300" onclick="app.closeModal()"></div>
+    <div id="modal" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 z-50 transform translate-y-full transition-transform duration-300">
+        <!-- Modal content -->
+    </div>
+
+</div>
+
+<script>
+// --- Data Source ---
+// HSK 1級 指定語句 (150語) + 頻出・生活語句 (Total 450 words)
+const hskData = [
+    // --- 第1章 HSK指定語句 (150語) ---
+    // 1. 代名詞
+    { id: 101, char: "我", pinyin: "wǒ", meaning: "私", category: "代名詞", example: "我是学生。", exampleMeaning: "私は学生です。" },
+    { id: 102, char: "你", pinyin: "nǐ", meaning: "あなた", category: "代名詞", example: "你好！", exampleMeaning: "こんにちは！" },
+    { id: 103, char: "他", pinyin: "tā", meaning: "彼", category: "代名詞", example: "他是谁？", exampleMeaning: "彼は誰ですか？" },
+    { id: 104, char: "她", pinyin: "tā", meaning: "彼女", category: "代名詞", example: "她是我的老师。", exampleMeaning: "彼女は私の先生です。" },
+    { id: 105, char: "我们", pinyin: "wǒmen", meaning: "私たち", category: "代名詞", example: "我们去吃饭吧。", exampleMeaning: "私たちは食事に行きましょう。" },
+    { id: 106, char: "这", pinyin: "zhè", meaning: "これ、この", category: "代名詞", example: "这是什么？", exampleMeaning: "これは何ですか？" },
+    { id: 107, char: "这儿", pinyin: "zhèr", meaning: "ここ", category: "代名詞", example: "我坐在这儿。", exampleMeaning: "私はここに座ります。" },
+    { id: 108, char: "那", pinyin: "nà", meaning: "あれ、あの", category: "代名詞", example: "那是我的书。", exampleMeaning: "あれは私の本です。" },
+    { id: 109, char: "那儿", pinyin: "nàr", meaning: "あそこ", category: "代名詞", example: "他在那儿。", exampleMeaning: "彼はあそこにいます。" },
+    { id: 110, char: "哪", pinyin: "nǎ", meaning: "どれ、どの", category: "代名詞", example: "你是哪国人？", exampleMeaning: "あなたはどこの国の人ですか？" },
+    { id: 111, char: "哪儿", pinyin: "nǎr", meaning: "どこ", category: "代名詞", example: "你去哪儿？", exampleMeaning: "あなたはどこへ行きますか？" },
+    { id: 112, char: "谁", pinyin: "shéi", meaning: "誰", category: "代名詞", example: "他是谁？", exampleMeaning: "彼は誰ですか？" },
+    { id: 113, char: "什么", pinyin: "shénme", meaning: "何", category: "代名詞", example: "你喝什么？", exampleMeaning: "あなたは何を飲みますか？" },
+    { id: 114, char: "多少", pinyin: "duōshao", meaning: "いくつ（多い）", category: "代名詞", example: "这个多少钱？", exampleMeaning: "これはいくらですか？" },
+    { id: 115, char: "几", pinyin: "jǐ", meaning: "いくつ（少ない）", category: "代名詞", example: "你有几个苹果？", exampleMeaning: "あなたはリンゴをいくつ持っていますか？" },
+    { id: 116, char: "怎么", pinyin: "zěnme", meaning: "どうやって", category: "代名詞", example: "这个字怎么读？", exampleMeaning: "この字はどう読みますか？" },
+    { id: 117, char: "怎么样", pinyin: "zěnmeyàng", meaning: "どうですか", category: "代名詞", example: "天气怎么样？", exampleMeaning: "天気はどうですか？" },
+
+    // 2. 数詞
+    { id: 201, char: "一", pinyin: "yī", meaning: "1", category: "数詞", example: "一月一日。", exampleMeaning: "1月1日。" },
+    { id: 202, char: "二", pinyin: "èr", meaning: "2", category: "数詞", example: "二月二日。", exampleMeaning: "2月2日。" },
+    { id: 203, char: "三", pinyin: "sān", meaning: "3", category: "数詞", example: "星期三。", exampleMeaning: "水曜日。" },
+    { id: 204, char: "四", pinyin: "sì", meaning: "4", category: "数詞", example: "四个苹果。", exampleMeaning: "4つのリンゴ。" },
+    { id: 205, char: "五", pinyin: "wǔ", meaning: "5", category: "数詞", example: "五个人。", exampleMeaning: "5人。" },
+    { id: 206, char: "六", pinyin: "liù", meaning: "6", category: "数詞", example: "六点。", exampleMeaning: "6時。" },
+    { id: 207, char: "七", pinyin: "qī", meaning: "7", category: "数詞", example: "七岁。", exampleMeaning: "7歳。" },
+    { id: 208, char: "八", pinyin: "bā", meaning: "8", category: "数詞", example: "八块钱。", exampleMeaning: "8元。" },
+    { id: 209, char: "九", pinyin: "jiǔ", meaning: "9", category: "数詞", example: "九月。", exampleMeaning: "9月。" },
+    { id: 210, char: "十", pinyin: "shí", meaning: "10", category: "数詞", example: "十月。", exampleMeaning: "10月。" },
+    { id: 211, char: "零", pinyin: "líng", meaning: "0", category: "数詞", example: "二零二五年。", exampleMeaning: "2025年。" },
+
+    // 3. 量詞
+    { id: 301, char: "个", pinyin: "gè", meaning: "個、人", category: "量詞", example: "一个人。", exampleMeaning: "一人。" },
+    { id: 302, char: "岁", pinyin: "suì", meaning: "歳", category: "量詞", example: "我二十岁。", exampleMeaning: "私は20歳です。" },
+    { id: 303, char: "本", pinyin: "běn", meaning: "冊", category: "量詞", example: "一本书。", exampleMeaning: "一冊の本。" },
+    { id: 304, char: "些", pinyin: "xiē", meaning: "いくつかの", category: "量詞", example: "这些书。", exampleMeaning: "これらの本。" },
+    { id: 305, char: "块", pinyin: "kuài", meaning: "元（通貨）、かたまり", category: "量詞", example: "五十块钱。", exampleMeaning: "50元。" },
+
+    // 4. 名詞 (人物・場所・時間・物)
+    { id: 401, char: "家", pinyin: "jiā", meaning: "家、家族", category: "名詞", example: "大家", exampleMeaning: "みんな" },
+    { id: 402, char: "学校", pinyin: "xuéxiào", meaning: "学校", category: "名詞", example: "我去学校。", exampleMeaning: "私は学校へ行きます。" },
+    { id: 403, char: "饭店", pinyin: "fàndiàn", meaning: "レストラン、ホテル", category: "名詞", example: "大饭店。", exampleMeaning: "大きなホテル。" },
+    { id: 404, char: "商店", pinyin: "shāngdiàn", meaning: "店", category: "名詞", example: "去商店买东西。", exampleMeaning: "店へ行って物を買う。" },
+    { id: 405, char: "医院", pinyin: "yīyuàn", meaning: "病院", category: "名詞", example: "他在医院工作。", exampleMeaning: "彼は病院で働いています。" },
+    { id: 406, char: "火车站", pinyin: "huǒchēzhàn", meaning: "駅", category: "名詞", example: "去火车站。", exampleMeaning: "駅へ行く。" },
+    { id: 407, char: "中国", pinyin: "Zhōngguó", meaning: "中国", category: "名詞", example: "中国人。", exampleMeaning: "中国人。" },
+    { id: 408, char: "北京", pinyin: "Běijīng", meaning: "北京", category: "名詞", example: "北京烤鸭。", exampleMeaning: "北京ダック。" },
+    { id: 409, char: "爸爸", pinyin: "bàba", meaning: "お父さん", category: "名詞", example: "我爸爸是医生。", exampleMeaning: "私の父は医者です。" },
+    { id: 410, char: "妈妈", pinyin: "māma", meaning: "お母さん", category: "名詞", example: "我爱妈妈。", exampleMeaning: "私は母を愛しています。" },
+    { id: 411, char: "儿子", pinyin: "érzi", meaning: "息子", category: "名詞", example: "我儿子五岁。", exampleMeaning: "私の息子は5歳です。" },
+    { id: 412, char: "女儿", pinyin: "nǚ'ér", meaning: "娘", category: "名詞", example: "她是我女儿。", exampleMeaning: "彼女は私の娘です。" },
+    { id: 413, char: "老师", pinyin: "lǎoshī", meaning: "先生", category: "名詞", example: "王老师。", exampleMeaning: "王先生。" },
+    { id: 414, char: "学生", pinyin: "xuésheng", meaning: "学生", category: "名詞", example: "他是好学生。", exampleMeaning: "彼は良い学生です。" },
+    { id: 415, char: "同学", pinyin: "tóngxué", meaning: "クラスメート", category: "名詞", example: "我们是同学。", exampleMeaning: "私たちはクラスメートです。" },
+    { id: 416, char: "朋友", pinyin: "péngyou", meaning: "友達", category: "名詞", example: "好朋友。", exampleMeaning: "親友。" },
+    { id: 417, char: "医生", pinyin: "yīshēng", meaning: "医者", category: "名詞", example: "看医生。", exampleMeaning: "医者に診てもらう。" },
+    { id: 418, char: "先生", pinyin: "xiānsheng", meaning: "～さん（男性）、夫", category: "名詞", example: "李先生。", exampleMeaning: "李さん。" },
+    { id: 419, char: "小姐", pinyin: "xiǎojiě", meaning: "～さん（女性）", category: "名詞", example: "张小姐。", exampleMeaning: "張さん。" },
+    { id: 501, char: "现在", pinyin: "xiànzài", meaning: "今", category: "名詞（時間・物）", example: "现在几点？", exampleMeaning: "今は何時ですか？" },
+    { id: 502, char: "今天", pinyin: "jīntiān", meaning: "今日", category: "名詞（時間・物）", example: "今天是星期一。", exampleMeaning: "今日は月曜日です。" },
+    { id: 503, char: "明天", pinyin: "míngtiān", meaning: "明日", category: "名詞（時間・物）", example: "明天见。", exampleMeaning: "また明日。" },
+    { id: 504, char: "昨天", pinyin: "zuótiān", meaning: "昨日", category: "名詞（時間・物）", example: "昨天很冷。", exampleMeaning: "昨日は寒かった。" },
+    { id: 505, char: "上午", pinyin: "shàngwǔ", meaning: "午前", category: "名詞（時間・物）", example: "上午好。", exampleMeaning: "おはようございます。" },
+    { id: 506, char: "中午", pinyin: "zhōngwǔ", meaning: "昼、正午", category: "名詞（時間・物）", example: "中午吃饭。", exampleMeaning: "昼にご飯を食べる。" },
+    { id: 507, char: "下午", pinyin: "xiàwǔ", meaning: "午後", category: "名詞（時間・物）", example: "下午好。", exampleMeaning: "こんにちは。" },
+    { id: 508, char: "年", pinyin: "nián", meaning: "年", category: "名詞（時間・物）", example: "明年。", exampleMeaning: "来年。" },
+    { id: 509, char: "月", pinyin: "yuè", meaning: "月", category: "名詞（時間・物）", example: "一月。", exampleMeaning: "一月。" },
+    { id: 510, char: "号", pinyin: "hào", meaning: "日", category: "名詞（時間・物）", example: "五月一号。", exampleMeaning: "5月1日。" },
+    { id: 511, char: "星期", pinyin: "xīngqī", meaning: "週、曜日", category: "名詞（時間・物）", example: "星期日。", exampleMeaning: "日曜日。" },
+    { id: 512, char: "点", pinyin: "diǎn", meaning: "時", category: "名詞（時間・物）", example: "七点。", exampleMeaning: "7時。" },
+    { id: 513, char: "分钟", pinyin: "fēnzhōng", meaning: "分", category: "名詞（時間・物）", example: "十分钟。", exampleMeaning: "10分。" },
+    { id: 514, char: "时候", pinyin: "shíhou", meaning: "時、ころ", category: "名詞（時間・物）", example: "什么时候？", exampleMeaning: "いつですか？" },
+    { id: 515, char: "字", pinyin: "zì", meaning: "字", category: "名詞（時間・物）", example: "汉字。", exampleMeaning: "漢字。" },
+    { id: 516, char: "名字", pinyin: "míngzi", meaning: "名前", category: "名詞（時間・物）", example: "你叫什么名字？", exampleMeaning: "あなたの名前は何ですか？" },
+    { id: 517, char: "书", pinyin: "shū", meaning: "本", category: "名詞（時間・物）", example: "看书。", exampleMeaning: "本を読む。" },
+    { id: 518, char: "桌子", pinyin: "zhuōzi", meaning: "机、テーブル", category: "名詞（時間・物）", example: "在桌子上。", exampleMeaning: "机の上に。" },
+    { id: 519, char: "椅子", pinyin: "yǐzi", meaning: "椅子", category: "名詞（時間・物）", example: "请坐椅子。", exampleMeaning: "椅子に座ってください。" },
+    { id: 520, char: "衣服", pinyin: "yīfu", meaning: "服", category: "名詞（時間・物）", example: "漂亮的衣服。", exampleMeaning: "きれいな服。" },
+    { id: 521, char: "水", pinyin: "shuǐ", meaning: "水", category: "名詞（時間・物）", example: "喝水。", exampleMeaning: "水を飲む。" },
+    { id: 522, char: "菜", pinyin: "cài", meaning: "料理、野菜", category: "名詞（時間・物）", example: "做菜。", exampleMeaning: "料理を作る。" },
+    { id: 523, char: "米饭", pinyin: "mǐfàn", meaning: "ご飯（米）", category: "名詞（時間・物）", example: "吃米饭。", exampleMeaning: "ご飯を食べる。" },
+    { id: 524, char: "水果", pinyin: "shuǐguǒ", meaning: "果物", category: "名詞（時間・物）", example: "买水果。", exampleMeaning: "果物を買う。" },
+    { id: 525, char: "苹果", pinyin: "píngguǒ", meaning: "リンゴ", category: "名詞（時間・物）", example: "一个苹果。", exampleMeaning: "一個のリンゴ。" },
+    { id: 526, char: "茶", pinyin: "chá", meaning: "お茶", category: "名詞（時間・物）", example: "喝茶。", exampleMeaning: "お茶を飲む。" },
+    { id: 527, char: "杯子", pinyin: "bēizi", meaning: "コップ", category: "名詞（時間・物）", example: "水杯。", exampleMeaning: "水飲みコップ。" },
+    { id: 528, char: "钱", pinyin: "qián", meaning: "お金", category: "名詞（時間・物）", example: "多少钱？", exampleMeaning: "いくらですか？" },
+    { id: 529, char: "飞机", pinyin: "fēijī", meaning: "飛行機", category: "名詞（時間・物）", example: "坐飞机。", exampleMeaning: "飛行機に乗る。" },
+    { id: 530, char: "出租车", pinyin: "chūzūchē", meaning: "タクシー", category: "名詞（時間・物）", example: "坐出租车。", exampleMeaning: "タクシーに乗る。" },
+    { id: 531, char: "电视", pinyin: "diànshì", meaning: "テレビ", category: "名詞（時間・物）", example: "看电视。", exampleMeaning: "テレビを見る。" },
+    { id: 532, char: "电脑", pinyin: "diànnǎo", meaning: "コンピュータ", category: "名詞（時間・物）", example: "玩电脑。", exampleMeaning: "パソコンで遊ぶ。" },
+    { id: 533, char: "电影", pinyin: "diànyǐng", meaning: "映画", category: "名詞（時間・物）", example: "看电影。", exampleMeaning: "映画を見る。" },
+    { id: 534, char: "天气", pinyin: "tiānqì", meaning: "天気", category: "名詞（時間・物）", example: "天气很好。", exampleMeaning: "天気がとても良い。" },
+    { id: 535, char: "猫", pinyin: "māo", meaning: "猫", category: "名詞（時間・物）", example: "小猫。", exampleMeaning: "子猫。" },
+    { id: 536, char: "狗", pinyin: "gǒu", meaning: "犬", category: "名詞（時間・物）", example: "小狗。", exampleMeaning: "子犬。" },
+    { id: 537, char: "东西", pinyin: "dōngxi", meaning: "物", category: "名詞（時間・物）", example: "买东西。", exampleMeaning: "買い物をする。" },
+
+    // 5. 動詞
+    { id: 601, char: "谢谢", pinyin: "xièxie", meaning: "ありがとう", category: "動詞", example: "谢谢你。", exampleMeaning: "ありがとう。" },
+    { id: 602, char: "不客气", pinyin: "bú kèqi", meaning: "どういたしまして", category: "動詞", example: "不客气。", exampleMeaning: "どういたしまして。" },
+    { id: 603, char: "再见", pinyin: "zàijiàn", meaning: "さようなら", category: "動詞", example: "再见！", exampleMeaning: "さようなら！" },
+    { id: 604, char: "请", pinyin: "qǐng", meaning: "どうぞ～してください", category: "動詞", example: "请进。", exampleMeaning: "どうぞお入りください。" },
+    { id: 605, char: "对不起", pinyin: "duìbuqi", meaning: "ごめんなさい", category: "動詞", example: "对不起。", exampleMeaning: "ごめんなさい。" },
+    { id: 606, char: "没关系", pinyin: "méi guānxi", meaning: "大丈夫です", category: "動詞", example: "没关系。", exampleMeaning: "気にしないでください。" },
+    { id: 607, char: "是", pinyin: "shì", meaning: "はい、〜です", category: "動詞", example: "我是学生。", exampleMeaning: "私は学生です。" },
+    { id: 608, char: "有", pinyin: "yǒu", meaning: "ある、いる", category: "動詞", example: "我有一本书。", exampleMeaning: "私は本を一冊持っています。" },
+    { id: 609, char: "看", pinyin: "kàn", meaning: "見る、読む", category: "動詞", example: "看书。", exampleMeaning: "本を読む。" },
+    { id: 610, char: "听", pinyin: "tīng", meaning: "聞く", category: "動詞", example: "听音乐。", exampleMeaning: "音楽を聴く。" },
+    { id: 611, char: "说", pinyin: "shuō", meaning: "話す", category: "動詞", example: "说汉语。", exampleMeaning: "中国語を話す。" },
+    { id: 612, char: "读", pinyin: "dú", meaning: "読む", category: "動詞", example: "读书。", exampleMeaning: "本を読む/勉強する。" },
+    { id: 613, char: "写", pinyin: "xiě", meaning: "書く", category: "動詞", example: "写字。", exampleMeaning: "字を書く。" },
+    { id: 614, char: "看见", pinyin: "kànjiàn", meaning: "見える、見かける", category: "動詞", example: "我看见他了。", exampleMeaning: "彼を見かけました。" },
+    { id: 615, char: "叫", pinyin: "jiào", meaning: "～という名前だ", category: "動詞", example: "我叫李明。", exampleMeaning: "私は李明と言います。" },
+    { id: 616, char: "来", pinyin: "lái", meaning: "来る", category: "動詞", example: "你来吗？", exampleMeaning: "あなたは来ますか？" },
+    { id: 617, char: "回", pinyin: "huí", meaning: "帰る、戻る", category: "動詞", example: "回家。", exampleMeaning: "家に帰る。" },
+    { id: 618, char: "去", pinyin: "qù", meaning: "行く", category: "動詞", example: "去学校。", exampleMeaning: "学校へ行く。" },
+    { id: 619, char: "吃", pinyin: "chī", meaning: "食べる", category: "動詞", example: "吃饭。", exampleMeaning: "ご飯を食べる。" },
+    { id: 620, char: "喝", pinyin: "hē", meaning: "飲む", category: "動詞", example: "喝茶。", exampleMeaning: "お茶を飲む。" },
+    { id: 621, char: "睡觉", pinyin: "shuìjiào", meaning: "寝る", category: "動詞", example: "去睡觉。", exampleMeaning: "寝に行く。" },
+    { id: 622, char: "打电话", pinyin: "dǎ diànhuà", meaning: "電話をかける", category: "動詞", example: "他在打电话。", exampleMeaning: "彼は電話をしています。" },
+    { id: 623, char: "做", pinyin: "zuò", meaning: "する、作る", category: "動詞", example: "做饭。", exampleMeaning: "料理を作る。" },
+    { id: 624, char: "买", pinyin: "mǎi", meaning: "買う", category: "動詞", example: "买衣服。", exampleMeaning: "服を買う。" },
+    { id: 625, char: "开", pinyin: "kāi", meaning: "開ける、運転する", category: "動詞", example: "开车。", exampleMeaning: "車を運転する。" },
+    { id: 626, char: "坐", pinyin: "zuò", meaning: "座る、乗る", category: "動詞", example: "坐飞机。", exampleMeaning: "飛行機に乗る。" },
+    { id: 627, char: "住", pinyin: "zhù", meaning: "住む", category: "動詞", example: "住在北京。", exampleMeaning: "北京に住む。" },
+    { id: 628, char: "学习", pinyin: "xuéxí", meaning: "勉強する", category: "動詞", example: "学习汉语。", exampleMeaning: "中国語を勉強する。" },
+    { id: 629, char: "工作", pinyin: "gōngzuò", meaning: "働く、仕事", category: "動詞", example: "他在工作。", exampleMeaning: "彼は仕事をしています。" },
+    { id: 630, char: "下雨", pinyin: "xià yǔ", meaning: "雨が降る", category: "動詞", example: "明天下雨。", exampleMeaning: "明日は雨が降ります。" },
+    { id: 631, char: "爱", pinyin: "ài", meaning: "愛する、好む", category: "動詞", example: "我爱你。", exampleMeaning: "愛しています。" },
+    { id: 632, char: "喜欢", pinyin: "xǐhuān", meaning: "好きだ", category: "動詞", example: "我喜欢中国。", exampleMeaning: "私は中国が好きです。" },
+    { id: 633, char: "想", pinyin: "xiǎng", meaning: "～したい、思う", category: "動詞", example: "我想去北京。", exampleMeaning: "私は北京に行きたいです。" },
+    { id: 634, char: "认识", pinyin: "rènshi", meaning: "知っている", category: "動詞", example: "认识你很高兴。", exampleMeaning: "お会いできて嬉しいです。" },
+    { id: 635, char: "会", pinyin: "huì", meaning: "～できる", category: "動詞", example: "我会说汉语。", exampleMeaning: "私は中国語が話せます。" },
+    { id: 636, char: "能", pinyin: "néng", meaning: "～できる", category: "動詞", example: "我能去吗？", exampleMeaning: "行ってもいいですか？" },
+
+    // 6. 形容詞・副詞・その他
+    { id: 701, char: "好", pinyin: "hǎo", meaning: "良い", category: "形容詞", example: "你好。", exampleMeaning: "こんにちは。" },
+    { id: 702, char: "大", pinyin: "dà", meaning: "大きい", category: "形容詞", example: "很大的苹果。", exampleMeaning: "とても大きなリンゴ。" },
+    { id: 703, char: "小", pinyin: "xiǎo", meaning: "小さい", category: "形容詞", example: "很小的猫。", exampleMeaning: "とても小さな猫。" },
+    { id: 704, char: "多", pinyin: "duō", meaning: "多い", category: "形容詞", example: "人很多。", exampleMeaning: "人がとても多い。" },
+    { id: 705, char: "少", pinyin: "shǎo", meaning: "少ない", category: "形容詞", example: "人很少。", exampleMeaning: "人がとても少ない。" },
+    { id: 706, char: "冷", pinyin: "lěng", meaning: "寒い", category: "形容詞", example: "今天很冷。", exampleMeaning: "今日はとても寒い。" },
+    { id: 707, char: "热", pinyin: "rè", meaning: "暑い", category: "形容詞", example: "夏天很热。", exampleMeaning: "夏はとても暑い。" },
+    { id: 708, char: "高兴", pinyin: "gāoxìng", meaning: "嬉しい", category: "形容詞", example: "很高兴。", exampleMeaning: "とても嬉しい。" },
+    { id: 709, char: "漂亮", pinyin: "piàoliang", meaning: "きれいだ", category: "形容詞", example: "你很漂亮。", exampleMeaning: "あなたはとても綺麗です。" },
+    { id: 801, char: "不", pinyin: "bù", meaning: "～ない（否定）", category: "副詞・その他", example: "不是。", exampleMeaning: "違います。" },
+    { id: 802, char: "没", pinyin: "méi", meaning: "～なかった（否定）", category: "副詞・その他", example: "没去。", exampleMeaning: "行かなかった。" },
+    { id: 803, char: "很", pinyin: "hěn", meaning: "とても", category: "副詞・その他", example: "很好。", exampleMeaning: "とても良い。" },
+    { id: 804, char: "太", pinyin: "tài", meaning: "あまりに～すぎる", category: "副詞・その他", example: "太好了！", exampleMeaning: "最高だ！" },
+    { id: 805, char: "都", pinyin: "dōu", meaning: "すべて、みんな", category: "副詞・その他", example: "我们都来了。", exampleMeaning: "私たちはみんな来ました。" },
+    { id: 806, char: "和", pinyin: "hé", meaning: "～と", category: "副詞・その他", example: "我和你。", exampleMeaning: "私とあなた。" },
+    { id: 807, char: "在", pinyin: "zài", meaning: "～にある、いる", category: "副詞・その他", example: "在家。", exampleMeaning: "家にいる。" },
+    { id: 808, char: "喂", pinyin: "wèi", meaning: "もしもし", category: "副詞・その他", example: "喂，你好。", exampleMeaning: "もしもし、こんにちは。" },
+    { id: 809, char: "的", pinyin: "de", meaning: "～の", category: "副詞・その他", example: "我的书。", exampleMeaning: "私の本。" },
+    { id: 810, char: "了", pinyin: "le", meaning: "（完了・変化）", category: "副詞・その他", example: "下雨了。", exampleMeaning: "雨が降ってきた。" },
+    { id: 811, char: "吗", pinyin: "ma", meaning: "～ですか？", category: "副詞・その他", example: "好吗？", exampleMeaning: "いいですか？" },
+    { id: 812, char: "呢", pinyin: "ne", meaning: "～は？", category: "副詞・その他", example: "你呢？", exampleMeaning: "あなたは？" },
+    { id: 813, char: "一点儿", pinyin: "yìdiǎnr", meaning: "少し", category: "副詞・その他", example: "喝一点儿水。", exampleMeaning: "水を少し飲む。" },
+    { id: 814, char: "前面", pinyin: "qiánmiàn", meaning: "前", category: "副詞・その他", example: "在前面。", exampleMeaning: "前にいる。" },
+    { id: 815, char: "后面", pinyin: "hòumiàn", meaning: "後ろ", category: "副詞・その他", example: "在后面。", exampleMeaning: "後ろにいる。" },
+    { id: 816, char: "里", pinyin: "lǐ", meaning: "中", category: "副詞・その他", example: "在家里。", exampleMeaning: "家の中に。" },
+
+    // --- 第2章 頻出語句 & 第3章 生活語句 (追加分) ---
+    // カレンダー・日付・数字
+    { id: 1001, char: "一月", pinyin: "yīyuè", meaning: "1月", category: "生活語句：時間", example: "一月很冷。", exampleMeaning: "1月はとても寒いです。" },
+    { id: 1002, char: "二月", pinyin: "èryuè", meaning: "2月", category: "生活語句：時間", example: "二月有二十八天。", exampleMeaning: "2月は28日あります。" },
+    { id: 1003, char: "三月", pinyin: "sānyuè", meaning: "3月", category: "生活語句：時間", example: "三月去北京。", exampleMeaning: "3月に北京へ行きます。" },
+    { id: 1004, char: "四月", pinyin: "sìyuè", meaning: "4月", category: "生活語句：時間", example: "四月天气很好。", exampleMeaning: "4月は天気が良いです。" },
+    { id: 1005, char: "五月", pinyin: "wǔyuè", meaning: "5月", category: "生活語句：時間", example: "五月去旅游。", exampleMeaning: "5月に旅行に行きます。" },
+    { id: 1006, char: "六月", pinyin: "liùyuè", meaning: "6月", category: "生活語句：時間", example: "六月很热。", exampleMeaning: "6月は暑いです。" },
+    { id: 1007, char: "七月", pinyin: "qīyuè", meaning: "7月", category: "生活語句：時間", example: "七月放假。", exampleMeaning: "7月は休みです。" },
+    { id: 1008, char: "八月", pinyin: "bāyuè", meaning: "8月", category: "生活語句：時間", example: "八月去海边。", exampleMeaning: "8月に海に行きます。" },
+    { id: 1009, char: "九月", pinyin: "jiǔyuè", meaning: "9月", category: "生活語句：時間", example: "九月开学。", exampleMeaning: "9月に学校が始まります。" },
+    { id: 1010, char: "十月", pinyin: "shíyuè", meaning: "10月", category: "生活語句：時間", example: "十月很凉快。", exampleMeaning: "10月は涼しいです。" },
+    { id: 1011, char: "十一月", pinyin: "shíyīyuè", meaning: "11月", category: "生活語句：時間", example: "十一月去爬山。", exampleMeaning: "11月に山登りに行きます。" },
+    { id: 1012, char: "十二月", pinyin: "shí'èryuè", meaning: "12月", category: "生活語句：時間", example: "十二月下雪。", exampleMeaning: "12月は雪が降ります。" },
+    { id: 1013, char: "星期一", pinyin: "xīngqīyī", meaning: "月曜日", category: "生活語句：時間", example: "星期一上班。", exampleMeaning: "月曜日に出勤します。" },
+    { id: 1014, char: "星期二", pinyin: "xīngqī'èr", meaning: "火曜日", category: "生活語句：時間", example: "星期二有课。", exampleMeaning: "火曜日に授業があります。" },
+    { id: 1015, char: "星期三", pinyin: "xīngqīsān", meaning: "水曜日", category: "生活語句：時間", example: "星期三休息。", exampleMeaning: "水曜日は休みです。" },
+    { id: 1016, char: "星期四", pinyin: "xīngqīsì", meaning: "木曜日", category: "生活語句：時間", example: "星期四去医院。", exampleMeaning: "木曜日に病院へ行きます。" },
+    { id: 1017, char: "星期五", pinyin: "xīngqīwǔ", meaning: "金曜日", category: "生活語句：時間", example: "星期五看电影。", exampleMeaning: "金曜日に映画を見ます。" },
+    { id: 1018, char: "星期六", pinyin: "xīngqīliù", meaning: "土曜日", category: "生活語句：時間", example: "星期六去公园。", exampleMeaning: "土曜日に公園へ行きます。" },
+    { id: 1019, char: "星期日", pinyin: "xīngqīrì", meaning: "日曜日", category: "生活語句：時間", example: "星期日在家。", exampleMeaning: "日曜日は家にいます。" },
+    { id: 1020, char: "星期天", pinyin: "xīngqītiān", meaning: "日曜日(口語)", category: "生活語句：時間", example: "星期天快乐。", exampleMeaning: "楽しい日曜日。" },
+    { id: 1021, char: "百", pinyin: "bǎi", meaning: "百", category: "生活語句：数", example: "一百块。", exampleMeaning: "100元。" },
+    { id: 1022, char: "第一", pinyin: "dì-yī", meaning: "第一、一番目", category: "生活語句：数", example: "这是第一次。", exampleMeaning: "これは初めてです。" },
+    { id: 1023, char: "两", pinyin: "liǎng", meaning: "2（量詞の前で）", category: "生活語句：数", example: "两个人。", exampleMeaning: "二人。" },
+
+    // 生活語句 - 名詞（人・物・場所）
+    { id: 1101, char: "爷爷", pinyin: "yéye", meaning: "おじいさん", category: "生活語句：人・物", example: "爷爷七十岁。", exampleMeaning: "祖父は70歳です。" },
+    { id: 1102, char: "奶奶", pinyin: "nǎinai", meaning: "おばあさん", category: "生活語句：人・物", example: "奶奶喜欢喝茶。", exampleMeaning: "祖母はお茶が好きです。" },
+    { id: 1103, char: "哥哥", pinyin: "gēge", meaning: "兄", category: "生活語句：人・物", example: "我有哥哥。", exampleMeaning: "私には兄がいます。" },
+    { id: 1104, char: "姐姐", pinyin: "jiějie", meaning: "姉", category: "生活語句：人・物", example: "姐姐很漂亮。", exampleMeaning: "姉はきれいです。" },
+    { id: 1105, char: "弟弟", pinyin: "dìdi", meaning: "弟", category: "生活語句：人・物", example: "弟弟在学校。", exampleMeaning: "弟は学校にいます。" },
+    { id: 1106, char: "妹妹", pinyin: "mèimei", meaning: "妹", category: "生活語句：人・物", example: "妹妹喜欢苹果。", exampleMeaning: "妹はリンゴが好きです。" },
+    { id: 1107, char: "手机", pinyin: "shǒujī", meaning: "携帯電話", category: "生活語句：人・物", example: "看手机。", exampleMeaning: "スマホを見る。" },
+    { id: 1108, char: "钱包", pinyin: "qiánbāo", meaning: "財布", category: "生活語句：人・物", example: "钱包不见了。", exampleMeaning: "財布がなくなった。" },
+    { id: 1109, char: "银行", pinyin: "yínháng", meaning: "銀行", category: "生活語句：人・物", example: "去银行。", exampleMeaning: "銀行へ行く。" },
+    { id: 1110, char: "公园", pinyin: "gōngyuán", meaning: "公園", category: "生活語句：人・物", example: "在公园玩。", exampleMeaning: "公園で遊ぶ。" },
+    { id: 1111, char: "洗手间", pinyin: "xǐshǒujiān", meaning: "トイレ", category: "生活語句：人・物", example: "洗手间在哪儿？", exampleMeaning: "トイレはどこですか？" },
+    { id: 1112, char: "左边", pinyin: "zuǒbian", meaning: "左側", category: "生活語句：人・物", example: "往左边看。", exampleMeaning: "左を見て。" },
+    { id: 1113, char: "右边", pinyin: "yòubian", meaning: "右側", category: "生活語句：人・物", example: "在右边。", exampleMeaning: "右側にある。" },
+    { id: 1114, char: "旁边", pinyin: "pángbiān", meaning: "そば、隣", category: "生活語句：人・物", example: "坐在旁边。", exampleMeaning: "隣に座る。" },
+    { id: 1115, char: "早上", pinyin: "zǎoshang", meaning: "朝", category: "生活語句：人・物", example: "早上好。", exampleMeaning: "おはよう。" },
+    { id: 1116, char: "晚上", pinyin: "wǎnshang", meaning: "夜", category: "生活語句：人・物", example: "晚上好。", exampleMeaning: "こんばんは。" },
+    { id: 1117, char: "身体", pinyin: "shēntǐ", meaning: "体、健康", category: "生活語句：人・物", example: "身体很好。", exampleMeaning: "健康です。" },
+    { id: 1118, char: "公共汽车", pinyin: "gōnggòng qìchē", meaning: "バス", category: "生活語句：人・物", example: "坐公共汽车。", exampleMeaning: "バスに乗る。" },
+    { id: 1119, char: "自行车", pinyin: "zìxíngchē", meaning: "自転車", category: "生活語句：人・物", example: "骑自行车。", exampleMeaning: "自転車に乗る。" },
+    { id: 1120, char: "教室", pinyin: "jiàoshì", meaning: "教室", category: "生活語句：人・物", example: "在教室里。", exampleMeaning: "教室の中にいる。" },
+    { id: 1121, char: "房间", pinyin: "fángjiān", meaning: "部屋", category: "生活語句：人・物", example: "我的房间。", exampleMeaning: "私の部屋。" },
+    { id: 1122, char: "门", pinyin: "mén", meaning: "ドア", category: "生活語句：人・物", example: "开门。", exampleMeaning: "ドアを開ける。" },
+    { id: 1123, char: "窗户", pinyin: "chuānghu", meaning: "窓", category: "生活語句：人・物", example: "关窗户。", exampleMeaning: "窓を閉める。" },
+    { id: 1124, char: "路", pinyin: "lù", meaning: "道", category: "生活語句：人・物", example: "过马路。", exampleMeaning: "道を渡る。" },
+    { id: 1125, char: "题", pinyin: "tí", meaning: "問題", category: "生活語句：人・物", example: "这个问题。", exampleMeaning: "この問題。" },
+    { id: 1126, char: "课", pinyin: "kè", meaning: "授業", category: "生活語句：人・物", example: "上课。", exampleMeaning: "授業に出る。" },
+    { id: 1127, char: "姓", pinyin: "xìng", meaning: "名字", category: "生活語句：人・物", example: "您贵姓？", exampleMeaning: "お名前（名字）は？" },
+    { id: 1128, char: "票", pinyin: "piào", meaning: "チケット", category: "生活語句：人・物", example: "买票。", exampleMeaning: "チケットを買う。" },
+    { id: 1129, char: "手", pinyin: "shǒu", meaning: "手", category: "生活語句：人・物", example: "洗手。", exampleMeaning: "手を洗う。" },
+    { id: 1130, char: "眼睛", pinyin: "yǎnjing", meaning: "目", category: "生活語句：人・物", example: "大眼睛。", exampleMeaning: "大きな目。" },
+    { id: 1131, char: "鱼", pinyin: "yú", meaning: "魚", category: "生活語句：人・物", example: "吃鱼。", exampleMeaning: "魚を食べる。" },
+    { id: 1132, char: "羊肉", pinyin: "yángròu", meaning: "羊肉", category: "生活語句：人・物", example: "吃羊肉。", exampleMeaning: "羊肉を食べる。" },
+    { id: 1133, char: "牛奶", pinyin: "niúnǎi", meaning: "牛乳", category: "生活語句：人・物", example: "喝牛奶。", exampleMeaning: "牛乳を飲む。" },
+    { id: 1134, char: "鸡蛋", pinyin: "jīdàn", meaning: "卵", category: "生活語句：人・物", example: "吃鸡蛋。", exampleMeaning: "卵を食べる。" },
+    { id: 1135, char: "西瓜", pinyin: "xīguā", meaning: "スイカ", category: "生活語句：人・物", example: "买西瓜。", exampleMeaning: "スイカを買う。" },
+    { id: 1136, char: "咖啡", pinyin: "kāfēi", meaning: "コーヒー", category: "生活語句：人・物", example: "喝咖啡。", exampleMeaning: "コーヒーを飲む。" },
+    { id: 1137, char: "报纸", pinyin: "bàozhǐ", meaning: "新聞", category: "生活語句：人・物", example: "看报纸。", exampleMeaning: "新聞を読む。" },
+    { id: 1138, char: "颜色", pinyin: "yánsè", meaning: "色", category: "生活語句：人・物", example: "什么颜色？", exampleMeaning: "何色ですか？" },
+    { id: 1139, char: "丈夫", pinyin: "zhàngfu", meaning: "夫", category: "生活語句：人・物", example: "我的丈夫。", exampleMeaning: "私の夫。" },
+    { id: 1140, char: "妻子", pinyin: "qīzi", meaning: "妻", category: "生活語句：人・物", example: "我的妻子。", exampleMeaning: "私の妻。" },
+    { id: 1141, char: "孩子", pinyin: "háizi", meaning: "子供", category: "生活語句：人・物", example: "小孩子。", exampleMeaning: "小さな子供。" },
+    { id: 1142, char: "男", pinyin: "nán", meaning: "男", category: "生活語句：人・物", example: "男孩儿。", exampleMeaning: "男の子。" },
+    { id: 1143, char: "女", pinyin: "nǚ", meaning: "女", category: "生活語句：人・物", example: "女孩儿。", exampleMeaning: "女の子。" },
+    { id: 1144, char: "服务员", pinyin: "fúwùyuán", meaning: "店員", category: "生活語句：人・物", example: "叫服务员。", exampleMeaning: "店員を呼ぶ。" },
+    { id: 1145, char: "药", pinyin: "yào", meaning: "薬", category: "生活語句：人・物", example: "吃药。", exampleMeaning: "薬を飲む。" },
+    { id: 1146, char: "雪", pinyin: "xuě", meaning: "雪", category: "生活語句：人・物", example: "下雪了。", exampleMeaning: "雪が降った。" },
+    { id: 1147, char: "手表", pinyin: "shǒubiǎo", meaning: "腕時計", category: "生活語句：人・物", example: "买手表。", exampleMeaning: "腕時計を買う。" },
+    { id: 1148, char: "事情", pinyin: "shìqing", meaning: "事柄", category: "生活語句：人・物", example: "有什么事情？", exampleMeaning: "何か用事がありますか？" },
+    { id: 1149, char: "考试", pinyin: "kǎoshì", meaning: "試験", category: "生活語句：人・物", example: "准备考试。", exampleMeaning: "試験の準備をする。" },
+    { id: 1150, char: "意思", pinyin: "yìsi", meaning: "意味、面白さ", category: "生活語句：人・物", example: "很有意思。", exampleMeaning: "とても面白い。" },
+
+    // 生活語句 - 動詞・形容詞・その他
+    { id: 1201, char: "累", pinyin: "lèi", meaning: "疲れた", category: "生活語句：動・形", example: "我很累。", exampleMeaning: "私はとても疲れました。" },
+    { id: 1202, char: "饿", pinyin: "è", meaning: "お腹が空いた", category: "生活語句：動・形", example: "我饿了。", exampleMeaning: "お腹が空きました。" },
+    { id: 1203, char: "饱", pinyin: "bǎo", meaning: "お腹いっぱい", category: "生活語句：動・形", example: "我吃饱了。", exampleMeaning: "お腹いっぱいです。" },
+    { id: 1204, char: "欢迎", pinyin: "huānyíng", meaning: "ようこそ", category: "生活語句：動・形", example: "欢迎光临。", exampleMeaning: "いらっしゃいませ。" },
+    { id: 1205, char: "介绍", pinyin: "jièshào", meaning: "紹介する", category: "生活語句：動・形", example: "自我介绍。", exampleMeaning: "自己紹介。" },
+    { id: 1206, char: "休息", pinyin: "xiūxi", meaning: "休む", category: "生活語句：動・形", example: "休息一下。", exampleMeaning: "少し休む。" },
+    { id: 1207, char: "运动", pinyin: "yùndòng", meaning: "運動する", category: "生活語句：動・形", example: "多运动。", exampleMeaning: "たくさん運動する。" },
+    { id: 1208, char: "开始", pinyin: "kāishǐ", meaning: "始める", category: "生活語句：動・形", example: "开始上课。", exampleMeaning: "授業を始める。" },
+    { id: 1209, char: "懂", pinyin: "dǒng", meaning: "わかる", category: "生活語句：動・形", example: "听懂了吗？", exampleMeaning: "聞き取れましたか？" },
+    { id: 1210, char: "知道", pinyin: "zhīdào", meaning: "知っている", category: "生活語句：動・形", example: "我不知道。", exampleMeaning: "私は知りません。" },
+    { id: 1211, char: "帮助", pinyin: "bāngzhù", meaning: "助ける", category: "生活語句：動・形", example: "谢谢你的帮助。", exampleMeaning: "助けてくれてありがとう。" },
+    { id: 1212, char: "给", pinyin: "gěi", meaning: "あげる", category: "生活語句：動・形", example: "给你。", exampleMeaning: "君にあげる。" },
+    { id: 1213, char: "玩", pinyin: "wán", meaning: "遊ぶ", category: "生活語句：動・形", example: "去玩儿。", exampleMeaning: "遊びに行く。" },
+    { id: 1214, char: "因为", pinyin: "yīnwèi", meaning: "なぜなら", category: "生活語句：動・形", example: "因为下雨。", exampleMeaning: "雨が降ったから。" },
+    { id: 1215, char: "所以", pinyin: "suǒyǐ", meaning: "だから", category: "生活語句：動・形", example: "所以不去。", exampleMeaning: "だから行かない。" },
+    { id: 1216, char: "可是", pinyin: "kěshì", meaning: "しかし", category: "生活語句：動・形", example: "可是很贵。", exampleMeaning: "しかし高いです。" },
+    { id: 1217, char: "一起", pinyin: "yìqǐ", meaning: "一緒に", category: "生活語句：動・形", example: "一起去。", exampleMeaning: "一緒に行く。" },
+    { id: 1218, char: "真", pinyin: "zhēn", meaning: "本当に", category: "生活語句：動・形", example: "真好。", exampleMeaning: "本当によい。" },
+    { id: 1219, char: "最", pinyin: "zuì", meaning: "最も", category: "生活語句：動・形", example: "最好。", exampleMeaning: "最高。" },
+    { id: 1220, char: "非常", pinyin: "fēicháng", meaning: "非常に", category: "生活語句：動・形", example: "非常好。", exampleMeaning: "非常に良い。" },
+    { id: 1221, char: "已经", pinyin: "yǐjīng", meaning: "すでに", category: "生活語句：動・形", example: "已经走了。", exampleMeaning: "もう行ってしまった。" },
+    { id: 1222, char: "正在", pinyin: "zhèngzài", meaning: "～しているところ", category: "生活語句：動・形", example: "正在吃饭。", exampleMeaning: "食事中です。" },
+    { id: 1223, char: "还要", pinyin: "hái yào", meaning: "まだ～したい", category: "生活語句：動・形", example: "还要那个。", exampleMeaning: "あれも欲しい。" },
+    { id: 1224, char: "别", pinyin: "bié", meaning: "～するな", category: "生活語句：動・形", example: "别说话。", exampleMeaning: "話さないで。" },
+    { id: 1225, char: "便宜", pinyin: "piányi", meaning: "安い", category: "生活語句：動・形", example: "很便宜。", exampleMeaning: "とても安い。" },
+    { id: 1226, char: "贵", pinyin: "guì", meaning: "高い", category: "生活語句：動・形", example: "太贵了。", exampleMeaning: "高すぎる。" },
+    { id: 1227, char: "红", pinyin: "hóng", meaning: "赤い", category: "生活語句：動・形", example: "红色的。", exampleMeaning: "赤色の。" },
+    { id: 1228, char: "白", pinyin: "bái", meaning: "白い", category: "生活語句：動・形", example: "白色的。", exampleMeaning: "白色の。" },
+    { id: 1229, char: "黑", pinyin: "hēi", meaning: "黒い", category: "生活語句：動・形", example: "黑色的。", exampleMeaning: "黒色の。" },
+    { id: 1230, char: "新", pinyin: "xīn", meaning: "新しい", category: "生活語句：動・形", example: "新书。", exampleMeaning: "新しい本。" },
+    { id: 1231, char: "旧", pinyin: "jiù", meaning: "古い", category: "生活語句：動・形", example: "旧车。", exampleMeaning: "古い車。" },
+    { id: 1232, char: "远", pinyin: "yuǎn", meaning: "遠い", category: "生活語句：動・形", example: "很远。", exampleMeaning: "とても遠い。" },
+    { id: 1233, char: "近", pinyin: "jìn", meaning: "近い", category: "生活語句：動・形", example: "很近。", exampleMeaning: "とても近い。" },
+    { id: 1234, char: "穿", pinyin: "chuān", meaning: "着る", category: "生活語句：動・形", example: "穿衣服。", exampleMeaning: "服を着る。" },
+    { id: 1235, char: "进", pinyin: "jìn", meaning: "入る", category: "生活語句：動・形", example: "请进。", exampleMeaning: "お入りください。" },
+    { id: 1236, char: "出", pinyin: "chū", meaning: "出る", category: "生活語句：動・形", example: "出去。", exampleMeaning: "出ていく。" },
+    { id: 1237, char: "跑步", pinyin: "pǎobù", meaning: "走る", category: "生活語句：動・形", example: "我喜欢跑步。", exampleMeaning: "私は走るのが好きです。" },
+    { id: 1238, char: "唱歌", pinyin: "chànggē", meaning: "歌う", category: "生活語句：動・形", example: "她爱唱歌。", exampleMeaning: "彼女は歌うのが好きです。" },
+    { id: 1239, char: "跳舞", pinyin: "tiàowǔ", meaning: "踊る", category: "生活語句：動・形", example: "会跳舞吗？", exampleMeaning: "踊れますか？" },
+    { id: 1240, char: "旅游", pinyin: "lǚyóu", meaning: "旅行する", category: "生活語句：動・形", example: "去旅游。", exampleMeaning: "旅行に行く。" },
+    { id: 1241, char: "生病", pinyin: "shēngbìng", meaning: "病気になる", category: "生活語句：動・形", example: "他生病了。", exampleMeaning: "彼は病気になった。" },
+    { id: 1242, char: "起床", pinyin: "qǐchuáng", meaning: "起きる", category: "生活語句：動・形", example: "早起床。", exampleMeaning: "早く起きる。" },
+    { id: 1243, char: "上班", pinyin: "shàngbān", meaning: "出勤する", category: "生活語句：動・形", example: "八点上班。", exampleMeaning: "8時に出勤する。" },
+    { id: 1244, char: "让", pinyin: "ràng", meaning: "～させる", category: "生活語句：動・形", example: "让他去。", exampleMeaning: "彼に行かせる。" },
+    { id: 1245, char: "告诉", pinyin: "gàosu", meaning: "教える、伝える", category: "生活語句：動・形", example: "告诉我。", exampleMeaning: "私に教えて。" },
+    { id: 1246, char: "找", pinyin: "zhǎo", meaning: "探す", category: "生活語句：動・形", example: "找东西。", exampleMeaning: "物を探す。" },
+    { id: 1247, char: "等", pinyin: "děng", meaning: "待つ", category: "生活語句：動・形", example: "等一下。", exampleMeaning: "ちょっと待って。" },
+    { id: 1248, char: "送", pinyin: "sòng", meaning: "送る、あげる", category: "生活語句：動・形", example: "送礼物。", exampleMeaning: "プレゼントを贈る。" },
+    { id: 1249, char: "错", pinyin: "cuò", meaning: "間違い", category: "生活語句：動・形", example: "没错。", exampleMeaning: "間違いない。" },
+    { id: 1250, char: "对", pinyin: "duì", meaning: "正しい", category: "生活語句：動・形", example: "对不起。", exampleMeaning: "ごめんなさい（対不起）。" },
+    { id: 1251, char: "快", pinyin: "kuài", meaning: "速い", category: "生活語句：動・形", example: "跑得快。", exampleMeaning: "走るのが速い。" },
+    { id: 1252, char: "慢", pinyin: "màn", meaning: "遅い", category: "生活語句：動・形", example: "慢慢吃。", exampleMeaning: "ゆっくり食べる。" },
+    { id: 1253, char: "长", pinyin: "cháng", meaning: "長い", category: "生活語句：動・形", example: "很长。", exampleMeaning: "とても長い。" },
+    { id: 1254, char: "高", pinyin: "gāo", meaning: "高い", category: "生活語句：動・形", example: "很高兴。", exampleMeaning: "（高兴の誤用回避のため例文変更）那个楼很高。", exampleMeaning: "あの建物は高い。" },
+    { id: 1255, char: "每", pinyin: "měi", meaning: "毎～", category: "生活語句：動・形", example: "每天。", exampleMeaning: "毎日。" },
+    { id: 1256, char: "您", pinyin: "nín", meaning: "あなた（敬称）", category: "生活語句：動・形", example: "您好。", exampleMeaning: "こんにちは（丁寧）。" },
+    { id: 1257, char: "它", pinyin: "tā", meaning: "それ（動物・物）", category: "生活語句：動・形", example: "它是猫。", exampleMeaning: "それは猫です。" },
+    { id: 1258, char: "大家", pinyin: "dàjiā", meaning: "みんな", category: "生活語句：動・形", example: "大家好。", exampleMeaning: "みなさんこんにちは。" },
+    { id: 1259, char: "离", pinyin: "lí", meaning: "～から（距離）", category: "生活語句：動・形", example: "离这儿很近。", exampleMeaning: "ここからとても近い。" },
+    { id: 1260, char: "往", pinyin: "wǎng", meaning: "～へ向かって", category: "生活語句：動・形", example: "往前走。", exampleMeaning: "前へ歩く。" },
+    { id: 1261, char: "从", pinyin: "cóng", meaning: "～から（起点）", category: "生活語句：動・形", example: "从北京来。", exampleMeaning: "北京から来る。" },
+    { id: 1262, char: "比", pinyin: "bǐ", meaning: "～より（比較）", category: "生活語句：動・形", example: "比我大。", exampleMeaning: "私より大きい（年上）。" },
+    { id: 1263, char: "可能", pinyin: "kěnéng", meaning: "たぶん、可能", category: "生活語句：動・形", example: "可能下雨。", exampleMeaning: "たぶん雨が降る。" },
+    { id: 1264, char: "可以", pinyin: "kěyǐ", meaning: "～してもよい", category: "生活語句：動・形", example: "我可以去吗？", exampleMeaning: "行ってもいいですか？" },
+    { id: 1265, char: "要", pinyin: "yào", meaning: "～したい、要る", category: "生活語句：動・形", example: "我要喝水。", exampleMeaning: "水を飲みたい。" },
+    { id: 1266, char: "得", pinyin: "de", meaning: "（様態補語の助詞）", category: "生活語句：動・形", example: "做得好。", exampleMeaning: "よくできた。" },
+    { id: 1267, char: "着", pinyin: "zhe", meaning: "～している（持続）", category: "生活語句：動・形", example: "看着书。", exampleMeaning: "本を読んでいる。" },
+    { id: 1268, char: "过", pinyin: "guo", meaning: "～したことがある", category: "生活語句：動・形", example: "去过中国。", exampleMeaning: "中国に行ったことがある。" },
+    { id: 1269, char: "吧", pinyin: "ba", meaning: "～でしょう、～しよう", category: "生活語句：動・形", example: "走吧。", exampleMeaning: "行こう。" },
+    { id: 1270, char: "次", pinyin: "cì", meaning: "回", category: "生活語句：動・形", example: "第一次。", exampleMeaning: "初めて。" },
+    { id: 1271, char: "公斤", pinyin: "gōngjīn", meaning: "キログラム", category: "生活語句：動・形", example: "五公斤。", exampleMeaning: "5キロ。" },
+    { id: 1272, char: "件", pinyin: "jiàn", meaning: "着、件（量詞）", category: "生活語句：動・形", example: "一件衣服。", exampleMeaning: "一着の服。" },
+    { id: 1273, char: "张", pinyin: "zhāng", meaning: "枚（量詞）", category: "生活語句：動・形", example: "一张桌子。", exampleMeaning: "一台の机。" },
+    { id: 1274, char: "日", pinyin: "rì", meaning: "日", category: "生活語句：動・形", example: "五月一日。", exampleMeaning: "5月1日。" },
+    { id: 1275, char: "元", pinyin: "yuán", meaning: "元", category: "生活語句：動・形", example: "一百元。", exampleMeaning: "100元。" },
+    { id: 1276, char: "晴", pinyin: "qíng", meaning: "晴れ", category: "生活語句：動・形", example: "晴天。", exampleMeaning: "晴れの日。" },
+    { id: 1277, char: "阴", pinyin: "yīn", meaning: "曇り", category: "生活語句：動・形", example: "阴天。", exampleMeaning: "曇りの日。" },
+    { id: 1278, char: "好吃", pinyin: "hǎochī", meaning: "美味しい", category: "生活語句：動・形", example: "很好吃。", exampleMeaning: "とても美味しい。" },
+    { id: 1279, char: "觉得", pinyin: "juéde", meaning: "思う、感じる", category: "生活語句：動・形", example: "我觉得好。", exampleMeaning: "良いと思います。" },
+    { id: 1280, char: "希望", pinyin: "xīwàng", meaning: "希望する", category: "生活語句：動・形", example: "我希望...", exampleMeaning: "私は～と願っています。" },
+    { id: 1281, char: "笑", pinyin: "xiào", meaning: "笑う", category: "生活語句：動・形", example: "大笑。", exampleMeaning: "大笑いする。" },
+    { id: 1282, char: "哭", pinyin: "kū", meaning: "泣く", category: "生活語句：動・形", example: "别哭。", exampleMeaning: "泣かないで。" },
+    { id: 1283, char: "洗", pinyin: "xǐ", meaning: "洗う", category: "生活語句：動・形", example: "洗衣服。", exampleMeaning: "服を洗う。" },
+    { id: 1284, char: "准备", pinyin: "zhǔnbèi", meaning: "準備する", category: "生活語句：動・形", example: "准备好了。", exampleMeaning: "準備できました。" },
+    { id: 1285, char: "问", pinyin: "wèn", meaning: "聞く、尋ねる", category: "生活語句：動・形", example: "问老师。", exampleMeaning: "先生に聞く。" },
+    { id: 1286, char: "回答", pinyin: "huídá", meaning: "答える", category: "生活語句：動・形", example: "回答问题。", exampleMeaning: "質問に答える。" },
+    { id: 1287, char: "路", pinyin: "lù", meaning: "道", category: "生活語句：動・形", example: "在路上。", exampleMeaning: "道中に。" },
+    { id: 1288, char: "虽然", pinyin: "suīrán", meaning: "～だけれども", category: "生活語句：動・形", example: "虽然...", exampleMeaning: "～だけれども…" },
+    { id: 1289, char: "但是", pinyin: "dànshì", meaning: "しかし", category: "生活語句：動・形", example: "但是...", exampleMeaning: "しかし…" },
+    { id: 1290, char: "再", pinyin: "zài", meaning: "また", category: "生活語句：動・形", example: "再见。", exampleMeaning: "また会いましょう。" },
+    { id: 1291, char: "就", pinyin: "jiù", meaning: "すぐに、～だけ", category: "生活語句：動・形", example: "我就去。", exampleMeaning: "すぐに行きます。" },
+    { id: 1292, char: "还", pinyin: "hái", meaning: "まだ", category: "生活語句：動・形", example: "还没去。", exampleMeaning: "まだ行っていない。" },
+    { id: 1293, char: "让", pinyin: "ràng", meaning: "～させる", category: "生活語句：動・形", example: "让我看。", exampleMeaning: "私に見せて。" },
+    { id: 1294, char: "告诉", pinyin: "gàosu", meaning: "教える", category: "生活語句：動・形", example: "告诉我。", exampleMeaning: "私に教えて。" },
+    { id: 1295, char: "找", pinyin: "zhǎo", meaning: "探す", category: "生活語句：動・形", example: "找什么？", exampleMeaning: "何を探していますか？" },
+    { id: 1296, char: "懂", pinyin: "dǒng", meaning: "わかる", category: "生活語句：動・形", example: "听懂了。", exampleMeaning: "聞き取れました。" },
+    { id: 1297, char: "开始", pinyin: "kāishǐ", meaning: "始める", category: "生活語句：動・形", example: "开始工作。", exampleMeaning: "仕事を始める。" },
+    { id: 1298, char: "准备", pinyin: "zhǔnbèi", meaning: "準備", category: "生活語句：動・形", example: "做准备。", exampleMeaning: "準備をする。" },
+    { id: 1299, char: "非常", pinyin: "fēicháng", meaning: "非常に", category: "生活語句：動・形", example: "非常好。", exampleMeaning: "非常に良い。" },
+    { id: 1300, char: "最", pinyin: "zuì", meaning: "最も", category: "生活語句：動・形", example: "最好。", exampleMeaning: "最も良い。" },
+
+    // --- 追加：定型表現・生活語句 (残り約130語) ---
+    { id: 1301, char: "饺子", pinyin: "jiǎozi", meaning: "餃子", category: "生活語句：食べ物", example: "吃饺子。", exampleMeaning: "餃子を食べる。" },
+    { id: 1302, char: "面条", pinyin: "miàntiáo", meaning: "麺", category: "生活語句：食べ物", example: "一碗面条。", exampleMeaning: "一杯の麺。" },
+    { id: 1303, char: "包子", pinyin: "bāozi", meaning: "肉まん", category: "生活語句：食べ物", example: "买包子。", exampleMeaning: "肉まんを買う。" },
+    { id: 1304, char: "面包", pinyin: "miànbāo", meaning: "パン", category: "生活語句：食べ物", example: "吃面包。", exampleMeaning: "パンを食べる。" },
+    { id: 1305, char: "啤酒", pinyin: "píjiǔ", meaning: "ビール", category: "生活語句：食べ物", example: "喝啤酒。", exampleMeaning: "ビールを飲む。" },
+    { id: 1306, char: "香蕉", pinyin: "xiāngjiāo", meaning: "バナナ", category: "生活語句：食べ物", example: "吃香蕉。", exampleMeaning: "バナナを食べる。" },
+    { id: 1307, char: "蛋糕", pinyin: "dàngāo", meaning: "ケーキ", category: "生活語句：食べ物", example: "生日蛋糕。", exampleMeaning: "誕生日ケーキ。" },
+    { id: 1308, char: "筷子", pinyin: "kuàizi", meaning: "箸", category: "生活語句：食べ物", example: "用筷子。", exampleMeaning: "箸を使う。" },
+    { id: 1309, char: "碗", pinyin: "wǎn", meaning: "茶碗", category: "生活語句：食べ物", example: "一只碗。", exampleMeaning: "一つのお椀。" },
+    { id: 1310, char: "盘子", pinyin: "pánzi", meaning: "皿", category: "生活語句：食べ物", example: "洗盘子。", exampleMeaning: "皿を洗う。" },
+    { id: 1311, char: "公司", pinyin: "gōngsī", meaning: "会社", category: "生活語句：場所", example: "去公司。", exampleMeaning: "会社に行く。" },
+    { id: 1312, char: "机场", pinyin: "jīchǎng", meaning: "空港", category: "生活語句：場所", example: "去机场。", exampleMeaning: "空港に行く。" },
+    { id: 1313, char: "超市", pinyin: "chāoshì", meaning: "スーパー", category: "生活語句：場所", example: "逛超市。", exampleMeaning: "スーパーをぶらつく。" },
+    { id: 1314, char: "图书馆", pinyin: "túshūguǎn", meaning: "図書館", category: "生活語句：場所", example: "在图书馆。", exampleMeaning: "図書館にいる。" },
+    { id: 1315, char: "宿舍", pinyin: "sùshè", meaning: "寮", category: "生活語句：場所", example: "回宿舍。", exampleMeaning: "寮に帰る。" },
+    { id: 1316, char: "食堂", pinyin: "shítáng", meaning: "食堂", category: "生活語句：場所", example: "去食堂。", exampleMeaning: "食堂に行く。" },
+    { id: 1317, char: "办公室", pinyin: "bàngōngshì", meaning: "オフィス", category: "生活語句：場所", example: "在办公室。", exampleMeaning: "オフィスにいる。" },
+    { id: 1318, char: "楼", pinyin: "lóu", meaning: "建物、階", category: "生活語句：場所", example: "上楼。", exampleMeaning: "上の階に行く。" },
+    { id: 1319, char: "地图", pinyin: "dìtú", meaning: "地図", category: "生活語句：身の回り", example: "看地图。", exampleMeaning: "地図を見る。" },
+    { id: 1320, char: "照片", pinyin: "zhàopiàn", meaning: "写真", category: "生活語句：身の回り", example: "拍照片。", exampleMeaning: "写真を撮る。" },
+    { id: 1321, char: "信", pinyin: "xìn", meaning: "手紙", category: "生活語句：身の回り", example: "写信。", exampleMeaning: "手紙を書く。" },
+    { id: 1322, char: "伞", pinyin: "sǎn", meaning: "傘", category: "生活語句：身の回り", example: "带伞。", exampleMeaning: "傘を持つ。" },
+    { id: 1323, char: "笔", pinyin: "bǐ", meaning: "ペン", category: "生活語句：身の回り", example: "一支笔。", exampleMeaning: "一本のペン。" },
+    { id: 1324, char: "纸", pinyin: "zhǐ", meaning: "紙", category: "生活語句：身の回り", example: "一张纸。", exampleMeaning: "一枚の紙。" },
+    { id: 1325, char: "药", pinyin: "yào", meaning: "薬", category: "生活語句：身の回り", example: "吃药。", exampleMeaning: "薬を飲む。" },
+    { id: 1326, char: "包", pinyin: "bāo", meaning: "鞄", category: "生活語句：身の回り", example: "买包。", exampleMeaning: "鞄を買う。" },
+    { id: 1327, char: "鞋", pinyin: "xié", meaning: "靴", category: "生活語句：身の回り", example: "穿鞋。", exampleMeaning: "靴を履く。" },
+    { id: 1328, char: "裤子", pinyin: "kùzi", meaning: "ズボン", category: "生活語句：身の回り", example: "这条裤子。", exampleMeaning: "このズボン。" },
+    { id: 1329, char: "裙子", pinyin: "qúnzi", meaning: "スカート", category: "生活語句：身の回り", example: "漂亮的裙子。", exampleMeaning: "きれいなスカート。" },
+    { id: 1330, char: "衬衫", pinyin: "chènshān", meaning: "シャツ", category: "生活語句：身の回り", example: "白衬衫。", exampleMeaning: "白いシャツ。" },
+    { id: 1331, char: "帽子", pinyin: "màozi", meaning: "帽子", category: "生活語句：身の回り", example: "戴帽子。", exampleMeaning: "帽子をかぶる。" },
+    { id: 1332, char: "头", pinyin: "tóu", meaning: "頭", category: "生活語句：身の回り", example: "头疼。", exampleMeaning: "頭が痛い。" },
+    { id: 1333, char: "发", pinyin: "fà", meaning: "髪", category: "生活語句：身の回り", example: "头发。", exampleMeaning: "髪の毛。" },
+    { id: 1334, char: "脸", pinyin: "liǎn", meaning: "顔", category: "生活語句：身の回り", example: "洗脸。", exampleMeaning: "顔を洗う。" },
+    { id: 1335, char: "嘴", pinyin: "zuǐ", meaning: "口", category: "生活語句：身の回り", example: "闭嘴。", exampleMeaning: "黙る。" },
+    { id: 1336, char: "耳朵", pinyin: "ěrduo", meaning: "耳", category: "生活語句：身の回り", example: "耳朵疼。", exampleMeaning: "耳が痛い。" },
+    { id: 1337, char: "脚", pinyin: "jiǎo", meaning: "足", category: "生活語句：身の回り", example: "洗脚。", exampleMeaning: "足を洗う。" },
+    { id: 1338, char: "树", pinyin: "shù", meaning: "木", category: "生活語句：自然", example: "种树。", exampleMeaning: "木を植える。" },
+    { id: 1339, char: "花", pinyin: "huā", meaning: "花", category: "生活語句：自然", example: "红花。", exampleMeaning: "赤い花。" },
+    { id: 1340, char: "草", pinyin: "cǎo", meaning: "草", category: "生活語句：自然", example: "绿草。", exampleMeaning: "緑の草。" },
+    { id: 1341, char: "月亮", pinyin: "yuèliang", meaning: "月", category: "生活語句：自然", example: "看月亮。", exampleMeaning: "月を見る。" },
+    { id: 1342, char: "太阳", pinyin: "tàiyáng", meaning: "太陽", category: "生活語句：自然", example: "晒太阳。", exampleMeaning: "日光浴をする。" },
+    { id: 1343, char: "熊猫", pinyin: "xióngmāo", meaning: "パンダ", category: "生活語句：自然", example: "大熊猫。", exampleMeaning: "ジャイアントパンダ。" },
+    { id: 1344, char: "鸟", pinyin: "niǎo", meaning: "鳥", category: "生活語句：自然", example: "小鸟。", exampleMeaning: "小鳥。" },
+    { id: 1345, char: "马", pinyin: "mǎ", meaning: "馬", category: "生活語句：自然", example: "骑马。", exampleMeaning: "馬に乗る。" },
+    { id: 1346, char: "羊", pinyin: "yáng", meaning: "羊", category: "生活語句：自然", example: "小羊。", exampleMeaning: "子羊。" },
+    { id: 1347, char: "鱼", pinyin: "yú", meaning: "魚", category: "生活語句：自然", example: "一条鱼。", exampleMeaning: "一匹の魚。" },
+    { id: 1348, char: "跑", pinyin: "pǎo", meaning: "走る", category: "生活語句：動・形", example: "跑步。", exampleMeaning: "ランニングする。" },
+    { id: 1349, char: "跳", pinyin: "tiào", meaning: "跳ぶ", category: "生活語句：動・形", example: "跳高。", exampleMeaning: "高く跳ぶ。" },
+    { id: 1350, char: "拿", pinyin: "ná", meaning: "持つ、取る", category: "生活語句：動・形", example: "拿书。", exampleMeaning: "本を取る。" },
+    { id: 1351, char: "换", pinyin: "huàn", meaning: "換える", category: "生活語句：動・形", example: "换钱。", exampleMeaning: "両替する。" },
+    { id: 1352, char: "关", pinyin: "guān", meaning: "閉める、消す", category: "生活語句：動・形", example: "关灯。", exampleMeaning: "電気を消す。" },
+    { id: 1353, char: "放", pinyin: "fàng", meaning: "置く、放す", category: "生活語句：動・形", example: "放在这儿。", exampleMeaning: "ここに置く。" },
+    { id: 1354, char: "记", pinyin: "jì", meaning: "覚える", category: "生活語句：動・形", example: "记住。", exampleMeaning: "しっかりと覚える。" },
+    { id: 1355, char: "忘", pinyin: "wàng", meaning: "忘れる", category: "生活語句：動・形", example: "忘了。", exampleMeaning: "忘れた。" },
+    { id: 1356, char: "借", pinyin: "jiè", meaning: "借りる、貸す", category: "生活語句：動・形", example: "借书。", exampleMeaning: "本を借りる。" },
+    { id: 1357, char: "用", pinyin: "yòng", meaning: "使う", category: "生活語句：動・形", example: "用电脑。", exampleMeaning: "パソコンを使う。" },
+    { id: 1358, char: "画", pinyin: "huà", meaning: "描く", category: "生活語句：動・形", example: "画画儿。", exampleMeaning: "絵を描く。" },
+    { id: 1359, char: "像", pinyin: "xiàng", meaning: "似ている", category: "生活語句：動・形", example: "很像。", exampleMeaning: "よく似ている。" },
+    { id: 1360, char: "疼", pinyin: "téng", meaning: "痛い", category: "生活語句：動・形", example: "手疼。", exampleMeaning: "手が痛い。" },
+    { id: 1361, char: "清楚", pinyin: "qīngchu", meaning: "はっきりしている", category: "生活語句：動・形", example: "听清楚。", exampleMeaning: "はっきりと聞く。" },
+    { id: 1362, char: "干净", pinyin: "gānjìng", meaning: "きれいだ", category: "生活語句：動・形", example: "很干净。", exampleMeaning: "とてもきれいだ。" },
+    { id: 1363, char: "安静", pinyin: "ānjìng", meaning: "静かだ", category: "生活語句：動・形", example: "安静一下。", exampleMeaning: "静かにしてください。" },
+    { id: 1364, char: "容易", pinyin: "róngyì", meaning: "簡単だ", category: "生活語句：動・形", example: "很容易。", exampleMeaning: "とても簡単だ。" },
+    { id: 1365, char: "难", pinyin: "nán", meaning: "難しい", category: "生活語句：動・形", example: "很难。", exampleMeaning: "とても難しい。" },
+    { id: 1366, char: "胖", pinyin: "pàng", meaning: "太っている", category: "生活語句：動・形", example: "长胖了。", exampleMeaning: "太った。" },
+    { id: 1367, char: "瘦", pinyin: "shòu", meaning: "痩せている", category: "生活語句：動・形", example: "很瘦。", exampleMeaning: "とても痩せている。" },
+    { id: 1368, char: "一样", pinyin: "yíyàng", meaning: "同じだ", category: "生活語句：動・形", example: "都一样。", exampleMeaning: "みんな同じだ。" },
+    { id: 1369, char: "方便", pinyin: "fāngbiàn", meaning: "便利だ", category: "生活語句：動・形", example: "很方便。", exampleMeaning: "とても便利だ。" },
+    { id: 1370, char: "小心", pinyin: "xiǎoxīn", meaning: "気をつける", category: "生活語句：動・形", example: "小心点儿。", exampleMeaning: "気をつけて。" },
+    { id: 1371, char: "努力", pinyin: "nǔlì", meaning: "努力する", category: "生活語句：動・形", example: "努力学习。", exampleMeaning: "一生懸命勉強する。" },
+    { id: 1372, char: "相信", pinyin: "xiāngxìn", meaning: "信じる", category: "生活語句：動・形", example: "相信我。", exampleMeaning: "私を信じて。" },
+    { id: 1373, char: "习惯", pinyin: "xíguàn", meaning: "慣れる", category: "生活語句：動・形", example: "习惯了。", exampleMeaning: "慣れました。" },
+    { id: 1374, char: "你好", pinyin: "nǐhǎo", meaning: "こんにちは", category: "定型表現", example: "你好！", exampleMeaning: "こんにちは！" },
+    { id: 1375, char: "早上好", pinyin: "zǎoshang hǎo", meaning: "おはよう", category: "定型表現", example: "老师，早上好。", exampleMeaning: "先生、おはようございます。" },
+    { id: 1376, char: "晚安", pinyin: "wǎn'ān", meaning: "おやすみ", category: "定型表現", example: "大家晚安。", exampleMeaning: "みなさん、おやすみなさい。" },
+    { id: 1377, char: "好久不见", pinyin: "hǎojiǔ bújiàn", meaning: "お久しぶりです", category: "定型表現", example: "好久不见！", exampleMeaning: "お久しぶりです！" },
+    { id: 1378, char: "最近怎么样", pinyin: "zuìjìn zěnmeyàng", meaning: "最近どうですか", category: "定型表現", example: "你最近怎么样？", exampleMeaning: "最近どうですか？" },
+    { id: 1379, char: "辛苦了", pinyin: "xīnkǔ le", meaning: "お疲れ様でした", category: "定型表現", example: "大家辛苦了。", exampleMeaning: "みなさんお疲れ様でした。" },
+    { id: 1380, char: "麻烦你了", pinyin: "máfan nǐ le", meaning: "お手数をおかけします", category: "定型表現", example: "麻烦你了。", exampleMeaning: "ご迷惑をおかけします。" },
+    { id: 1381, char: "不用谢", pinyin: "búyòngxiè", meaning: "どういたしまして", category: "定型表現", example: "不用谢。", exampleMeaning: "お礼には及びません。" },
+    { id: 1382, char: "别客气", pinyin: "bié kèqi", meaning: "遠慮しないで", category: "定型表現", example: "别客气。", exampleMeaning: "遠慮なさらないでください。" },
+    { id: 1383, char: "请问", pinyin: "qǐngwèn", meaning: "お尋ねします", category: "定型表現", example: "请问，厕所在哪儿？", exampleMeaning: "すみません、トイレはどこですか？" },
+    { id: 1384, char: "请进", pinyin: "qǐngjìn", meaning: "どうぞお入りください", category: "定型表現", example: "请进！", exampleMeaning: "どうぞお入りください！" },
+    { id: 1385, char: "请坐", pinyin: "qǐngzuò", meaning: "どうぞお座りください", category: "定型表現", example: "大家请坐。", exampleMeaning: "みなさんお座りください。" },
+    { id: 1386, char: "请多关照", pinyin: "qǐng duō guānzhào", meaning: "よろしくお願いします", category: "定型表現", example: "我是新来的，请多关照。", exampleMeaning: "新入りです、よろしくお願いします。" },
+    { id: 1387, char: "慢走", pinyin: "mànzǒu", meaning: "お気をつけて（見送り）", category: "定型表現", example: "慢走啊。", exampleMeaning: "お気をつけてお帰りください。" },
+    { id: 1388, char: "一路平安", pinyin: "yílù píng'ān", meaning: "道中ご無事で", category: "定型表現", example: "祝你一路平安。", exampleMeaning: "道中のご無事をお祈りします。" },
+    { id: 1389, char: "生日快乐", pinyin: "shēngrì kuàilè", meaning: "誕生日おめでとう", category: "定型表現", example: "祝你生日快乐！", exampleMeaning: "お誕生日おめでとう！" },
+    { id: 1390, char: "新年快乐", pinyin: "xīnnián kuàilè", meaning: "明けましておめでとう", category: "定型表現", example: "大家新年快乐！", exampleMeaning: "みなさん明けましておめでとう！" },
+    { id: 1391, char: "恭喜", pinyin: "gōngxǐ", meaning: "おめでとう", category: "定型表現", example: "恭喜恭喜！", exampleMeaning: "おめでとうございます！" },
+    { id: 1392, char: "干杯", pinyin: "gānbēi", meaning: "乾杯", category: "定型表現", example: "为友谊干杯！", exampleMeaning: "友情のために乾杯！" },
+    { id: 1393, char: "当然", pinyin: "dāngrán", meaning: "もちろん", category: "定型表現", example: "当然可以。", exampleMeaning: "もちろんいいですよ。" },
+    { id: 1394, char: "真的吗", pinyin: "zhēnde ma", meaning: "本当ですか", category: "定型表現", example: "真的吗？太好了！", exampleMeaning: "本当ですか？やった！" },
+    { id: 1395, char: "别担心", pinyin: "bié dānxīn", meaning: "心配しないで", category: "定型表現", example: "别担心，没事。", exampleMeaning: "心配しないで、大丈夫だから。" },
+    { id: 1396, char: "我也一样", pinyin: "wǒ yě yíyàng", meaning: "私も同じです", category: "定型表現", example: "我也一样。", exampleMeaning: "私も同じです。" },
+    { id: 1397, char: "有点儿", pinyin: "yǒudiǎnr", meaning: "少し～だ", category: "定型表現", example: "有点儿累。", exampleMeaning: "少し疲れました。" },
+    { id: 1398, char: "为什么", pinyin: "wèishénme", meaning: "なぜ", category: "定型表現", example: "为什么不去？", exampleMeaning: "なぜ行かないのですか？" },
+    { id: 1399, char: "怎么了", pinyin: "zěnme le", meaning: "どうしたの", category: "定型表現", example: "你怎么了？", exampleMeaning: "どうしたんですか？" },
+    { id: 1400, char: "怎么办", pinyin: "zěnme bàn", meaning: "どうしよう", category: "定型表現", example: "我该怎么办？", exampleMeaning: "私はどうすればいいですか？" },
+    { id: 1401, char: "加油", pinyin: "jiāyóu", meaning: "がんばれ", category: "定型表現", example: "加油！", exampleMeaning: "がんばれ！" },
+    { id: 1402, char: "太棒了", pinyin: "tài bàng le", meaning: "すごい、素晴らしい", category: "定型表現", example: "太棒了！", exampleMeaning: "すごいですね！" },
+    { id: 1403, char: "好的", pinyin: "hǎo de", meaning: "わかりました、OK", category: "定型表現", example: "好的，我知道了。", exampleMeaning: "はい、わかりました。" },
+    { id: 1404, char: "对了", pinyin: "duì le", meaning: "そうだ（話題転換）", category: "定型表現", example: "对了，你吃饭了吗？", exampleMeaning: "そうだ、ご飯食べた？" },
+    { id: 1405, char: "一共", pinyin: "yígòng", meaning: "全部で", category: "生活語句：数", example: "一共多少钱？", exampleMeaning: "全部でいくらですか？" }
+];
+
+// App Logic
+const app = {
+    state: {
+        mode: 'home', // home, learn, quiz
+        currentIndex: 0,
+        score: 0,
+        learningQueue: [], 
+        quizQueue: [],
+        masteredIds: [],
+        currentCategory: 'all'
+    },
+
+    init: function() {
+        this.loadProgress();
+        this.showHome();
+    },
+
+    loadProgress: function() {
+        const saved = localStorage.getItem('hsk1_mastered_ids');
+        if (saved) {
+            this.state.masteredIds = JSON.parse(saved);
+        }
+    },
+
+    saveProgress: function() {
+        localStorage.setItem('hsk1_mastered_ids', JSON.stringify(this.state.masteredIds));
+        this.updateHeaderStats();
+    },
+
+    updateHeaderStats: function() {
+        const total = hskData.length;
+        const learned = this.state.masteredIds.length;
+        const percentage = Math.round((learned / total) * 100);
+        
+        const statsEl = document.getElementById('header-stats');
+        statsEl.innerHTML = `
+            <div class="flex flex-col items-end">
+                <span class="text-xs text-gray-400">習得率</span>
+                <span class="text-primary text-base">${percentage}%</span>
+            </div>
+            <div class="w-10 h-10 ml-2 relative flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-gray-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                    <path class="text-yellow-400 progress-fill" stroke-dasharray="${percentage}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                </svg>
+                <i class="fas fa-medal absolute text-yellow-500 text-xs"></i>
+            </div>
+        `;
+    },
+
+    // --- Navigation ---
+
+    showHome: function() {
+        this.state.mode = 'home';
+        document.getElementById('back-btn').classList.add('invisible');
+        this.toggleBottomNav(false);
+        this.updateHeaderStats();
+
+        // Group by category
+        const categories = [...new Set(hskData.map(item => item.category))];
+        
+        const container = document.getElementById('main-view');
+        container.innerHTML = `
+            <div class="p-6 pb-24 animate-slide-up">
+                <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-3xl p-6 text-white mb-8 shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-bold mb-1">HSK1級 合格への道</h2>
+                        <p class="opacity-90 text-sm mb-4">全${hskData.length}語完全対応</p>
+                        <button onclick="app.startReview()" class="bg-white text-orange-500 px-6 py-2 rounded-full font-bold text-sm shadow-md active:scale-95 transition">
+                            <i class="fas fa-sync-alt mr-1"></i> 苦手復習
+                        </button>
+                    </div>
+                    <i class="fas fa-dragon absolute -bottom-4 -right-4 text-8xl opacity-20 transform rotate-12"></i>
+                </div>
+
+                <h3 class="font-bold text-gray-700 mb-4 px-2 border-l-4 border-primary">カテゴリー別学習</h3>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    ${categories.map(cat => {
+                        const catItems = hskData.filter(i => i.category === cat);
+                        const learnedCount = catItems.filter(i => this.state.masteredIds.includes(i.id)).length;
+                        const progress = Math.round((learnedCount / catItems.length) * 100);
+                        
+                        return `
+                        <div onclick="app.startCategorySession('${cat}')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 active:bg-gray-50 transition cursor-pointer flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl mr-4">
+                                    ${this.getCategoryIcon(cat)}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-800">${cat}</div>
+                                    <div class="text-xs text-gray-400">${catItems.length}単語</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs font-bold ${progress === 100 ? 'text-green-500' : 'text-gray-400'}">${progress}%</span>
+                                <div class="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                                    <div class="h-full bg-primary" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="mt-8">
+                    <button onclick="app.startQuiz()" class="w-full bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 active:translate-y-1 transition btn-3d">
+                        <i class="fas fa-gamepad mr-2"></i> 総合実力テスト (ランダム10問)
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    getCategoryIcon: function(cat) {
+        if (cat.includes("名詞")) return '<i class="fas fa-cube"></i>';
+        if (cat.includes("動詞")) return '<i class="fas fa-running"></i>';
+        if (cat.includes("形容詞")) return '<i class="fas fa-star"></i>';
+        if (cat.includes("代名詞")) return '<i class="fas fa-user"></i>';
+        if (cat.includes("数詞")) return '<i class="fas fa-calculator"></i>';
+        if (cat.includes("食べ物")) return '<i class="fas fa-utensils"></i>';
+        if (cat.includes("時間")) return '<i class="fas fa-clock"></i>';
+        if (cat.includes("場所")) return '<i class="fas fa-map-marker-alt"></i>';
+        if (cat.includes("自然")) return '<i class="fas fa-tree"></i>';
+        if (cat.includes("定型")) return '<i class="fas fa-comments"></i>';
+        return '<i class="fas fa-book"></i>';
+    },
+
+    // --- Learning Session ---
+
+    startCategorySession: function(category) {
+        const items = hskData.filter(i => i.category === category);
+        // Sort: unmastered first
+        this.state.learningQueue = items.sort((a, b) => {
+            const aMastered = this.state.masteredIds.includes(a.id);
+            const bMastered = this.state.masteredIds.includes(b.id);
+            return aMastered - bMastered;
+        });
+        
+        this.state.mode = 'learn';
+        this.state.currentIndex = 0;
+        
+        document.getElementById('back-btn').classList.remove('invisible');
+        document.getElementById('back-btn').onclick = () => app.showHome();
+        document.getElementById('header-title').innerText = category;
+        
+        this.showLearnCard();
+    },
+
+    startReview: function() {
+        const unmastered = hskData.filter(i => !this.state.masteredIds.includes(i.id));
+        if (unmastered.length === 0) {
+            alert("素晴らしい！全ての単語を学習済みです。");
+            return;
+        }
+        // Pick random 10
+        this.state.learningQueue = unmastered.sort(() => 0.5 - Math.random()).slice(0, 10);
+        this.state.mode = 'learn';
+        this.state.currentIndex = 0;
+        document.getElementById('back-btn').classList.remove('invisible');
+        document.getElementById('back-btn').onclick = () => app.showHome();
+        this.showLearnCard();
+    },
+
+    showLearnCard: function() {
+        const item = this.state.learningQueue[this.state.currentIndex];
+        const isMastered = this.state.masteredIds.includes(item.id);
+        const container = document.getElementById('main-view');
+        
+        container.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center p-6 animate-pop pb-24">
+                <div class="w-full bg-white rounded-3xl p-8 text-center card-shadow mb-6 border border-slate-100 relative overflow-hidden">
+                    
+                    ${isMastered ? '<div class="absolute top-0 left-0 bg-green-100 text-green-600 px-3 py-1 rounded-br-xl text-xs font-bold"><i class="fas fa-check-circle"></i> 習得済</div>' : ''}
+                    
+                    <button onclick="app.speak('${item.char}')" class="absolute top-4 right-4 text-gray-300 hover:text-primary transition w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-50">
+                        <i class="fas fa-volume-up text-2xl"></i>
+                    </button>
+
+                    <div class="text-sm text-gray-400 font-bold mb-2 tracking-widest uppercase">HSK 1</div>
+                    <div class="text-6xl font-bold text-gray-800 mb-2 chinese-text mt-4">${item.char}</div>
+                    <div class="text-2xl text-primary font-serif mb-6">${item.pinyin}</div>
+                    <div class="w-12 h-1 bg-gray-100 mx-auto mb-6 rounded-full"></div>
+                    <div class="text-2xl font-bold text-gray-700">${item.meaning}</div>
+                </div>
+
+                <div class="w-full bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    <div class="flex items-start">
+                        <div class="bg-blue-50 text-blue-500 rounded-lg p-2 mr-3 shrink-0">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <div>
+                            <div class="text-lg text-gray-800 chinese-text mb-1 flex items-center cursor-pointer" onclick="app.speak('${item.example}')">
+                                ${item.example} 
+                                <i class="fas fa-volume-up ml-2 text-xs text-gray-300"></i>
+                            </div>
+                            <div class="text-sm text-gray-500">${item.exampleMeaning}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Render Bottom Actions
+        const nav = document.getElementById('bottom-nav');
+        nav.classList.remove('hidden');
+        nav.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="app.markAsMastered(${item.id}, false)" class="bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl btn-3d">
+                    <i class="fas fa-redo mr-2"></i> まだ
+                </button>
+                <button onclick="app.markAsMastered(${item.id}, true)" class="bg-primary text-white font-bold py-4 rounded-2xl btn-3d shadow-orange-200">
+                    <i class="fas fa-check mr-2"></i> 覚えた
+                </button>
+            </div>
+        `;
+
+        setTimeout(() => app.speak(item.char), 300);
+    },
+
+    markAsMastered: function(id, learned) {
+        if (learned) {
+            if (!this.state.masteredIds.includes(id)) {
+                this.state.masteredIds.push(id);
+                this.saveProgress();
+                // Show mini confetti or success feedback here if desired
+            }
+        } else {
+            // Remove from mastered if it was there
+            this.state.masteredIds = this.state.masteredIds.filter(mid => mid !== id);
+            this.saveProgress();
+        }
+
+        this.state.currentIndex++;
+        if (this.state.currentIndex >= this.state.learningQueue.length) {
+            this.showSessionComplete();
+        } else {
+            this.showLearnCard();
+        }
+    },
+
+    showSessionComplete: function() {
+        this.toggleBottomNav(false);
+        const container = document.getElementById('main-view');
+        container.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center p-6 text-center animate-pop">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-green-500 text-4xl mb-6">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">セッション完了！</h2>
+                <p class="text-gray-500 mb-8">着実に力がついていますね。</p>
+                <button onclick="app.showHome()" class="bg-primary text-white font-bold py-3 px-8 rounded-full shadow-lg btn-3d">
+                    ホームに戻る
+                </button>
+            </div>
+        `;
+    },
+
+    // --- Quiz Logic ---
+
+    startQuiz: function() {
+        this.state.mode = 'quiz';
+        this.state.score = 0;
+        this.state.currentIndex = 0;
+        // Generate random 10 questions from ALL data
+        const pool = hskData.sort(() => 0.5 - Math.random()).slice(0, 10);
+        this.state.quizQueue = pool.map(item => this.generateQuestion(item));
+        
+        document.getElementById('back-btn').classList.remove('invisible');
+        document.getElementById('back-btn').onclick = () => app.showHome();
+        this.toggleBottomNav(false);
+        this.showQuizCard();
+    },
+
+    generateQuestion: function(target) {
+        // Types: 1: Audio->Meaning, 2: Char->Meaning, 3: Meaning->Char
+        const type = Math.floor(Math.random() * 3) + 1;
+        const distractors = hskData.filter(d => d.id !== target.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+        const options = [target, ...distractors].sort(() => 0.5 - Math.random());
+        return { target, type, options };
+    },
+
+    showQuizCard: function() {
+        const q = this.state.quizQueue[this.state.currentIndex];
+        const container = document.getElementById('main-view');
+        
+        let headerContent = '';
+        if (q.type === 1) {
+            headerContent = `
+                <div class="w-20 h-20 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-3xl mb-4 cursor-pointer hover:bg-blue-200 transition" onclick="app.speak('${q.target.char}')">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+                <div class="text-gray-500 font-bold">何と言いましたか？</div>
+            `;
+            setTimeout(() => app.speak(q.target.char), 300);
+        } else if (q.type === 2) {
+            headerContent = `
+                <div class="text-5xl font-bold text-gray-800 chinese-text mb-2">${q.target.char}</div>
+                <div class="text-gray-400 font-serif">${q.target.pinyin}</div>
+                <div class="text-gray-500 text-sm mt-4 font-bold">意味を選んでください</div>
+            `;
+        } else {
+            headerContent = `
+                <div class="text-2xl font-bold text-gray-800 mb-4">${q.target.meaning}</div>
+                <div class="text-gray-500 text-sm font-bold">中国語を選んでください</div>
+            `;
+        }
+
+        const optionsHtml = q.options.map((opt, idx) => {
+            const label = (q.type === 1 || q.type === 2) ? opt.meaning : `<span class="chinese-text font-bold text-lg">${opt.char}</span>`;
+            return `
+                <button onclick="app.checkAnswer(${opt.id}, this)" class="option-btn w-full bg-white p-4 rounded-xl mb-3 text-left font-bold text-gray-600 shadow-sm border-2 border-transparent hover:border-gray-100 relative overflow-hidden transition-all active:scale-95">
+                    <span class="inline-block w-6 h-6 bg-gray-100 rounded-full text-xs text-gray-400 text-center leading-6 mr-3">${idx+1}</span>
+                    ${label}
+                </button>
+            `;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center min-h-full p-6 animate-slide-up">
+                <div class="flex-1 flex flex-col items-center justify-center w-full mb-6">
+                    ${headerContent}
+                </div>
+                <div class="w-full">
+                    ${optionsHtml}
+                </div>
+                <div class="h-10"></div>
+            </div>
+        `;
+    },
+
+    checkAnswer: function(id, btn) {
+        if (document.querySelector('.border-green-500')) return; // Prevent double click
+
+        const q = this.state.quizQueue[this.state.currentIndex];
+        const isCorrect = id === q.target.id;
+        const allBtns = document.querySelectorAll('.option-btn');
+
+        if (isCorrect) {
+            btn.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+            this.state.score += 10;
+            app.speak('太棒了'); // Excellent in Chinese (simple feedback)
+        } else {
+            btn.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+            // Show correct
+            allBtns.forEach(b => {
+                if (b.innerHTML.includes(q.type === 3 ? q.target.char : q.target.meaning)) {
+                    b.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+                }
+            });
+        }
+
+        // Auto advance
+        setTimeout(() => {
+            this.state.currentIndex++;
+            if (this.state.currentIndex >= this.state.quizQueue.length) {
+                this.showQuizResult();
+            } else {
+                this.showQuizCard();
+            }
+        }, 1200);
+    },
+
+    showQuizResult: function() {
+        const container = document.getElementById('main-view');
+        container.innerHTML = `
+            <div class="h-full flex flex-col items-center justify-center p-6 text-center animate-pop">
+                <div class="text-6xl mb-4">🏆</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">クイズ終了！</h2>
+                <div class="text-5xl font-bold text-primary mb-6">${this.state.score}<span class="text-lg text-gray-400 ml-2">/ 100</span></div>
+                
+                <button onclick="app.showHome()" class="w-full bg-white border-2 border-gray-100 text-gray-600 font-bold py-3 rounded-xl mb-3">
+                    ホームに戻る
+                </button>
+                <button onclick="app.startQuiz()" class="w-full bg-primary text-white font-bold py-3 rounded-xl btn-3d">
+                    もう一度挑戦
+                </button>
+            </div>
+        `;
+    },
+
+    // --- Utilities ---
+    toggleBottomNav: function(show) {
+        const nav = document.getElementById('bottom-nav');
+        if (show) nav.classList.remove('hidden');
+        else nav.classList.add('hidden');
+    },
+
+    speak: function(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'zh-CN';
+            u.rate = 0.8;
+            window.speechSynthesis.speak(u);
+        }
+    },
+
+    showSettings: function() {
+        if(confirm("学習データをリセットしますか？")) {
+            localStorage.removeItem('hsk1_mastered_ids');
+            this.state.masteredIds = [];
+            this.showHome();
+        }
+    }
+};
+
+// Start
+app.init();
+</script>
+</body>
+</html>
