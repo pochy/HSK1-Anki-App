@@ -18,15 +18,15 @@
       <span class="text-xs font-medium">Cards</span>
     </a>
     <a
-      href="/quiz"
+      href="/game"
       class="flex flex-col items-center justify-center transition-all active:bg-gray-50 relative {$page.url.pathname.startsWith(
-        '/quiz'
+        '/game'
       )
         ? 'text-primary font-bold bg-orange-50'
         : 'text-gray-400 hover:text-primary'}"
     >
       <i class="fas fa-gamepad text-xl mb-1"></i>
-      <span class="text-xs font-medium">Quiz</span>
+      <span class="text-xs font-medium">Game</span>
     </a>
     <a
       href="/list"
