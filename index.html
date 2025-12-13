@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>新HSK1級 スピードマスター | 完全版(450語)</title>
+  <title>HSK スピードマスター | 中国語学習</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link
@@ -137,7 +137,7 @@
         class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 invisible transition">
         <i class="fas fa-chevron-left text-xl"></i>
       </button>
-      <h1 id="header-title" class="font-bold text-lg text-gray-700 tracking-wide">新HSK1級</h1>
+      <h1 id="header-title" class="font-bold text-lg text-gray-700 tracking-wide">HSK学習</h1>
       <div id="header-stats" class="text-sm font-bold text-gray-400 flex items-center gap-1">
         <!-- Stats injected here -->
       </div>
@@ -457,7 +457,7 @@
       { id: 1241, char: "生病", pinyin: "shēngbìng", meaning: "病気になる", category: "生活語句：動・形", example: "他生病了。", exampleMeaning: "彼は病気になった。" },
       { id: 1242, char: "起床", pinyin: "qǐchuáng", meaning: "起きる", category: "生活語句：動・形", example: "早起床。", exampleMeaning: "早く起きる。" },
       { id: 1243, char: "上班", pinyin: "shàngbān", meaning: "出勤する", category: "生活語句：動・形", example: "八点上班。", exampleMeaning: "8時に出勤する。" },
-      { id: 1244, char: "让", pinyin: "ràng", meaning: "～させる", category: "生活語句：動・形", example: "让他去。", exampleMeaning: "彼に行かせる。" },
+      { id: 1244, char: "让", pinyin: "ràng", meaning: "～させる", category: "生活語句：動・形", example: "让我去。", exampleMeaning: "行かせてください。" },
       { id: 1245, char: "告诉", pinyin: "gàosu", meaning: "教える、伝える", category: "生活語句：動・形", example: "告诉我。", exampleMeaning: "私に教えて。" },
       { id: 1246, char: "找", pinyin: "zhǎo", meaning: "探す", category: "生活語句：動・形", example: "找东西。", exampleMeaning: "物を探す。" },
       { id: 1247, char: "等", pinyin: "děng", meaning: "待つ", category: "生活語句：動・形", example: "等一下。", exampleMeaning: "ちょっと待って。" },
@@ -626,7 +626,7 @@
     // App Logic
     const app = {
       state: {
-        mode: 'home', // home, learn, quiz
+        mode: 'levelSelect', // 初期モードを変更
         currentIndex: 0,
         score: 0,
         learningQueue: [],
@@ -640,7 +640,7 @@
         this.setDynamicTitle();
         this.cacheEls();
         this.loadProgress();
-        this.showHome();
+        this.showLevelSelect(); // 初期画面を変更
         this.initVoices();
       },
 
@@ -656,7 +656,7 @@
       },
 
       setDynamicTitle: function () {
-        document.title = `新HSK1級 スピードマスター | 完全版(${hskData.length}語)`;
+        document.title = `HSK スピードマスター | 中国語学習`;
       },
 
       setHeaderTitle: function (title) {
@@ -734,12 +734,55 @@
 
       // --- Navigation ---
 
-      showHome: function () {
-        this.state.mode = 'home';
+      // 新しい画面: レベル選択
+      showLevelSelect: function () {
+        this.state.mode = 'levelSelect';
         this.setBackButton({ visible: false });
-        this.setHeaderTitle('新HSK1級');
+        this.setHeaderTitle('HSK学習アプリ');
         this.toggleBottomNav(false);
-        this.updateHeaderStats();
+        // トップ画面ではスタッツを非表示にする（すっきりさせるため）
+        this.els.headerStats.innerHTML = '';
+
+        this.setViewHtml(`
+            <div class="p-6 pb-24 animate-slide-up flex flex-col items-center">
+                <h2 class="text-2xl font-bold text-gray-700 mb-6 mt-4">レベルを選択</h2>
+                <div class="grid grid-cols-2 gap-4 w-full">
+                    <button onclick="app.selectLevel(1)" class="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-6 rounded-2xl shadow-lg transform transition active:scale-95 flex flex-col items-center justify-center h-40 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                            <i class="fas fa-dragon text-6xl"></i>
+                        </div>
+                        <span class="text-3xl font-bold mb-2">1級</span>
+                        <span class="text-xs opacity-90">入門 (450語)</span>
+                        <div class="mt-3 bg-white/20 px-3 py-1 rounded-full text-xs">学習する</div>
+                    </button>
+
+                    ${[2, 3, 4, 5, 6].map(level => `
+                        <button onclick="app.selectLevel(${level})" class="bg-white border-2 border-gray-100 text-gray-400 p-6 rounded-2xl shadow-sm transform transition active:scale-95 flex flex-col items-center justify-center h-40">
+                            <span class="text-2xl font-bold mb-2">${level}級</span>
+                            <span class="text-xs">准备中...</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `);
+      },
+
+      selectLevel: function (level) {
+        if (level === 1) {
+          this.showLevelHome();
+        } else {
+          alert(`HSK${level}級コースは現在準備中です。\nまずは1級から始めましょう！`);
+        }
+      },
+
+      // 旧 showHome -> showLevelHome (1級のホーム画面)
+      showLevelHome: function () {
+        this.state.mode = 'levelHome';
+        // バックボタンでレベル選択に戻る
+        this.setBackButton({ visible: true, onClick: () => app.showLevelSelect() });
+        this.setHeaderTitle('HSK1級');
+        this.toggleBottomNav(false);
+        this.updateHeaderStats(); // スタッツを表示
 
         // Group by category
         const categories = [...new Set(hskData.map(item => item.category))];
@@ -824,7 +867,8 @@
         this.state.mode = 'learn';
         this.state.currentIndex = 0;
 
-        this.setBackButton({ visible: true, onClick: () => app.showHome() });
+        // 戻るボタンの挙動を修正: 1級ホームに戻る
+        this.setBackButton({ visible: true, onClick: () => app.showLevelHome() });
         this.setHeaderTitle(category);
 
         this.showLearnCard();
@@ -840,7 +884,7 @@
         this.state.learningQueue = this.sample(unmastered, 10);
         this.state.mode = 'learn';
         this.state.currentIndex = 0;
-        this.setBackButton({ visible: true, onClick: () => app.showHome() });
+        this.setBackButton({ visible: true, onClick: () => app.showLevelHome() });
         this.setHeaderTitle('苦手復習');
         this.showLearnCard();
       },
@@ -930,8 +974,8 @@
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">セッション完了！</h2>
                 <p class="text-gray-500 mb-8">着実に力がついていますね。</p>
-                <button onclick="app.showHome()" class="bg-primary text-white font-bold py-3 px-8 rounded-full shadow-lg btn-3d">
-                    ホームに戻る
+                <button onclick="app.showLevelHome()" class="bg-primary text-white font-bold py-3 px-8 rounded-full shadow-lg btn-3d">
+                    メニューに戻る
                 </button>
             </div>
         `);
@@ -949,7 +993,7 @@
         const pool = this.sample(hskData, 10);
         this.state.quizQueue = pool.map(item => this.generateQuestion(item));
 
-        this.setBackButton({ visible: true, onClick: () => app.showHome() });
+        this.setBackButton({ visible: true, onClick: () => app.showLevelHome() });
         this.toggleBottomNav(false);
         this.showQuizCard();
       },
@@ -1047,7 +1091,7 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">クイズ終了！</h2>
                 <div class="text-5xl font-bold text-primary mb-6">${this.state.score}<span class="text-lg text-gray-400 ml-2">/ 100</span></div>
                 
-                <button onclick="app.showHome()" class="w-full bg-white border-2 border-gray-100 text-gray-600 font-bold py-3 rounded-xl mb-3">
+                <button onclick="app.showLevelHome()" class="w-full bg-white border-2 border-gray-100 text-gray-600 font-bold py-3 rounded-xl mb-3">
                     ホームに戻る
                 </button>
                 <button onclick="app.startQuiz()" class="w-full bg-primary text-white font-bold py-3 rounded-xl btn-3d">
@@ -1079,7 +1123,7 @@
         if (confirm("学習データをリセットしますか？")) {
           localStorage.removeItem('hsk1_mastered_ids');
           this.state.masteredIds = [];
-          this.showHome();
+          this.showLevelHome();
         }
       }
     };
