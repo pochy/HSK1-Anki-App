@@ -1,6 +1,11 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { headerTitle, showBottomNav, currentLevel, muted } from "$lib/stores/app";
+  import {
+    headerTitle,
+    showBottomNav,
+    currentLevel,
+    muted,
+  } from "$lib/stores/app";
   import {
     city,
     cards,
@@ -13,7 +18,12 @@
     resetCity,
     addCardToBuilding,
   } from "$lib/stores/civ-maintenance";
-  import type { Building, Card, BuildingType, QuizResult } from "$lib/types/civ-maintenance";
+  import type {
+    Building,
+    Card,
+    BuildingType,
+    QuizResult,
+  } from "$lib/types/civ-maintenance";
   import {
     getBuildingEmoji,
     calculateQuizRating,
@@ -26,6 +36,7 @@
   let showAddCardModal = $state(false);
   let showMaintenanceModal = $state(false);
   let showQuiz = $state(false);
+  let showHelpModal = $state(false);
   let currentQuizIndex = $state(0);
   let quizCards = $state<Card[]>([]);
   let quizResults = $state<QuizResult[]>([]);
@@ -65,10 +76,13 @@
   }
 
   // 施設を建設
-  function handleConstructBuilding(buildingType: BuildingType, category: string) {
+  function handleConstructBuilding(
+    buildingType: BuildingType,
+    category: string
+  ) {
     const gridSize = $city.layout.grid_size;
     const existingBuildings = $city.buildings;
-    
+
     // 空いている位置を探す
     let found = false;
     for (let y = 0; y < gridSize && !found; y++) {
@@ -96,12 +110,12 @@
     const buildingCards = $cards.filter(
       (c) => c.building_id === building.building_id
     );
-    
+
     if (buildingCards.length === 0) {
       alert("この施設にはカードがありません。カードを追加してください。");
       return;
     }
-    
+
     // 復習が必要なカードを取得
     // 1. 警告フラグが立っているカード
     // 2. 次回復習日が過ぎているカード
@@ -109,8 +123,8 @@
     const now = Date.now();
     const today = new Date(now).toISOString().split("T")[0];
     const cardsToReview = buildingCards.filter(
-      (c) => 
-        c.warning || 
+      (c) =>
+        c.warning ||
         new Date(c.next_review) <= new Date(today) ||
         c.metadata.total_reviews === 0
     );
@@ -167,9 +181,12 @@
 
     // 次のクイズへ
     currentQuizIndex++;
-    setTimeout(() => {
-      startNextQuiz();
-    }, isCorrect ? 1000 : 500);
+    setTimeout(
+      () => {
+        startNextQuiz();
+      },
+      isCorrect ? 1000 : 500
+    );
   }
 
   // メンテナンスを完了
@@ -189,10 +206,11 @@
     quizResults = [];
     currentQuizIndex = 0;
     playSound("success");
-    
+
     // 施設詳細を更新
     selectedBuilding.set(
-      $city.buildings.find((b) => b.building_id === building.building_id) || null
+      $city.buildings.find((b) => b.building_id === building.building_id) ||
+        null
     );
   }
 
@@ -320,7 +338,9 @@
   <div class="bg-white rounded-xl p-4 mb-4 shadow-sm">
     <div class="grid grid-cols-4 gap-2 text-center mb-3">
       <div>
-        <div class="text-lg font-bold text-blue-600">{$city.statistics.total_buildings}</div>
+        <div class="text-lg font-bold text-blue-600">
+          {$city.statistics.total_buildings}
+        </div>
         <div class="text-xs text-gray-500">施設</div>
       </div>
       <div>
@@ -330,11 +350,15 @@
         <div class="text-xs text-gray-500">維持率</div>
       </div>
       <div>
-        <div class="text-lg font-bold text-amber-600">{$city.statistics.active_cards}</div>
+        <div class="text-lg font-bold text-amber-600">
+          {$city.statistics.active_cards}
+        </div>
         <div class="text-xs text-gray-500">アクティブ</div>
       </div>
       <div>
-        <div class="text-lg font-bold text-purple-600">{$city.statistics.city_happiness}</div>
+        <div class="text-lg font-bold text-purple-600">
+          {$city.statistics.city_happiness}
+        </div>
         <div class="text-xs text-gray-500">幸福度</div>
       </div>
     </div>
@@ -376,6 +400,13 @@
       <h3 class="font-bold text-gray-800">都市マップ</h3>
       <div class="flex gap-2">
         <button
+          onclick={() => (showHelpModal = true)}
+          class="px-3 py-1 bg-gray-300 text-gray-700 rounded-lg text-sm active:scale-95"
+          title="遊び方"
+        >
+          <i class="fas fa-question-circle"></i>
+        </button>
+        <button
           onclick={() => (showConstructModal = true)}
           class="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm active:scale-95"
         >
@@ -394,9 +425,7 @@
       <div class="text-center py-12 text-gray-400">
         <i class="fas fa-city text-4xl mb-2"></i>
         <p class="text-sm">まだ施設がありません</p>
-        <p class="text-xs mt-1">
-          「建設」ボタンから施設を建設しましょう
-        </p>
+        <p class="text-xs mt-1">「建設」ボタンから施設を建設しましょう</p>
       </div>
     {:else}
       <div class="grid grid-cols-2 gap-3">
@@ -424,7 +453,8 @@
             </div>
             <div class="w-full bg-gray-200 rounded-full h-1.5 mb-1">
               <div
-                class="h-1.5 rounded-full transition-all {building.metrics.maintenance_level >= 0.7
+                class="h-1.5 rounded-full transition-all {building.metrics
+                  .maintenance_level >= 0.7
                   ? 'bg-green-500'
                   : building.metrics.maintenance_level >= 0.3
                     ? 'bg-yellow-500'
@@ -444,7 +474,9 @@
   <!-- 施設詳細モーダル -->
   {#if showBuildingDetail && $selectedBuilding}
     {@const building = $selectedBuilding}
-    {@const buildingCards = $cards.filter((c) => c.building_id === building.building_id)}
+    {@const buildingCards = $cards.filter(
+      (c) => c.building_id === building.building_id
+    )}
     <div
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
       role="button"
@@ -489,7 +521,8 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    class="h-3 rounded-full transition-all {building.metrics.maintenance_level >= 0.7
+                    class="h-3 rounded-full transition-all {building.metrics
+                      .maintenance_level >= 0.7
                       ? 'bg-green-500'
                       : building.metrics.maintenance_level >= 0.3
                         ? 'bg-yellow-500'
@@ -502,7 +535,8 @@
               <div class="flex justify-between text-sm">
                 <span class="text-gray-600">カード数</span>
                 <span class="font-bold">
-                  {building.metrics.active_cards} / {building.metrics.population}
+                  {building.metrics.active_cards} / {building.metrics
+                    .population}
                 </span>
               </div>
 
@@ -674,13 +708,13 @@
         role="dialog"
         onclick={(e) => e.stopPropagation()}
       >
-        <h3 class="text-xl font-bold text-gray-800 mb-4">
-          カードを追加
-        </h3>
+        <h3 class="text-xl font-bold text-gray-800 mb-4">カードを追加</h3>
         <div class="flex-1 overflow-y-auto">
           {#each $currentLevel === 1 ? hsk1 : hsk2 as word}
             {@const isAdded = $cards.some(
-              (c) => c.content.wordId === word.id && c.building_id === $selectedBuilding?.building_id
+              (c) =>
+                c.content.wordId === word.id &&
+                c.building_id === $selectedBuilding?.building_id
             )}
             <button
               onclick={() => addCardToSelectedBuilding(word.id)}
@@ -708,6 +742,124 @@
         <button
           onclick={() => (showAddCardModal = false)}
           class="mt-4 w-full bg-gray-200 text-gray-700 py-2 rounded-xl active:scale-95"
+        >
+          閉じる
+        </button>
+      </div>
+    </div>
+  {/if}
+
+  <!-- ヘルプモーダル -->
+  {#if showHelpModal}
+    <div
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      role="button"
+      tabindex="0"
+      onclick={() => (showHelpModal = false)}
+      onkeydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          showHelpModal = false;
+        }
+      }}
+    >
+      <div
+        class="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto animate-pop"
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
+        onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
+      >
+        <div class="text-center mb-6">
+          <div class="text-5xl mb-4">🏛️</div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            文明維持シミュレーション
+          </h3>
+          <p class="text-sm text-gray-600">遊び方ガイド</p>
+        </div>
+
+        <div class="space-y-4 text-sm text-gray-700">
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+              <i class="fas fa-building text-blue-500 mr-2"></i>
+              1. 施設を建設
+            </h4>
+            <p class="ml-6 mb-2">
+              知識のカテゴリーごとに施設を建設します。図書館、病院、発電所など、10種類の施設から選択できます。
+            </p>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+              <i class="fas fa-id-card text-green-500 mr-2"></i>
+              2. カードを追加
+            </h4>
+            <p class="ml-6 mb-2">
+              施設をタップして「カード追加」ボタンから、HSK単語をカードとして施設に追加します。カードは施設を稼働させる「構成員」です。
+            </p>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+              <i class="fas fa-tools text-amber-500 mr-2"></i>
+              3. メンテナンス（復習）
+            </h4>
+            <p class="ml-6 mb-2">
+              施設をタップして「メンテナンス」ボタンを押すと、復習が必要なカードをクイズ形式で復習できます。復習を怠ると、カードが機能停止し、施設の維持レベルが下がります。
+            </p>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+              <i class="fas fa-chart-line text-purple-500 mr-2"></i>
+              4. 維持レベル
+            </h4>
+            <p class="ml-6 mb-2">
+              維持レベルは、施設に所属するカードの貢献度の平均値です。復習を適切に行うことで維持レベルが上がり、施設の生産効率が向上します。
+            </p>
+            <ul
+              class="ml-6 list-disc list-inside space-y-1 text-xs text-gray-600"
+            >
+              <li>90%以上: 完璧（Pristine）</li>
+              <li>70-90%: 良好（Good）</li>
+              <li>50-70%: 普通（Fair）</li>
+              <li>30-50%: 悪い（Poor）</li>
+              <li>30%未満: 廃墟（Ruined）</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+              <i class="fas fa-coins text-yellow-500 mr-2"></i>
+              5. リソース獲得
+            </h4>
+            <p class="ml-6 mb-2">
+              メンテナンスで復習すると、知識、エネルギー、材料、ゴールドなどのリソースを獲得できます。リソースは施設のアップグレードなどに使用できます（今後の機能）。
+            </p>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2 flex items-center">
+              <i class="fas fa-lightbulb text-indigo-500 mr-2"></i>
+              コツ
+            </h4>
+            <ul
+              class="ml-6 list-disc list-inside space-y-1 text-xs text-gray-600"
+            >
+              <li>定期的にメンテナンスを行い、維持レベルを高く保ちましょう</li>
+              <li>
+                警告マークが表示された施設は優先的にメンテナンスしましょう
+              </li>
+              <li>
+                同じカテゴリーのカードを同じ施設にまとめると管理しやすくなります
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <button
+          onclick={() => (showHelpModal = false)}
+          class="mt-6 w-full bg-blue-500 text-white py-3 rounded-xl font-bold active:scale-95"
         >
           閉じる
         </button>
@@ -761,4 +913,3 @@
     }
   }
 </style>
-
