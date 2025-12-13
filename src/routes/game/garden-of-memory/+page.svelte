@@ -27,7 +27,16 @@
   let showSuccessEffect = $state(false);
   let showErrorEffect = $state(false);
   let showEvolutionEffect = $state(false);
-  let particles = $state<Array<{ id: number; x: number; y: number; vx: number; vy: number; life: number }>>([]);
+  let particles = $state<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+    }>
+  >([]);
   let particleIdCounter = $state(0);
   let quizInputRef = $state<HTMLInputElement | null>(null);
   // 音声設定（ミュート状態を反映）
@@ -100,10 +109,12 @@
       triggerWateringEffect();
       setTimeout(() => {
         triggerSuccessEffect();
-        
+
         // 進化チェック（少し遅延させてストアの更新を待つ）
         setTimeout(() => {
-          const updatedPlant = $garden.plants.find((p) => p.plant_id === plant.plant_id);
+          const updatedPlant = $garden.plants.find(
+            (p) => p.plant_id === plant.plant_id
+          );
           if (updatedPlant && updatedPlant.visual_state.stage > oldStage) {
             setTimeout(() => {
               triggerEvolutionEffect();
@@ -116,15 +127,18 @@
     }
 
     // 結果を表示
-    setTimeout(() => {
-      showQuiz = false;
-      userAnswer = "";
-      if (isCorrect) {
-        // アラートの代わりに視覚的フィードバック
-      } else {
-        // アラートの代わりに視覚的フィードバック
-      }
-    }, isCorrect ? 1500 : 500);
+    setTimeout(
+      () => {
+        showQuiz = false;
+        userAnswer = "";
+        if (isCorrect) {
+          // アラートの代わりに視覚的フィードバック
+        } else {
+          // アラートの代わりに視覚的フィードバック
+        }
+      },
+      isCorrect ? 1500 : 500
+    );
   }
 
   // 単語を選択して植物を追加
@@ -157,11 +171,16 @@
   );
 
   // 効果音生成関数
-  function playSound(type: "water" | "success" | "error" | "evolution" | "plant") {
-    if (!soundEnabled || typeof window === "undefined" || !window.AudioContext) return;
+  function playSound(
+    type: "water" | "success" | "error" | "evolution" | "plant"
+  ) {
+    if (!soundEnabled || typeof window === "undefined" || !window.AudioContext)
+      return;
 
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (
+        window.AudioContext || (window as any).webkitAudioContext
+      )();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -173,9 +192,15 @@
           // 水滴の音（高い音から低い音へ）
           oscillator.type = "sine";
           oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.2);
+          oscillator.frequency.exponentialRampToValueAtTime(
+            500,
+            audioContext.currentTime + 0.2
+          );
           gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioContext.currentTime + 0.2
+          );
           oscillator.start();
           oscillator.stop(audioContext.currentTime + 0.2);
           break;
@@ -183,10 +208,19 @@
           // 爽快な正解音
           oscillator.type = "sine";
           oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.15);
-          oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
+          oscillator.frequency.exponentialRampToValueAtTime(
+            1200,
+            audioContext.currentTime + 0.15
+          );
+          oscillator.frequency.exponentialRampToValueAtTime(
+            800,
+            audioContext.currentTime + 0.3
+          );
           gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioContext.currentTime + 0.3
+          );
           oscillator.start();
           oscillator.stop(audioContext.currentTime + 0.3);
           break;
@@ -194,9 +228,15 @@
           // 鈍い不正解音
           oscillator.type = "sawtooth";
           oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+          oscillator.frequency.exponentialRampToValueAtTime(
+            100,
+            audioContext.currentTime + 0.2
+          );
           gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioContext.currentTime + 0.2
+          );
           oscillator.start();
           oscillator.stop(audioContext.currentTime + 0.2);
           break;
@@ -204,10 +244,19 @@
           // 進化のファンファーレ
           oscillator.type = "sine";
           oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.2);
-          oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.4);
+          oscillator.frequency.exponentialRampToValueAtTime(
+            800,
+            audioContext.currentTime + 0.2
+          );
+          oscillator.frequency.exponentialRampToValueAtTime(
+            1200,
+            audioContext.currentTime + 0.4
+          );
           gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioContext.currentTime + 0.5
+          );
           oscillator.start();
           oscillator.stop(audioContext.currentTime + 0.5);
           break;
@@ -215,9 +264,15 @@
           // 種を植える音
           oscillator.type = "sine";
           oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.15);
+          oscillator.frequency.exponentialRampToValueAtTime(
+            600,
+            audioContext.currentTime + 0.15
+          );
           gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            audioContext.currentTime + 0.15
+          );
           oscillator.start();
           oscillator.stop(audioContext.currentTime + 0.15);
           break;
@@ -228,7 +283,12 @@
   }
 
   // パーティクル生成
-  function createParticles(count: number = 20, x: number = 50, y: number = 50, color: string = "#22c55e") {
+  function createParticles(
+    count: number = 20,
+    x: number = 50,
+    y: number = 50,
+    color: string = "#22c55e"
+  ) {
     particles = [];
     for (let i = 0; i < count; i++) {
       particles.push({
@@ -243,12 +303,14 @@
     // パーティクルをアニメーション
     let animationId: number;
     const animate = () => {
-      particles = particles.map((p) => ({
-        ...p,
-        x: p.x + p.vx,
-        y: p.y + p.vy,
-        life: Math.max(0, p.life - 0.03),
-      })).filter((p) => p.life > 0);
+      particles = particles
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          life: Math.max(0, p.life - 0.03),
+        }))
+        .filter((p) => p.life > 0);
       if (particles.length > 0) {
         animationId = requestAnimationFrame(animate);
       } else {
@@ -297,12 +359,16 @@
   }
 </script>
 
-<div class="p-4 pb-24 animate-slide-up min-h-screen bg-gradient-to-b from-green-50 to-blue-50">
+<div
+  class="p-4 pb-24 animate-slide-up min-h-screen bg-gradient-to-b from-green-50 to-blue-50"
+>
   <!-- 統計バー -->
   <div class="bg-white rounded-xl p-4 mb-4 shadow-sm">
     <div class="grid grid-cols-3 gap-4 text-center">
       <div>
-        <div class="text-2xl font-bold text-green-600">{$garden.statistics.total_plants}</div>
+        <div class="text-2xl font-bold text-green-600">
+          {$garden.statistics.total_plants}
+        </div>
         <div class="text-xs text-gray-500">植物</div>
       </div>
       <div>
@@ -322,7 +388,9 @@
 
   <!-- 警告表示 -->
   {#if warningPlants.length > 0}
-    <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 flex items-center">
+    <div
+      class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 flex items-center"
+    >
       <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
       <span class="text-sm text-red-700">
         {warningPlants.length}本の植物が水を必要としています！
@@ -354,7 +422,9 @@
       <div class="text-center py-12 text-gray-400">
         <i class="fas fa-seedling text-4xl mb-2"></i>
         <p class="text-sm">まだ植物がありません</p>
-        <p class="text-xs mt-1">「追加」ボタンから単語を選んで植物を育てましょう</p>
+        <p class="text-xs mt-1">
+          「追加」ボタンから単語を選んで植物を育てましょう
+        </p>
       </div>
     {:else}
       <div class="grid grid-cols-2 gap-3">
@@ -368,7 +438,9 @@
               : 'border-gray-100'}"
           >
             <div class="flex items-center justify-between mb-2">
-              <div class="text-2xl">{getPlantEmoji(plant.visual_state.stage)}</div>
+              <div class="text-2xl">
+                {getPlantEmoji(plant.visual_state.stage)}
+              </div>
               {#if isWarning}
                 <i class="fas fa-exclamation-circle text-red-500"></i>
               {/if}
@@ -428,7 +500,11 @@
         {#if !showQuiz}
           <!-- 植物詳細ビュー -->
           <div class="text-center mb-6 relative">
-            <div class="text-6xl mb-4 relative inline-block {showEvolutionEffect ? 'evolution-glow' : ''}">
+            <div
+              class="text-6xl mb-4 relative inline-block {showEvolutionEffect
+                ? 'evolution-glow'
+                : ''}"
+            >
               {getPlantEmoji(plant.visual_state.stage)}
               {#if showEvolutionEffect}
                 <div class="absolute inset-0 evolution-ring"></div>
@@ -438,13 +514,18 @@
               {plant.content.question}
             </h3>
             <p class="text-lg text-gray-600 mb-4">{plant.content.answer}</p>
-            
+
             <!-- パーティクルエフェクト -->
             {#if particles.length > 0}
-              <div class="absolute inset-0 pointer-events-none overflow-hidden" style="width: 100%; height: 100%;">
+              <div
+                class="absolute inset-0 pointer-events-none overflow-hidden"
+                style="width: 100%; height: 100%;"
+              >
                 {#each particles as particle (particle.id)}
                   <div
-                    class="absolute w-3 h-3 rounded-full particle {showEvolutionEffect ? 'bg-amber-400' : 'bg-green-400'}"
+                    class="absolute w-3 h-3 rounded-full particle {showEvolutionEffect
+                      ? 'bg-amber-400'
+                      : 'bg-green-400'}"
                     style="left: {particle.x}%; top: {particle.y}%; opacity: {particle.life}; transform: scale({particle.life});"
                   ></div>
                 {/each}
@@ -480,13 +561,15 @@
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">経験値</span>
               <span class="font-bold">
-                {plant.evolution_data.experience} / {plant.evolution_data.experience_to_next}
+                {plant.evolution_data.experience} / {plant.evolution_data
+                  .experience_to_next}
               </span>
             </div>
 
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">復習回数</span>
-              <span class="font-bold">{plant.metadata.total_water_count}回</span>
+              <span class="font-bold">{plant.metadata.total_water_count}回</span
+              >
             </div>
           </div>
 
@@ -511,16 +594,26 @@
           <!-- クイズビュー -->
           <div class="relative">
             {#if showSuccessEffect}
-              <div class="absolute inset-0 success-glow z-10 pointer-events-none"></div>
+              <div
+                class="absolute inset-0 success-glow z-10 pointer-events-none"
+              ></div>
             {/if}
             {#if showErrorEffect}
-              <div class="absolute inset-0 error-shake z-10 pointer-events-none"></div>
+              <div
+                class="absolute inset-0 error-shake z-10 pointer-events-none"
+              ></div>
             {/if}
-            
+
             <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
               水やりクイズ
             </h3>
-            <div class="bg-blue-50 rounded-xl p-4 mb-4 relative {showSuccessEffect ? 'success-border' : showErrorEffect ? 'error-border' : ''}">
+            <div
+              class="bg-blue-50 rounded-xl p-4 mb-4 relative {showSuccessEffect
+                ? 'success-border'
+                : showErrorEffect
+                  ? 'error-border'
+                  : ''}"
+            >
               <p class="text-sm text-gray-600 mb-2">問題</p>
               <p class="text-2xl font-bold text-gray-800 text-center">
                 {plant.content.question}
@@ -528,7 +621,10 @@
             </div>
 
             <div class="mb-4">
-              <label for="quiz-answer-input" class="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                for="quiz-answer-input"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
                 答えを入力してください
               </label>
               <input
@@ -564,19 +660,23 @@
                 キャンセル
               </button>
             </div>
-            
+
             <!-- 結果メッセージ -->
             {#if showSuccessEffect}
               <div class="mt-4 text-center animate-bounce">
                 <div class="text-4xl mb-2">✨</div>
-                <p class="text-green-600 font-bold">正解！植物に水をやりました🌱</p>
+                <p class="text-green-600 font-bold">
+                  正解！植物に水をやりました🌱
+                </p>
               </div>
             {/if}
             {#if showErrorEffect}
               <div class="mt-4 text-center">
                 <div class="text-4xl mb-2">❌</div>
                 <p class="text-red-600 font-bold">不正解</p>
-                <p class="text-sm text-gray-600 mt-1">正解: {plant.content.answer}</p>
+                <p class="text-sm text-gray-600 mt-1">
+                  正解: {plant.content.answer}
+                </p>
               </div>
             {/if}
           </div>
@@ -606,10 +706,14 @@
         onclick={(e) => e.stopPropagation()}
         onkeydown={(e) => e.stopPropagation()}
       >
-        <h3 class="text-xl font-bold text-gray-800 mb-4">単語を選んで植物を追加</h3>
+        <h3 class="text-xl font-bold text-gray-800 mb-4">
+          単語を選んで植物を追加
+        </h3>
         <div class="flex-1 overflow-y-auto">
-          {#each ($currentLevel === 1 ? hsk1 : hsk2) as word}
-            {@const isAdded = $garden.plants.some((p) => p.content.wordId === word.id)}
+          {#each $currentLevel === 1 ? hsk1 : hsk2 as word}
+            {@const isAdded = $garden.plants.some(
+              (p) => p.content.wordId === word.id
+            )}
             <button
               onclick={() => addWordAsPlant(word.id)}
               disabled={isAdded}
@@ -620,7 +724,9 @@
               <div class="flex justify-between items-center">
                 <div>
                   <div class="font-bold text-gray-800">{word.meaning}</div>
-                  <div class="text-sm text-gray-500">{word.char} ({word.pinyin})</div>
+                  <div class="text-sm text-gray-500">
+                    {word.char} ({word.pinyin})
+                  </div>
                 </div>
                 {#if isAdded}
                   <i class="fas fa-check-circle text-green-500"></i>
@@ -675,7 +781,11 @@
 
   /* 水やりエフェクト */
   .water-effect {
-    background: linear-gradient(180deg, rgba(59, 130, 246, 0.3) 0%, transparent 100%);
+    background: linear-gradient(
+      180deg,
+      rgba(59, 130, 246, 0.3) 0%,
+      transparent 100%
+    );
     animation: water-drip 1s ease-out;
   }
 
@@ -695,7 +805,11 @@
 
   /* 正解エフェクト */
   .success-glow {
-    background: radial-gradient(circle, rgba(34, 197, 94, 0.2) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(34, 197, 94, 0.2) 0%,
+      transparent 70%
+    );
     animation: success-pulse 1.5s ease-out;
   }
 
@@ -711,7 +825,8 @@
   }
 
   @keyframes success-pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 0;
       transform: scale(1);
     }
@@ -722,7 +837,8 @@
   }
 
   @keyframes border-glow {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
     }
     50% {
@@ -731,7 +847,8 @@
   }
 
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 0;
     }
     50% {
@@ -750,13 +867,21 @@
   }
 
   @keyframes shake {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateX(0);
     }
-    10%, 30%, 50%, 70%, 90% {
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
       transform: translateX(-5px);
     }
-    20%, 40%, 60%, 80% {
+    20%,
+    40%,
+    60%,
+    80% {
       transform: translateX(5px);
     }
   }
@@ -804,7 +929,8 @@
   }
 
   @keyframes warning-pulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
     }
     50% {
@@ -831,7 +957,8 @@
 
   /* 水分バーアニメーション */
   .transition-all {
-    transition: width 0.3s ease-out, background-color 0.3s ease-out;
+    transition:
+      width 0.3s ease-out,
+      background-color 0.3s ease-out;
   }
 </style>
-

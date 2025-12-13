@@ -49,9 +49,13 @@
   let showDamageEffect = $state(false);
   let damageValue = $state(0);
   let quizInputRef = $state<HTMLInputElement | null>(null);
-  
+
   // クイズ問題（選択したHSKレベルからランダムに出題）
-  let currentQuizQuestion = $state<{ question: string; answer: string; difficulty: number } | null>(null);
+  let currentQuizQuestion = $state<{
+    question: string;
+    answer: string;
+    difficulty: number;
+  } | null>(null);
 
   // エフェクト用
   let particles: Array<{
@@ -299,14 +303,18 @@
   }
 
   // HSKレベルからランダムな問題を生成
-  function generateRandomQuiz(): { question: string; answer: string; difficulty: number } {
+  function generateRandomQuiz(): {
+    question: string;
+    answer: string;
+    difficulty: number;
+  } {
     const level = $currentLevel;
     const wordData = level === 1 ? hsk1 : hsk2;
-    
+
     // ランダムに単語を選択
     const randomIndex = Math.floor(Math.random() * wordData.length);
     const word = wordData[randomIndex];
-    
+
     return {
       question: word.meaning, // 問題：日本語の意味
       answer: word.char, // 答え：中国語
@@ -334,8 +342,7 @@
 
     const timeTaken = (Date.now() - quizStartTime) / 1000;
     // 選択したHSKレベルから出題した問題の答えと比較
-    const isCorrect =
-      userAnswer.trim() === currentQuizQuestion.answer.trim();
+    const isCorrect = userAnswer.trim() === currentQuizQuestion.answer.trim();
     const rating = calculateQuizRating(
       isCorrect,
       timeTaken,
@@ -997,7 +1004,9 @@
       <!-- クイズ -->
       {#if showQuiz && currentWeapon && currentQuizQuestion}
         <div class="bg-gray-800 rounded-xl p-4 mb-4">
-          <div class="text-sm text-gray-400 mb-2">問題（HSK {$currentLevel}級から出題）</div>
+          <div class="text-sm text-gray-400 mb-2">
+            問題（HSK {$currentLevel}級から出題）
+          </div>
           <div class="text-lg font-bold mb-4">
             {currentQuizQuestion.question}
           </div>
