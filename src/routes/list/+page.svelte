@@ -9,8 +9,9 @@
   import { hsk1 } from "$lib/data/hsk1.js";
   import { hsk2 } from "$lib/data/hsk2.js";
   import { onMount } from "svelte";
+  import type { WordItem } from "$lib/types/word";
 
-  let items = $state([]);
+  let items = $state<WordItem[]>([]);
   let filteredItems = $derived(
     items.filter((item) => {
       if (!$searchQuery) return true;
@@ -25,7 +26,7 @@
 
   // Group by category
   let groupedItems = $derived.by(() => {
-    const groups = {};
+    const groups: Record<string, WordItem[]> = {};
     for (const item of filteredItems) {
       if (!groups[item.category]) groups[item.category] = [];
       groups[item.category].push(item);
@@ -39,7 +40,7 @@
     items = $currentLevel === 1 ? hsk1 : hsk2;
   });
 
-  function speak(text) {
+  function speak(text: string) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "zh-CN";
     speechSynthesis.speak(u);

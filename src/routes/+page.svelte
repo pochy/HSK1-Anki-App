@@ -11,6 +11,7 @@
   import { hsk2 } from "$lib/data/hsk2.js";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import type { WordItem } from "$lib/types/word";
 
   onMount(() => {
     $headerTitle = "HSK学習アプリ";
@@ -29,26 +30,26 @@
       level: 1,
       data: hsk1,
       color: "bg-orange-100 text-orange-600",
-      title: "HSK 1级",
-      desc: "基础词汇 150 词 (全450語)",
+      title: "HSK 1級",
+      desc: "入門語彙 150語 (全428語)",
     },
     {
       level: 2,
       data: hsk2,
       color: "bg-blue-100 text-blue-600",
-      title: "HSK 2级",
-      desc: "初级词汇 300 词",
+      title: "HSK 2級",
+      desc: "基礎語彙 150語 (全332語)",
     },
   ];
 
-  function selectLevel(level) {
+  function selectLevel(level: number) {
     $currentLevel = level;
     goto("/cards");
   }
 
-  function getProgress(levelData) {
+  function getProgress(levelData: WordItem[] | undefined) {
     if (!levelData) return 0;
-    const mastered = levelData.filter((item) =>
+    const mastered = levelData.filter((item: WordItem) =>
       $masteredIds.includes(item.id)
     ).length;
     return Math.round((mastered / levelData.length) * 100);
@@ -61,9 +62,9 @@
   >
     <span class="text-4xl font-bold text-white">词</span>
   </div>
-  <h2 class="text-2xl font-bold text-gray-800 mb-2">HSK Vocabulary</h2>
+  <h2 class="text-2xl font-bold text-gray-800 mb-2">HSK語彙</h2>
   <p class="text-gray-500 mb-8 text-center">
-    Master Chinese words<br />level by level
+    レベル別に中国語単語を<br />マスター
   </p>
 
   <div class="w-full space-y-4">

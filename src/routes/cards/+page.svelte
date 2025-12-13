@@ -15,17 +15,7 @@
   import { onMount } from "svelte";
   import { fly, fade } from "svelte/transition";
   import { goto } from "$app/navigation";
-
-  type WordItem = {
-    id: number;
-    char: string;
-    pinyin: string;
-    meaning: string;
-    category: string;
-    examples?: Array<{ chinese: string; japanese: string }>;
-    example?: string;
-    exampleMeaning?: string;
-  };
+  import type { WordItem } from "$lib/types/word";
 
   let rawData = $state<WordItem[]>([]);
   let items = $state<WordItem[]>([]);
