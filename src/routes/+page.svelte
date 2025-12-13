@@ -1,5 +1,5 @@
-<script>
-    import { currentLevel, headerTitle, showBottomNav, totalWords, learnedWords, masteredIds } from '$lib/stores/app.js';
+<script lang="ts">
+    import { currentLevel, headerTitle, showBottomNav, totalWords, learnedWords, masteredIds } from '$lib/stores/app';
     import { hsk1 } from '$lib/data/hsk1.js';
     import { hsk2 } from '$lib/data/hsk2.js';
     import { onMount } from 'svelte';

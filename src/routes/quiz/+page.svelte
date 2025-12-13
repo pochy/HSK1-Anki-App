@@ -1,25 +1,40 @@
-<script>
+<script lang="ts">
   import {
     currentLevel,
     headerTitle,
     showBottomNav,
     muted,
-  } from "$lib/stores/app.js";
+  } from "$lib/stores/app";
   import { hsk1 } from "$lib/data/hsk1.js";
   import { hsk2 } from "$lib/data/hsk2.js";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { goto } from "$app/navigation";
 
-  let items = $state([]);
-  let quizQueue = $state([]);
+  type WordItem = {
+    id: number;
+    char: string;
+    pinyin: string;
+    meaning: string;
+    category: string;
+    examples?: Array<{ chinese: string; japanese: string }>;
+  };
+
+  type QuizQuestion = {
+    target: WordItem;
+    type: number;
+    options: WordItem[];
+  };
+
+  let items = $state<WordItem[]>([]);
+  let quizQueue = $state<QuizQuestion[]>([]);
   let currentIndex = $state(0);
-  let currentQuestion = $state(null);
-  let questionType = $state(1); // 1: 音声→意味, 2: 漢字+ピンイン→意味, 3: 意味→中国語
-  let options = $state([]);
+  let currentQuestion = $state<WordItem | null>(null);
+  let questionType = $state<1 | 2 | 3>(1); // 1: 音声→意味, 2: 漢字+ピンイン→意味, 3: 意味→中国語
+  let options = $state<WordItem[]>([]);
   let score = $state(0);
   let finished = $state(false);
-  let selectedOption = $state(null);
+  let selectedOption = $state<WordItem | null>(null);
   let quizAnswered = $state(false);
 
   const TOTAL_QUESTIONS = 10;
@@ -32,7 +47,7 @@
     startQuiz();
   });
 
-  function shuffle(array) {
+  function shuffle<T>(array: T[]): T[] {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -41,12 +56,12 @@
     return arr;
   }
 
-  function sample(array, n) {
+  function sample<T>(array: T[], n: number): T[] {
     return shuffle([...array]).slice(0, n);
   }
 
-  function generateQuestion(target) {
-    const type = Math.floor(Math.random() * 3) + 1;
+  function generateQuestion(target: WordItem): QuizQuestion {
+    const type = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
     const distractors = sample(
       items.filter((d) => d.id !== target.id),
       3
@@ -73,7 +88,7 @@
 
     const q = quizQueue[currentIndex];
     currentQuestion = q.target;
-    questionType = q.type;
+    questionType = q.type as 1 | 2 | 3;
     options = q.options;
     selectedOption = null;
     quizAnswered = false;
@@ -84,8 +99,8 @@
     }
   }
 
-  function handleSelect(option) {
-    if (quizAnswered) return;
+  function handleSelect(option: WordItem) {
+    if (quizAnswered || !currentQuestion) return;
     quizAnswered = true;
     selectedOption = option;
 
@@ -105,17 +120,22 @@
     }, 1200);
   }
 
-  function isCorrectAnswer(opt) {
-    return quizAnswered && opt.id === currentQuestion.id;
-  }
-
-  function isWrongAnswer(opt) {
+  function isCorrectAnswer(opt: WordItem): boolean {
     return (
-      quizAnswered && selectedOption === opt && opt.id !== currentQuestion.id
+      quizAnswered && currentQuestion !== null && opt.id === currentQuestion.id
     );
   }
 
-  function speak(text) {
+  function isWrongAnswer(opt: WordItem): boolean {
+    return (
+      quizAnswered &&
+      selectedOption === opt &&
+      currentQuestion !== null &&
+      opt.id !== currentQuestion.id
+    );
+  }
+
+  function speak(text: string) {
     if ($muted) return;
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
@@ -135,17 +155,17 @@
 >
   {#if !finished && currentQuestion}
     <div class="flex-1 flex flex-col items-center justify-center w-full mb-6">
-      {#if questionType === 1}
+      {#if questionType === 1 && currentQuestion}
         <!-- タイプ1: 音声のみ → 意味を選択 -->
         <button
-          onclick={() => speak(currentQuestion.char)}
+          onclick={() => currentQuestion && speak(currentQuestion.char)}
           class="w-20 h-20 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-3xl mb-4 cursor-pointer hover:bg-blue-200 transition"
           aria-label="音声を再生"
         >
           <i class="fas fa-volume-up"></i>
         </button>
         <div class="text-gray-500 font-bold">何と言いましたか？</div>
-      {:else if questionType === 2}
+      {:else if questionType === 2 && currentQuestion}
         <!-- タイプ2: 漢字 + ピンイン → 意味を選択 -->
         <div class="text-5xl font-bold text-gray-800 chinese-text mb-2">
           {currentQuestion.char}
@@ -155,7 +175,7 @@
         >
           {currentQuestion.pinyin}
           <button
-            onclick={() => speak(currentQuestion.char)}
+            onclick={() => currentQuestion && speak(currentQuestion.char)}
             class="text-gray-400 hover:text-primary transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-50"
             aria-label="音声を再生"
           >

@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 	import "../app.css";
 	import favicon from "$lib/assets/favicon.svg";
 	import Header from "$lib/components/Header.svelte";
 	import BottomNav from "$lib/components/BottomNav.svelte";
 	import SettingsModal from "$lib/components/SettingsModal.svelte";
-	import { showBottomNav } from "$lib/stores/app.js";
+	import { showBottomNav } from "$lib/stores/app";
 
 	let { children } = $props();
 </script>

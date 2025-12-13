@@ -1,5 +1,5 @@
-<script>
-    import { headerTitle, totalWords, learnedWords } from "$lib/stores/app.js";
+<script lang="ts">
+    import { headerTitle, totalWords, learnedWords, showSettings } from "$lib/stores/app";
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
 
@@ -41,6 +41,7 @@
         {/if}
         <!-- Settings Button -->
         <button
+            onclick={() => ($showSettings = true)}
             class="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
             aria-label="Settings"
         >
