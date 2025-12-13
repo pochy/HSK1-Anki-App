@@ -13,6 +13,10 @@ const config = {
     prerender: {
       entries: ["*"],
     },
+    // GitHub Pages のサブディレクトリに対応
+    paths: {
+      base: process.env.BASE_PATH || "/HSK1-Anki-App",
+    },
   },
 };
 

@@ -2,6 +2,7 @@
   import { headerTitle, showBottomNav } from "$lib/stores/app";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import { base } from "$app/paths";
 
   onMount(() => {
     $headerTitle = "ゲーム";
@@ -15,7 +16,7 @@
       description: "総合実力テスト",
       icon: "fa-gamepad",
       color: "bg-blue-100 text-blue-600",
-      route: "/quiz",
+      route: `${base}/game/quiz`,
     },
     {
       id: "sentence-smith",
@@ -23,7 +24,7 @@
       description: "構文構築パズル",
       icon: "fa-hammer",
       color: "bg-amber-100 text-amber-600",
-      route: "/game/sentence-smith",
+      route: `${base}/game/sentence-smith`,
     },
     {
       id: "garden-of-memory",
@@ -31,7 +32,7 @@
       description: "育成シミュレーション",
       icon: "fa-seedling",
       color: "bg-green-100 text-green-600",
-      route: "/game/garden-of-memory",
+      route: `${base}/game/garden-of-memory`,
     },
     {
       id: "rogue-like-memory",
@@ -39,7 +40,7 @@
       description: "ローグライクRPG",
       icon: "fa-gavel",
       color: "bg-purple-100 text-purple-600",
-      route: "/game/rogue-like-memory",
+      route: `${base}/game/rogue-like-memory`,
     },
     {
       id: "civ-maintenance",
@@ -47,7 +48,7 @@
       description: "街づくり学習ゲーム",
       icon: "fa-city",
       color: "bg-indigo-100 text-indigo-600",
-      route: "/game/civ-maintenance",
+      route: `${base}/game/civ-maintenance`,
     },
   ];
 </script>

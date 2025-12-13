@@ -9,9 +9,10 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { browser } from "$app/environment";
+  import { base } from "$app/paths";
 
   // Check if we show back button: if not on home
-  let showBack = $derived($page.url.pathname !== "/");
+  let showBack = $derived($page.url.pathname !== base + "/");
 
   function goBack() {
     // カスタム戻るハンドラが設定されている場合はそれを使用
@@ -31,10 +32,10 @@
           // ただし、これは完全には信頼できないので、より良い方法を検討
         }, 100);
       } catch (e) {
-        goto("/");
+        goto(`${base}/`);
       }
     } else {
-      goto("/");
+      goto(`${base}/`);
     }
   }
 </script>

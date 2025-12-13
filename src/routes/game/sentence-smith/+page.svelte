@@ -19,6 +19,7 @@
   import type { Token, Rating, CardResult } from "$lib/types/sentence-smith";
   import { headerTitle, showBottomNav } from "$lib/stores/app";
   import { goto } from "$app/navigation";
+  import { base } from "$app/paths";
 
   // State for current card
   let materials = $state<Token[]>([]);
@@ -319,7 +320,7 @@
   function onNext() {
     if ($gameSession.current_card_index >= $gameSession.cards.length - 1) {
       endGame();
-      goto("/game"); // Return to menu or show summary
+      goto(`${base}/game`); // Return to menu or show summary
     } else {
       nextCard();
     }
@@ -336,7 +337,7 @@
     <div class="flex items-center space-x-2">
       <button
         class="text-gray-400 hover:text-gray-600 active:scale-95 transition-all p-2 -ml-2"
-        onclick={() => goto("/game")}
+        onclick={() => goto(`${base}/game`)}
         aria-label="Back to Game Menu"
       >
         <i class="fas fa-arrow-left"></i>

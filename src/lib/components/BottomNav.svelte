@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
+  import { base } from "$app/paths";
 </script>
 
 <nav
@@ -7,9 +8,9 @@
 >
   <div class="grid grid-cols-3 h-16">
     <a
-      href="/cards"
+      href="{base}/cards"
       class="flex flex-col items-center justify-center transition-all active:bg-gray-50 relative {$page.url.pathname.startsWith(
-        '/cards'
+        base + '/cards'
       )
         ? 'text-primary font-bold bg-orange-50'
         : 'text-gray-400 hover:text-primary'}"
@@ -18,9 +19,9 @@
       <span class="text-xs font-medium">Cards</span>
     </a>
     <a
-      href="/game"
+      href="{base}/game"
       class="flex flex-col items-center justify-center transition-all active:bg-gray-50 relative {$page.url.pathname.startsWith(
-        '/game'
+        base + '/game'
       )
         ? 'text-primary font-bold bg-orange-50'
         : 'text-gray-400 hover:text-primary'}"
@@ -29,9 +30,9 @@
       <span class="text-xs font-medium">Game</span>
     </a>
     <a
-      href="/list"
+      href="{base}/list"
       class="flex flex-col items-center justify-center transition-all active:bg-gray-50 relative {$page.url.pathname.startsWith(
-        '/list'
+        base + '/list'
       )
         ? 'text-primary font-bold bg-orange-50'
         : 'text-gray-400 hover:text-primary'}"

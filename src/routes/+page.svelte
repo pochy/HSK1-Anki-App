@@ -11,6 +11,7 @@
   import { hsk2 } from "$lib/data/hsk2.js";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
+  import { base } from "$app/paths";
   import type { WordItem } from "$lib/types/word";
 
   onMount(() => {
@@ -44,7 +45,7 @@
 
   function selectLevel(level: number) {
     $currentLevel = level;
-    goto("/cards");
+    goto(`${base}/cards`);
   }
 
   function getProgress(levelData: WordItem[] | undefined) {

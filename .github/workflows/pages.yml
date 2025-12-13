@@ -76,6 +76,8 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} run prepare
       - name: Build with SvelteKit
         run: ${{ steps.detect-package-manager.outputs.manager }} run build
+        env:
+          BASE_PATH: /HSK1-Anki-App
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:

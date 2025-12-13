@@ -15,6 +15,7 @@
   import { onMount } from "svelte";
   import { fly, fade } from "svelte/transition";
   import { goto } from "$app/navigation";
+  import { base } from "$app/paths";
   import type { WordItem } from "$lib/types/word";
 
   let rawData = $state<WordItem[]>([]);
@@ -42,7 +43,7 @@
         if (typeof window !== "undefined" && window.history.length > 1) {
           window.history.back();
         } else {
-          goto("/");
+          goto(`${base}/`);
         }
       }
     };
@@ -307,7 +308,7 @@
       <!-- Quiz Button -->
       <div class="mt-8">
         <button
-          onclick={() => goto("/quiz")}
+          onclick={() => goto(`${base}/quiz`)}
           class="w-full bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 active:translate-y-1 transition btn-3d"
         >
           <i class="fas fa-gamepad mr-2"></i> 総合実力テスト (ランダム10問)

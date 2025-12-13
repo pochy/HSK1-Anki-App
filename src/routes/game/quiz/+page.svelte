@@ -10,6 +10,7 @@
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import { goto } from "$app/navigation";
+  import { base } from "$app/paths";
   import type { WordItem } from "$lib/types/word";
 
   type QuizQuestion = {
@@ -138,7 +139,7 @@
   }
 
   function goHome() {
-    goto("/");
+    goto(`${base}/`);
   }
 </script>
 
