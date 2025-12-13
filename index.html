@@ -161,7 +161,7 @@
     </header>
 
     <!-- Main Content -->
-    <main id="main-view" class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
+    <main id="main-view" class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50 pb-16">
       <!-- Views will be injected here -->
     </main>
 
@@ -169,6 +169,28 @@
     <div id="bottom-nav" class="p-4 bg-white border-t border-gray-100 shrink-0 hidden z-20">
       <!-- Buttons injected here -->
     </div>
+
+    <!-- Fixed Bottom Navigation -->
+    <nav id="fixed-bottom-nav"
+      class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 max-w-[480px] mx-auto shadow-lg">
+      <div class="grid grid-cols-3 h-16">
+        <button id="nav-cards" onclick="app.navigateToCards()"
+          class="flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-all active:bg-gray-50 relative">
+          <i class="fas fa-layer-group text-xl mb-1"></i>
+          <span class="text-xs font-medium">Cards</span>
+        </button>
+        <button id="nav-quiz" onclick="app.navigateToQuiz()"
+          class="flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-all active:bg-gray-50 relative">
+          <i class="fas fa-gamepad text-xl mb-1"></i>
+          <span class="text-xs font-medium">Quiz</span>
+        </button>
+        <button id="nav-list" onclick="app.navigateToList()"
+          class="flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-all active:bg-gray-50 relative">
+          <i class="fas fa-list text-xl mb-1"></i>
+          <span class="text-xs font-medium">List</span>
+        </button>
+      </div>
+    </nav>
 
     <!-- Overlay & Modals -->
     <div id="overlay" class="absolute inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300"
@@ -210,6 +232,10 @@
           backBtn: document.getElementById('back-btn'),
           mainView: document.getElementById('main-view'),
           bottomNav: document.getElementById('bottom-nav'),
+          fixedBottomNav: document.getElementById('fixed-bottom-nav'),
+          navCards: document.getElementById('nav-cards'),
+          navQuiz: document.getElementById('nav-quiz'),
+          navList: document.getElementById('nav-list'),
           overlay: document.getElementById('overlay'),
           modal: document.getElementById('modal')
         };
@@ -313,6 +339,8 @@
         this.setHeaderTitle('HSK学習アプリ');
         this.toggleBottomNav(false);
         this.els.headerStats.innerHTML = '';
+        // ナビゲーションタブをリセット
+        this.updateActiveNav('');
 
         this.setViewHtml(`
             <div class="p-6 pb-24 animate-slide-up flex flex-col items-center">
@@ -362,6 +390,7 @@
         this.setHeaderTitle(`HSK${this.state.currentLevel}級`);
         this.toggleBottomNav(false);
         this.updateHeaderStats();
+        this.updateActiveNav('cards');
 
         const categories = [...new Set(currentData.map(item => item.category))];
 
@@ -587,6 +616,7 @@
         this.state.quizQueue = pool.map(item => this.generateQuestion(item));
         this.setBackButton({ visible: true, onClick: () => app.showLevelHome() });
         this.toggleBottomNav(false);
+        this.updateActiveNav('quiz');
         this.showQuizCard();
       },
 
@@ -792,6 +822,118 @@
 
       showSettings: function () {
         this.renderSettings();
+      },
+
+      updateActiveNav: function (activeTab) {
+        // すべてのタブをリセット
+        [this.els.navCards, this.els.navQuiz, this.els.navList].forEach(btn => {
+          if (btn) {
+            btn.classList.remove('text-primary', 'font-bold', 'bg-orange-50');
+            btn.classList.add('text-gray-400');
+          }
+        });
+
+        // アクティブなタブをハイライト
+        if (activeTab === 'cards' && this.els.navCards) {
+          this.els.navCards.classList.remove('text-gray-400');
+          this.els.navCards.classList.add('text-primary', 'font-bold', 'bg-orange-50');
+        } else if (activeTab === 'quiz' && this.els.navQuiz) {
+          this.els.navQuiz.classList.remove('text-gray-400');
+          this.els.navQuiz.classList.add('text-primary', 'font-bold', 'bg-orange-50');
+        } else if (activeTab === 'list' && this.els.navList) {
+          this.els.navList.classList.remove('text-gray-400');
+          this.els.navList.classList.add('text-primary', 'font-bold', 'bg-orange-50');
+        }
+      },
+
+      navigateToCards: function () {
+        if (this.state.mode === 'levelSelect') {
+          // レベルが選択されていない場合は、デフォルトでレベル1を選択
+          this.state.currentLevel = 1;
+          this.showLevelHome();
+        } else {
+          this.showLevelHome();
+        }
+        this.updateActiveNav('cards');
+      },
+
+      navigateToQuiz: function () {
+        if (this.state.mode === 'levelSelect') {
+          // レベルが選択されていない場合は、デフォルトでレベル1を選択
+          this.state.currentLevel = 1;
+          this.showLevelHome();
+        }
+        this.startQuiz();
+        this.updateActiveNav('quiz');
+      },
+
+      navigateToList: function () {
+        if (this.state.mode === 'levelSelect') {
+          // レベルが選択されていない場合は、デフォルトでレベル1を選択
+          this.state.currentLevel = 1;
+        }
+        this.showWordList();
+        this.updateActiveNav('list');
+      },
+
+      showWordList: function () {
+        this.state.mode = 'list';
+        const currentData = this.getCurrentData();
+        this.setBackButton({ visible: true, onClick: () => app.showLevelHome() });
+        this.setHeaderTitle(`単語リスト - HSK${this.state.currentLevel}級`);
+        this.toggleBottomNav(false);
+        this.updateHeaderStats();
+
+        // カテゴリーごとにグループ化
+        const categories = [...new Set(currentData.map(item => item.category))];
+        const groupedData = {};
+        categories.forEach(cat => {
+          groupedData[cat] = currentData.filter(item => item.category === cat);
+        });
+
+        let listHtml = '<div class="p-4 pb-24 animate-slide-up">';
+
+        categories.forEach(cat => {
+          const items = groupedData[cat];
+          const learnedCount = items.filter(i => this.state.masteredIds.includes(i.id)).length;
+
+          listHtml += `
+            <div class="mb-6">
+              <div class="flex items-center justify-between mb-3 px-2">
+                <h3 class="font-bold text-gray-700 text-lg flex items-center">
+                  <span class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center text-sm mr-2">
+                    ${this.getCategoryIcon(cat)}
+                  </span>
+                  ${cat}
+                </h3>
+                <span class="text-xs text-gray-400">${learnedCount}/${items.length}</span>
+              </div>
+              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                ${items.map((item, idx) => {
+            const isMastered = this.state.masteredIds.includes(item.id);
+            return `
+                    <div class="flex items-center justify-between p-4 ${idx < items.length - 1 ? 'border-b border-gray-100' : ''} ${isMastered ? 'bg-green-50/50' : ''}">
+                      <div class="flex-1">
+                        <div class="flex items-center mb-1">
+                          <span class="text-2xl font-bold text-gray-800 chinese-text mr-3">${item.char}</span>
+                          <span class="text-sm text-primary font-serif">${item.pinyin}</span>
+                          ${isMastered ? '<i class="fas fa-check-circle text-green-500 ml-2"></i>' : ''}
+                        </div>
+                        <div class="text-sm text-gray-600">${item.meaning}</div>
+                      </div>
+                      <button onclick="app.speak('${item.char.replace(/'/g, "\\'")}')" class="ml-3 w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:text-primary hover:bg-orange-50 flex items-center justify-center transition">
+                        <i class="fas fa-volume-up"></i>
+                      </button>
+                    </div>
+                  `;
+          }).join('')}
+              </div>
+            </div>
+          `;
+        });
+
+        listHtml += '</div>';
+        this.setViewHtml(listHtml);
       }
     };
 

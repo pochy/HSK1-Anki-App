@@ -52,14 +52,16 @@ alwaysApply: true
 
 ```javascript
 {
-  mode: String,              // 'levelSelect' | 'home' | 'learn' | 'quiz'
+  mode: String,              // 'levelSelect' | 'levelHome' | 'learn' | 'quiz' | 'list'
   currentIndex: Number,      // 現在の学習/クイズインデックス
   score: Number,            // クイズスコア（0-100）
   learningQueue: Array,     // 学習キュー（単語オブジェクトの配列）
   quizQueue: Array,         // クイズキュー（問題オブジェクトの配列）
   masteredIds: Array,       // 習得済み単語IDの配列
   currentCategory: String,  // 現在選択中のカテゴリー
-  quizAnswered: Boolean     // クイズ回答済みフラグ
+  quizAnswered: Boolean,    // クイズ回答済みフラグ
+  muted: Boolean,           // 音声読み上げミュート状態
+  currentLevel: Number      // 現在選択中のHSKレベル（1, 2, ...）
 }
 ```
 
@@ -101,13 +103,15 @@ alwaysApply: true
 ## 🔧 主要機能
 
 1. **レベル選択画面** (`showLevelSelect()`)
-2. **ホーム画面** (`showHome()`) - カテゴリー別学習一覧
+2. **ホーム画面** (`showLevelHome()`) - カテゴリー別学習一覧
 3. **カテゴリー学習** (`startCategorySession(category)`) - フラッシュカード形式
 4. **苦手復習** (`startReview()`) - 未習得単語からランダム 10 語
 5. **総合実力テスト** (`startQuiz()`) - 全 428 語からランダム 10 問
-6. **進捗管理** - LocalStorage で習得済み単語を記録
-7. **音声読み上げ** (`speak(text)`) - Web Speech API 使用
-8. **設定機能** (`showSettings()`) - 学習データのリセット
+6. **単語リスト** (`showWordList()`) - カテゴリー別に全単語を一覧表示
+7. **固定ボトムナビゲーション** - Cards、Quiz、List タブで主要機能にアクセス
+8. **進捗管理** - LocalStorage で習得済み単語を記録
+9. **音声読み上げ** (`speak(text)`) - Web Speech API 使用
+10. **設定機能** (`showSettings()`) - 学習データのリセット
 
 ## 🐛 既知の制約・注意事項
 

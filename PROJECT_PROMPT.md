@@ -85,14 +85,16 @@ HSK1-Anki-App/
 
 ```javascript
 {
-  mode: String,              // 'levelSelect' | 'home' | 'learn' | 'quiz'
+  mode: String,              // 'levelSelect' | 'levelHome' | 'learn' | 'quiz' | 'list'
   currentIndex: Number,      // 現在の学習/クイズインデックス
   score: Number,            // クイズスコア（0-100）
   learningQueue: Array,     // 学習キュー（単語オブジェクトの配列）
   quizQueue: Array,         // クイズキュー（問題オブジェクトの配列）
   masteredIds: Array,       // 習得済み単語IDの配列
   currentCategory: String,  // 現在選択中のカテゴリー
-  quizAnswered: Boolean     // クイズ回答済みフラグ
+  quizAnswered: Boolean,    // クイズ回答済みフラグ
+  muted: Boolean,           // 音声読み上げミュート状態
+  currentLevel: Number      // 現在選択中のHSKレベル（1, 2, ...）
 }
 ```
 
@@ -153,6 +155,22 @@ HSK1-Anki-App/
 
 - 学習データのリセット（確認ダイアログ付き）
 
+### 9. 固定ボトムナビゲーション
+
+- ページ下部に常に表示される固定ナビゲーション
+- 3つのタブ:
+  - **Cards**: ホーム画面（カテゴリー別学習）に遷移
+  - **Quiz**: クイズを開始
+  - **List**: 単語リストを表示（カテゴリー別、習得状況表示）
+- アクティブなタブはオレンジ色でハイライト表示
+
+### 10. 単語リスト表示（`showWordList()`）
+
+- カテゴリー別にグループ化して単語を一覧表示
+- 各単語に習得状況のアイコンを表示
+- 各単語に音声読み上げボタンを追加
+- カテゴリーごとの習得進捗を表示
+
 ## 🎨 UI/UX 特徴
 
 ### デザインシステム
@@ -173,8 +191,9 @@ HSK1-Anki-App/
 
 - **ヘッダー**: タイトル、戻るボタン、統計表示、設定ボタン
 - **メインコンテンツエリア**: 動的にコンテンツを差し替え
-- **ボトムナビゲーション**: コンテキストに応じたボタン表示
-- **モーダル/オーバーレイ**: 設定画面用（現在は未使用）
+- **ボトムナビゲーション**: コンテキストに応じたボタン表示（学習カードの「まだ」「覚えた」ボタンなど）
+- **固定ボトムナビゲーション**: 常に表示される3つのタブ（Cards、Quiz、List）
+- **モーダル/オーバーレイ**: 設定画面用
 
 ### レスポンシブ対応
 
@@ -197,6 +216,11 @@ HSK1-Anki-App/
 - `app.showHome()`: ホーム画面表示
 - `app.setBackButton()`: 戻るボタンの設定
 - `app.toggleBottomNav()`: ボトムナビゲーションの表示/非表示
+- `app.navigateToCards()`: Cardsタブからホーム画面に遷移
+- `app.navigateToQuiz()`: Quizタブからクイズを開始
+- `app.navigateToList()`: Listタブから単語リストを表示
+- `app.updateActiveNav(activeTab)`: アクティブなタブをハイライト
+- `app.showWordList()`: 単語リストをカテゴリー別に表示
 
 ### 学習機能
 
