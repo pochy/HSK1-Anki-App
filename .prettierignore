@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+build/
+.svelte-kit/
+dist/
+
+# Legacy files
+legacy/
+
+# Config files that shouldn't be formatted
+*.config.js
+*.config.ts
+

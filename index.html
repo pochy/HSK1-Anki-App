@@ -343,7 +343,7 @@
         saveProgress: function () {
           localStorage.setItem(
             "hsk1_mastered_ids",
-            JSON.stringify(this.state.masteredIds),
+            JSON.stringify(this.state.masteredIds)
           );
           this.updateHeaderStats();
         },
@@ -352,7 +352,7 @@
           const currentData = this.getCurrentData();
           const total = currentData.length;
           const learned = this.state.masteredIds.filter((id) =>
-            currentData.some((item) => item.id === id),
+            currentData.some((item) => item.id === id)
           ).length;
           const percentage = Math.round((learned / total) * 100);
 
@@ -430,7 +430,7 @@
             this.showLevelHome();
           } else {
             alert(
-              `HSK${level}級コースは現在準備中です。\nまずは1級から始めましょう！`,
+              `HSK${level}級コースは現在準備中です。\nまずは1級から始めましょう！`
             );
           }
         },
@@ -470,13 +470,13 @@
                     ${categories
                       .map((cat) => {
                         const catItems = currentData.filter(
-                          (i) => i.category === cat,
+                          (i) => i.category === cat
                         );
                         const learnedCount = catItems.filter((i) =>
-                          this.state.masteredIds.includes(i.id),
+                          this.state.masteredIds.includes(i.id)
                         ).length;
                         const progress = Math.round(
-                          (learnedCount / catItems.length) * 100,
+                          (learnedCount / catItems.length) * 100
                         );
 
                         return `
@@ -550,7 +550,7 @@
         startReview: function () {
           const currentData = this.getCurrentData();
           const unmastered = currentData.filter(
-            (i) => !this.state.masteredIds.includes(i.id),
+            (i) => !this.state.masteredIds.includes(i.id)
           );
           if (unmastered.length === 0) {
             alert("素晴らしい！全ての単語を学習済みです。");
@@ -672,7 +672,7 @@
             }
           } else {
             this.state.masteredIds = this.state.masteredIds.filter(
-              (mid) => mid !== id,
+              (mid) => mid !== id
             );
             this.saveProgress();
           }
@@ -709,7 +709,7 @@
           const currentData = this.getCurrentData();
           const pool = this.sample(currentData, 10);
           this.state.quizQueue = pool.map((item) =>
-            this.generateQuestion(item),
+            this.generateQuestion(item)
           );
           this.setBackButton({
             visible: true,
@@ -725,7 +725,7 @@
           const currentData = this.getCurrentData();
           const distractors = this.sample(
             currentData.filter((d) => d.id !== target.id),
-            3,
+            3
           );
           const options = this.shuffle([target, ...distractors]);
           return { target, type, options };
@@ -797,20 +797,20 @@
             btn.classList.add(
               "border-green-500",
               "bg-green-50",
-              "text-green-700",
+              "text-green-700"
             );
             this.state.score += 10;
             app.speak("太棒了");
           } else {
             btn.classList.add("border-red-500", "bg-red-50", "text-red-700");
             const correctBtn = document.querySelector(
-              `.option-btn[data-id="${q.target.id}"]`,
+              `.option-btn[data-id="${q.target.id}"]`
             );
             if (correctBtn)
               correctBtn.classList.add(
                 "border-green-500",
                 "bg-green-50",
-                "text-green-700",
+                "text-green-700"
               );
           }
           setTimeout(() => {
@@ -888,7 +888,7 @@
         resetProgress: function () {
           if (
             confirm(
-              "学習データをリセットしますか？\nこの操作は取り消せません。",
+              "学習データをリセットしますか？\nこの操作は取り消せません。"
             )
           ) {
             localStorage.removeItem("hsk1_mastered_ids");
@@ -960,11 +960,11 @@
                 btn.classList.remove(
                   "text-primary",
                   "font-bold",
-                  "bg-orange-50",
+                  "bg-orange-50"
                 );
                 btn.classList.add("text-gray-400");
               }
-            },
+            }
           );
 
           // アクティブなタブをハイライト
@@ -973,21 +973,21 @@
             this.els.navCards.classList.add(
               "text-primary",
               "font-bold",
-              "bg-orange-50",
+              "bg-orange-50"
             );
           } else if (activeTab === "quiz" && this.els.navQuiz) {
             this.els.navQuiz.classList.remove("text-gray-400");
             this.els.navQuiz.classList.add(
               "text-primary",
               "font-bold",
-              "bg-orange-50",
+              "bg-orange-50"
             );
           } else if (activeTab === "list" && this.els.navList) {
             this.els.navList.classList.remove("text-gray-400");
             this.els.navList.classList.add(
               "text-primary",
               "font-bold",
-              "bg-orange-50",
+              "bg-orange-50"
             );
           }
         },
@@ -1055,7 +1055,7 @@
           // 検索クエリでフィルタリング
           const filteredData = this.filterWords(
             currentData,
-            this.state.searchQuery,
+            this.state.searchQuery
           );
 
           // カテゴリーごとにグループ化
@@ -1065,7 +1065,7 @@
           const groupedData = {};
           categories.forEach((cat) => {
             groupedData[cat] = filteredData.filter(
-              (item) => item.category === cat,
+              (item) => item.category === cat
             );
           });
 
@@ -1124,7 +1124,7 @@
             categories.forEach((cat) => {
               const items = groupedData[cat];
               const learnedCount = items.filter((i) =>
-                this.state.masteredIds.includes(i.id),
+                this.state.masteredIds.includes(i.id)
               ).length;
 
               listHtml += `

@@ -42,4 +42,3 @@ export const searchQuery = writable<string>("");
 
 // Modal State
 export const showSettings = writable<boolean>(false);
-
