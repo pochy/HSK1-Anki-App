@@ -25,6 +25,14 @@
       color: "bg-amber-100 text-amber-600",
       route: "/game/sentence-smith",
     },
+    {
+      id: "garden-of-memory",
+      title: "記憶の庭",
+      description: "育成シミュレーション",
+      icon: "fa-seedling",
+      color: "bg-green-100 text-green-600",
+      route: "/game/garden-of-memory",
+    },
   ];
 </script>
 
