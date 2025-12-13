@@ -656,11 +656,19 @@
       role="button"
       tabindex="0"
       onclick={() => (showConstructModal = false)}
+      onkeydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          showConstructModal = false;
+        }
+      }}
     >
       <div
         class="bg-white rounded-2xl p-6 w-full max-w-md animate-pop"
         role="dialog"
+        aria-modal="true"
+        tabindex="-1"
         onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
       >
         <h3 class="text-xl font-bold text-gray-800 mb-4">施設を建設</h3>
         <div class="grid grid-cols-2 gap-3">
@@ -724,11 +732,19 @@
       role="button"
       tabindex="0"
       onclick={() => (showAddCardModal = false)}
+      onkeydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          showAddCardModal = false;
+        }
+      }}
     >
       <div
         class="bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col animate-pop"
         role="dialog"
+        aria-modal="true"
+        tabindex="-1"
         onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
       >
         <h3 class="text-xl font-bold text-gray-800 mb-4">カードを追加</h3>
         <div class="flex-1 overflow-y-auto">

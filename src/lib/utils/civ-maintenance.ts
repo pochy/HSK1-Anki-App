@@ -35,10 +35,7 @@ export function calculateDaysSinceReview(card: Card): number {
 /**
  * カードの状態を更新
  */
-export function updateCardStatus(
-  card: Card,
-  currentTime: number
-): void {
+export function updateCardStatus(card: Card, currentTime: number): void {
   const daysSinceReview = calculateDaysSinceReview(card);
   const expectedInterval = card.srs_data.interval;
 
@@ -73,13 +70,13 @@ export function calculateCardContribution(
 
   if (daysSinceReview <= expectedInterval * 0.5) {
     // 早めの復習: 貢献度高い
-    contribution =
-      80 + (1 - daysSinceReview / (expectedInterval * 0.5)) * 20;
+    contribution = 80 + (1 - daysSinceReview / (expectedInterval * 0.5)) * 20;
   } else if (daysSinceReview <= expectedInterval) {
     // 適切なタイミング: 貢献度標準
     contribution =
       60 +
-      (1 - (daysSinceReview - expectedInterval * 0.5) / (expectedInterval * 0.5)) *
+      (1 -
+        (daysSinceReview - expectedInterval * 0.5) / (expectedInterval * 0.5)) *
         20;
   } else if (daysSinceReview <= expectedInterval * 1.5) {
     // やや遅れ: 貢献度低下
@@ -174,9 +171,7 @@ export function calculateBuildingOutput(
 /**
  * 施設の外観を更新
  */
-export function updateBuildingAppearance(
-  building: Building
-): void {
+export function updateBuildingAppearance(building: Building): void {
   const maintenance = building.metrics.maintenance_level;
 
   if (maintenance >= 0.9) {
@@ -209,11 +204,12 @@ export function updateBuildingMetrics(
   if (!building.metadata.last_decay_time) {
     building.metadata.last_decay_time = currentTime;
   }
-  
-  const timeSinceLastDecay = (currentTime - building.metadata.last_decay_time) / 1000; // 秒
+
+  const timeSinceLastDecay =
+    (currentTime - building.metadata.last_decay_time) / 1000; // 秒
   const decayInterval = 10; // 10秒
   const decayAmount = 0.01; // 1%
-  
+
   if (timeSinceLastDecay >= decayInterval) {
     const decayCount = Math.floor(timeSinceLastDecay / decayInterval);
     const currentMaintenance = building.metrics.maintenance_level;
@@ -222,16 +218,17 @@ export function updateBuildingMetrics(
       0,
       currentMaintenance - decayCount * decayAmount
     );
-    building.metadata.last_decay_time = currentTime - (timeSinceLastDecay % decayInterval) * 1000;
+    building.metadata.last_decay_time =
+      currentTime - (timeSinceLastDecay % decayInterval) * 1000;
   }
-  
+
   // 維持レベルの更新（カードベースの計算）
   const cardBasedLevel = calculateMaintenanceLevel(
     building,
     cards,
     currentTime
   );
-  
+
   // テスト用: 時間ベースの減衰とカードベースの計算の小さい方を採用
   building.metrics.maintenance_level = Math.min(
     building.metrics.maintenance_level,
@@ -277,10 +274,7 @@ export function calculateQuizRating(
 /**
  * SRSデータを更新（復習後）
  */
-export function updateSRSAfterReview(
-  card: Card,
-  quizResult: QuizResult
-): void {
+export function updateSRSAfterReview(card: Card, quizResult: QuizResult): void {
   const now = Date.now();
   const today = new Date(now).toISOString().split("T")[0];
 
@@ -391,7 +385,9 @@ export function getBaseOutput(buildingType: BuildingType): number {
 /**
  * 施設タイプからリソースタイプを取得
  */
-export function getResourceType(buildingType: BuildingType): ResourceAmount["type"] {
+export function getResourceType(
+  buildingType: BuildingType
+): ResourceAmount["type"] {
   const resourceTypes: Record<BuildingType, ResourceAmount["type"]> = {
     library: "knowledge",
     hospital: "energy",
@@ -478,10 +474,10 @@ export function calculateDaysUntilZero(
 
     const daysSinceReview = calculateDaysSinceReview(card);
     const expectedInterval = card.srs_data.interval;
-    
+
     // 現在の貢献度を計算
     const currentContribution = calculateCardContribution(card, currentTime);
-    
+
     if (currentContribution <= 0) {
       daysUntilZeroList.push(0);
       continue;
@@ -490,9 +486,9 @@ export function calculateDaysUntilZero(
     // 貢献度が0になるまでの日数を推定
     // 大幅に遅れた場合の式: contribution = 40 - (daysSinceReview - expectedInterval * 1.5) * 5
     // これを逆算: daysUntilZero = (40 - contribution) / 5 + expectedInterval * 1.5 - daysSinceReview
-    
+
     let daysUntilZero = 0;
-    
+
     if (daysSinceReview <= expectedInterval * 1.5) {
       // まだ大幅に遅れていない場合
       // 大幅に遅れるまでの日数 + 0になるまでの日数
@@ -516,4 +512,3 @@ export function calculateDaysUntilZero(
   // 最短の日数を返す（最も早く0になるカード）
   return Math.min(...daysUntilZeroList);
 }
-
