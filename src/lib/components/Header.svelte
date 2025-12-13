@@ -21,22 +21,24 @@
       return;
     }
 
-    // ブラウザの履歴がある場合は、履歴を使って戻る
-    if (browser) {
-      // 履歴を使って戻る（フォールバックとしてホームに戻る）
-      try {
-        window.history.back();
-        // 履歴がない場合のフォールバック（少し遅延を入れて確認）
-        setTimeout(() => {
-          // もし戻れなかった場合（履歴がない場合）はホームに戻る
-          // ただし、これは完全には信頼できないので、より良い方法を検討
-        }, 100);
-      } catch (e) {
-        goto(`${base}/`);
-      }
-    } else {
-      goto(`${base}/`);
-    }
+    // 現在のパスから1階層上に戻る
+    const currentPath = $page.url.pathname;
+
+    // base を除いた相対パスを取得
+    const relativePath = currentPath.startsWith(base)
+      ? currentPath.slice(base.length)
+      : currentPath;
+
+    // 末尾のスラッシュを削除
+    const normalizedPath = relativePath.replace(/\/$/, "");
+
+    // 親ディレクトリを取得（最後のスラッシュ以降を削除）
+    const parentPath = normalizedPath.split("/").slice(0, -1).join("/");
+
+    // 親パスが空の場合は base に戻る、そうでなければ base + 親パスに移動
+    const targetPath = parentPath === "" ? `${base}/` : `${base}${parentPath}/`;
+
+    goto(targetPath);
   }
 </script>
 
