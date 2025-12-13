@@ -4,15 +4,38 @@
     totalWords,
     learnedWords,
     showSettings,
+    customBackHandler,
   } from "$lib/stores/app";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
+  import { browser } from "$app/environment";
 
   // Check if we show back button: if not on home
   let showBack = $derived($page.url.pathname !== "/");
 
   function goBack() {
-    goto("/");
+    // カスタム戻るハンドラが設定されている場合はそれを使用
+    if ($customBackHandler) {
+      $customBackHandler();
+      return;
+    }
+
+    // ブラウザの履歴がある場合は、履歴を使って戻る
+    if (browser) {
+      // 履歴を使って戻る（フォールバックとしてホームに戻る）
+      try {
+        window.history.back();
+        // 履歴がない場合のフォールバック（少し遅延を入れて確認）
+        setTimeout(() => {
+          // もし戻れなかった場合（履歴がない場合）はホームに戻る
+          // ただし、これは完全には信頼できないので、より良い方法を検討
+        }, 100);
+      } catch (e) {
+        goto("/");
+      }
+    } else {
+      goto("/");
+    }
   }
 </script>
 

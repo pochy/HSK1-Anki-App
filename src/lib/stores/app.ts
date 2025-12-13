@@ -42,3 +42,6 @@ export const searchQuery = writable<string>("");
 
 // Modal State
 export const showSettings = writable<boolean>(false);
+
+// Custom back handler (for pages that need custom back behavior)
+export const customBackHandler = writable<(() => void) | null>(null);

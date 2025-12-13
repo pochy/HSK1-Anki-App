@@ -8,6 +8,7 @@
     totalWords,
     learnedWords,
     muted,
+    customBackHandler,
   } from "$lib/stores/app";
   import { hsk1 } from "$lib/data/hsk1.js";
   import { hsk2 } from "$lib/data/hsk2.js";
@@ -41,11 +42,33 @@
     currentItem ? $masteredIds.includes(currentItem.id) : false
   );
 
+  // カスタム戻るハンドラを更新する関数
+  function updateBackHandler() {
+    $customBackHandler = () => {
+      if (viewMode === "card") {
+        goBackToList();
+      } else {
+        // リストビューの場合は、ブラウザの履歴を使って戻る
+        if (typeof window !== "undefined" && window.history.length > 1) {
+          window.history.back();
+        } else {
+          goto("/");
+        }
+      }
+    };
+  }
+
   onMount(() => {
     $headerTitle = `HSK ${$currentLevel}級`;
     $showBottomNav = true;
 
     loadData();
+    updateBackHandler();
+
+    // ページがアンマウントされたときに、カスタムハンドラをクリア
+    return () => {
+      $customBackHandler = null;
+    };
   });
 
   function loadData() {
@@ -73,6 +96,7 @@
     uniqueKey = 0;
     showingMeaning = false;
     viewMode = "card";
+    updateBackHandler();
     autoSpeak();
   }
 
@@ -89,6 +113,7 @@
     uniqueKey = 0;
     showingMeaning = false;
     viewMode = "card";
+    updateBackHandler();
     autoSpeak();
   }
 
@@ -104,6 +129,7 @@
   function goBackToList() {
     viewMode = "list";
     $currentCategory = "all";
+    updateBackHandler();
   }
 
   function getCategoryIcon(cat: string): string {
@@ -150,6 +176,7 @@
   function showSessionComplete() {
     viewMode = "list";
     $currentCategory = "all";
+    updateBackHandler();
     alert("セッション完了！着実に力がついていますね。");
   }
 
@@ -171,7 +198,7 @@
     updateLearnedCount();
   }
 
-  function speak(text) {
+  function speak(text: string) {
     if ($muted) return;
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "zh-CN";
@@ -194,7 +221,7 @@
   }
 
   // Helper for examples
-  function getExamples(item) {
+  function getExamples(item: WordItem) {
     if (item.examples && Array.isArray(item.examples)) {
       return item.examples.slice(0, 3);
     }
@@ -244,6 +271,15 @@
           {@const progress = Math.round((learnedCount / catItems.length) * 100)}
           <div
             onclick={() => startCategorySession(cat)}
+            onkeydown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                startCategorySession(cat);
+              }
+            }}
+            role="button"
+            tabindex="0"
+            aria-label={`${cat}カテゴリーを学習する`}
             class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 active:bg-gray-50 transition cursor-pointer flex items-center justify-between"
           >
             <div class="flex items-center">
@@ -291,17 +327,6 @@
   {:else}
     <!-- Card View -->
     <div class="h-full flex flex-col pt-4">
-      <!-- Back Button -->
-      <div class="px-4 mb-4">
-        <button
-          onclick={goBackToList}
-          class="flex items-center text-gray-400 hover:text-gray-600 transition"
-        >
-          <i class="fas fa-chevron-left mr-2"></i>
-          <span class="text-sm">戻る</span>
-        </button>
-      </div>
-
       <!-- Card Area -->
       <div class="flex-1 px-4 pb-24 relative perspective-1000">
         {#if currentItem}
@@ -309,7 +334,7 @@
             <div
               in:fly={{ x: direction * 50, duration: 300, opacity: 0 }}
               out:fly={{ x: direction * -50, duration: 300, opacity: 0 }}
-              class="absolute inset-x-4 top-0 bottom-24 bg-white rounded-3xl shadow-xl border border-gray-100 flex flex-col items-center justify-center p-6 text-center transition-all cursor-pointer hover:shadow-2xl"
+              class="h-full absolute inset-x-4 top-0 bottom-24 bg-white rounded-3xl shadow-xl border border-gray-100 flex flex-col items-center justify-center p-6 text-center transition-all cursor-pointer hover:shadow-2xl"
               onclick={toggleMeaning}
               role="button"
               tabindex="0"
