@@ -632,18 +632,78 @@
         learningQueue: [],
         quizQueue: [],
         masteredIds: [],
-        currentCategory: 'all'
+        currentCategory: 'all',
+        quizAnswered: false
       },
 
       init: function () {
+        this.setDynamicTitle();
+        this.cacheEls();
         this.loadProgress();
         this.showHome();
+        this.initVoices();
+      },
+
+      // --- Bootstrap / DOM helpers ---
+      cacheEls: function () {
+        this.els = {
+          headerTitle: document.getElementById('header-title'),
+          headerStats: document.getElementById('header-stats'),
+          backBtn: document.getElementById('back-btn'),
+          mainView: document.getElementById('main-view'),
+          bottomNav: document.getElementById('bottom-nav')
+        };
+      },
+
+      setDynamicTitle: function () {
+        document.title = `新HSK1級 スピードマスター | 完全版(${hskData.length}語)`;
+      },
+
+      setHeaderTitle: function (title) {
+        this.els.headerTitle.innerText = title;
+      },
+
+      setBackButton: function ({ visible, onClick } = {}) {
+        if (visible) this.els.backBtn.classList.remove('invisible');
+        else this.els.backBtn.classList.add('invisible');
+        this.els.backBtn.onclick = onClick || null;
+      },
+
+      setViewHtml: function (html) {
+        this.els.mainView.innerHTML = html;
+      },
+
+      initVoices: function () {
+        if (!('speechSynthesis' in window)) return;
+        const pickVoice = () => {
+          const voices = window.speechSynthesis.getVoices();
+          this._zhVoice =
+            voices.find(v => v.lang === 'zh-CN') ||
+            voices.find(v => v.lang?.startsWith('zh')) ||
+            null;
+        };
+        pickVoice();
+        window.speechSynthesis.onvoiceschanged = pickVoice;
+      },
+
+      // --- Generic utilities ---
+      shuffle: function (arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      },
+
+      sample: function (arr, n) {
+        return this.shuffle([...arr]).slice(0, n);
       },
 
       loadProgress: function () {
         const saved = localStorage.getItem('hsk1_mastered_ids');
         if (saved) {
-          this.state.masteredIds = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          this.state.masteredIds = Array.isArray(parsed) ? [...new Set(parsed)] : [];
         }
       },
 
@@ -657,8 +717,7 @@
         const learned = this.state.masteredIds.length;
         const percentage = Math.round((learned / total) * 100);
 
-        const statsEl = document.getElementById('header-stats');
-        statsEl.innerHTML = `
+        this.els.headerStats.innerHTML = `
             <div class="flex flex-col items-end">
                 <span class="text-xs text-gray-400">習得率</span>
                 <span class="text-primary text-base">${percentage}%</span>
@@ -677,15 +736,15 @@
 
       showHome: function () {
         this.state.mode = 'home';
-        document.getElementById('back-btn').classList.add('invisible');
+        this.setBackButton({ visible: false });
+        this.setHeaderTitle('新HSK1級');
         this.toggleBottomNav(false);
         this.updateHeaderStats();
 
         // Group by category
         const categories = [...new Set(hskData.map(item => item.category))];
 
-        const container = document.getElementById('main-view');
-        container.innerHTML = `
+        this.setViewHtml(`
             <div class="p-6 pb-24 animate-slide-up">
                 <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-3xl p-6 text-white mb-8 shadow-lg relative overflow-hidden">
                     <div class="relative z-10">
@@ -734,7 +793,7 @@
                     </button>
                 </div>
             </div>
-        `;
+        `);
       },
 
       getCategoryIcon: function (cat) {
@@ -765,9 +824,8 @@
         this.state.mode = 'learn';
         this.state.currentIndex = 0;
 
-        document.getElementById('back-btn').classList.remove('invisible');
-        document.getElementById('back-btn').onclick = () => app.showHome();
-        document.getElementById('header-title').innerText = category;
+        this.setBackButton({ visible: true, onClick: () => app.showHome() });
+        this.setHeaderTitle(category);
 
         this.showLearnCard();
       },
@@ -779,20 +837,19 @@
           return;
         }
         // Pick random 10
-        this.state.learningQueue = unmastered.sort(() => 0.5 - Math.random()).slice(0, 10);
+        this.state.learningQueue = this.sample(unmastered, 10);
         this.state.mode = 'learn';
         this.state.currentIndex = 0;
-        document.getElementById('back-btn').classList.remove('invisible');
-        document.getElementById('back-btn').onclick = () => app.showHome();
+        this.setBackButton({ visible: true, onClick: () => app.showHome() });
+        this.setHeaderTitle('苦手復習');
         this.showLearnCard();
       },
 
       showLearnCard: function () {
         const item = this.state.learningQueue[this.state.currentIndex];
         const isMastered = this.state.masteredIds.includes(item.id);
-        const container = document.getElementById('main-view');
 
-        container.innerHTML = `
+        this.setViewHtml(`
             <div class="h-full flex flex-col items-center justify-center p-6 animate-pop pb-24">
                 <div class="w-full bg-white rounded-3xl p-8 text-center card-shadow mb-6 border border-slate-100 relative overflow-hidden">
                     
@@ -824,10 +881,10 @@
                     </div>
                 </div>
             </div>
-        `;
+        `);
 
         // Render Bottom Actions
-        const nav = document.getElementById('bottom-nav');
+        const nav = this.els.bottomNav;
         nav.classList.remove('hidden');
         nav.innerHTML = `
             <div class="grid grid-cols-2 gap-4">
@@ -866,8 +923,7 @@
 
       showSessionComplete: function () {
         this.toggleBottomNav(false);
-        const container = document.getElementById('main-view');
-        container.innerHTML = `
+        this.setViewHtml(`
             <div class="h-full flex flex-col items-center justify-center p-6 text-center animate-pop">
                 <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-green-500 text-4xl mb-6">
                     <i class="fas fa-check"></i>
@@ -878,7 +934,7 @@
                     ホームに戻る
                 </button>
             </div>
-        `;
+        `);
       },
 
       // --- Quiz Logic ---
@@ -887,12 +943,13 @@
         this.state.mode = 'quiz';
         this.state.score = 0;
         this.state.currentIndex = 0;
-        // Generate random 10 questions from ALL data
-        const pool = hskData.sort(() => 0.5 - Math.random()).slice(0, 10);
+        this.state.quizAnswered = false;
+        this.setHeaderTitle('クイズ');
+        // Generate random 10 questions from ALL data (do not mutate `hskData`)
+        const pool = this.sample(hskData, 10);
         this.state.quizQueue = pool.map(item => this.generateQuestion(item));
 
-        document.getElementById('back-btn').classList.remove('invisible');
-        document.getElementById('back-btn').onclick = () => app.showHome();
+        this.setBackButton({ visible: true, onClick: () => app.showHome() });
         this.toggleBottomNav(false);
         this.showQuizCard();
       },
@@ -900,14 +957,14 @@
       generateQuestion: function (target) {
         // Types: 1: Audio->Meaning, 2: Char->Meaning, 3: Meaning->Char
         const type = Math.floor(Math.random() * 3) + 1;
-        const distractors = hskData.filter(d => d.id !== target.id).sort(() => 0.5 - Math.random()).slice(0, 3);
-        const options = [target, ...distractors].sort(() => 0.5 - Math.random());
+        const distractors = this.sample(hskData.filter(d => d.id !== target.id), 3);
+        const options = this.shuffle([target, ...distractors]);
         return { target, type, options };
       },
 
       showQuizCard: function () {
         const q = this.state.quizQueue[this.state.currentIndex];
-        const container = document.getElementById('main-view');
+        this.state.quizAnswered = false;
 
         let headerContent = '';
         if (q.type === 1) {
@@ -934,14 +991,14 @@
         const optionsHtml = q.options.map((opt, idx) => {
           const label = (q.type === 1 || q.type === 2) ? opt.meaning : `<span class="chinese-text font-bold text-lg">${opt.char}</span>`;
           return `
-                <button onclick="app.checkAnswer(${opt.id}, this)" class="option-btn w-full bg-white p-4 rounded-xl mb-3 text-left font-bold text-gray-600 shadow-sm border-2 border-transparent hover:border-gray-100 relative overflow-hidden transition-all active:scale-95">
+                <button data-id="${opt.id}" onclick="app.checkAnswer(this)" class="option-btn w-full bg-white p-4 rounded-xl mb-3 text-left font-bold text-gray-600 shadow-sm border-2 border-transparent hover:border-gray-100 relative overflow-hidden transition-all active:scale-95">
                     <span class="inline-block w-6 h-6 bg-gray-100 rounded-full text-xs text-gray-400 text-center leading-6 mr-3">${idx + 1}</span>
                     ${label}
                 </button>
             `;
         }).join('');
 
-        container.innerHTML = `
+        this.setViewHtml(`
             <div class="flex flex-col items-center justify-center min-h-full p-6 animate-slide-up">
                 <div class="flex-1 flex flex-col items-center justify-center w-full mb-6">
                     ${headerContent}
@@ -951,15 +1008,15 @@
                 </div>
                 <div class="h-10"></div>
             </div>
-        `;
+        `);
       },
 
-      checkAnswer: function (id, btn) {
-        if (document.querySelector('.border-green-500')) return; // Prevent double click
-
+      checkAnswer: function (btn) {
+        if (this.state.quizAnswered) return;
+        this.state.quizAnswered = true;
         const q = this.state.quizQueue[this.state.currentIndex];
+        const id = Number(btn.dataset.id);
         const isCorrect = id === q.target.id;
-        const allBtns = document.querySelectorAll('.option-btn');
 
         if (isCorrect) {
           btn.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
@@ -968,11 +1025,8 @@
         } else {
           btn.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
           // Show correct
-          allBtns.forEach(b => {
-            if (b.innerHTML.includes(q.type === 3 ? q.target.char : q.target.meaning)) {
-              b.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
-            }
-          });
+          const correctBtn = document.querySelector(`.option-btn[data-id="${q.target.id}"]`);
+          if (correctBtn) correctBtn.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
         }
 
         // Auto advance
@@ -987,8 +1041,7 @@
       },
 
       showQuizResult: function () {
-        const container = document.getElementById('main-view');
-        container.innerHTML = `
+        this.setViewHtml(`
             <div class="h-full flex flex-col items-center justify-center p-6 text-center animate-pop">
                 <div class="text-6xl mb-4">🏆</div>
                 <h2 class="text-3xl font-bold text-gray-800 mb-2">クイズ終了！</h2>
@@ -1001,12 +1054,12 @@
                     もう一度挑戦
                 </button>
             </div>
-        `;
+        `);
       },
 
       // --- Utilities ---
       toggleBottomNav: function (show) {
-        const nav = document.getElementById('bottom-nav');
+        const nav = this.els.bottomNav;
         if (show) nav.classList.remove('hidden');
         else nav.classList.add('hidden');
       },
@@ -1017,6 +1070,7 @@
           const u = new SpeechSynthesisUtterance(text);
           u.lang = 'zh-CN';
           u.rate = 0.8;
+          if (this._zhVoice) u.voice = this._zhVoice;
           window.speechSynthesis.speak(u);
         }
       },
