@@ -41,6 +41,14 @@
       color: "bg-purple-100 text-purple-600",
       route: "/game/rogue-like-memory",
     },
+    {
+      id: "civ-maintenance",
+      title: "文明維持シミュレーション",
+      description: "街づくり学習ゲーム",
+      icon: "fa-city",
+      color: "bg-indigo-100 text-indigo-600",
+      route: "/game/civ-maintenance",
+    },
   ];
 </script>
 
