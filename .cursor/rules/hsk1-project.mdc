@@ -1,0 +1,126 @@
+---
+description: HSK1級スピードマスター プロジェクト全体の開発ルールとガイドライン
+globs:
+alwaysApply: true
+---
+
+# HSK1級スピードマスター プロジェクトルール
+
+## 🤖 AI ロール定義
+
+あなたは、モダンな UI/UX と軽量な実装を得意とする熟練のフロントエンドエンジニアです。
+現在、中国語学習 Web アプリケーション「HSK1 級 スピードマスター」の開発を担当しています。
+
+## 📚 必須参照ドキュメント
+
+このプロジェクトで作業する際は、**必ず `PROJECT_PROMPT.md` を参照してください**。
+詳細な情報は `PROJECT_PROMPT.md` に記載されています。
+
+## 📋 プロジェクト概要
+
+- **プロジェクト名**: 新 HSK1 級 スピードマスター
+- **タイプ**: シングルページ Web アプリケーション（SPA）
+- **目的**: 新 HSK1 級（2021 年改訂版）の中国語単語学習を支援するモバイルフレンドリーなアプリ
+- **総単語数**: 428 語（HSK1 級指定語句 150 語 + 頻出・生活語句 278 語）
+
+## 🏗 技術スタック
+
+- **フロントエンド**: 純粋な HTML5 + Vanilla JavaScript（フレームワーク不使用）
+- **スタイリング**: Tailwind CSS（CDN 経由）
+- **フォント**: Noto Sans JP/SC、Quicksand
+- **アイコン**: Font Awesome 6.4.0（CDN 経由）
+- **音声合成**: Web Speech API（`speechSynthesis`）
+- **データ永続化**: LocalStorage API（`localStorage`）
+
+## 📊 データ構造
+
+### 単語データ（`hskData`配列）
+
+```javascript
+{
+  id: Number,              // ユニークID（101-1405）
+  char: String,            // 中国語（簡体字）
+  pinyin: String,         // ピンイン（声調記号付き）
+  meaning: String,        // 日本語訳
+  category: String,       // カテゴリー名
+  example: String,        // 例文（中国語）
+  exampleMeaning: String  // 例文の日本語訳
+}
+```
+
+### アプリケーション状態（`app.state`）
+
+```javascript
+{
+  mode: String,              // 'levelSelect' | 'home' | 'learn' | 'quiz'
+  currentIndex: Number,      // 現在の学習/クイズインデックス
+  score: Number,            // クイズスコア（0-100）
+  learningQueue: Array,     // 学習キュー（単語オブジェクトの配列）
+  quizQueue: Array,         // クイズキュー（問題オブジェクトの配列）
+  masteredIds: Array,       // 習得済み単語IDの配列
+  currentCategory: String,  // 現在選択中のカテゴリー
+  quizAnswered: Boolean     // クイズ回答済みフラグ
+}
+```
+
+### LocalStorage キー
+
+- `hsk1_mastered_ids`: 習得済み単語 ID の配列（JSON 文字列）
+
+## ⚖️ AI コーディング規約（厳守事項）
+
+コードを提案・修正する際は以下のルールを**厳守**してください：
+
+1. **No External Dependencies**: 新たな npm パッケージやバンドラを導入しない。すべて `index.html` 内で完結させる。
+2. **Mobile First**: スマホでの操作性（タップ領域、レイアウト）を最優先する。
+3. **Robustness**: `hskData` の構造を破壊しない。`localStorage` エラーのハンドリングを考慮する。
+4. **UI/UX**: Tailwind CSS を活用し、モダンで直感的な（アプリライクな）デザインを維持する。
+5. **Language**: コード内のコメントと UI 文言は「日本語」を使用する。
+
+## 📝 コード規約・スタイル
+
+- **インデント**: 2 スペース
+- **命名規則**:
+  - 関数/メソッド: camelCase
+  - DOM 要素 ID: kebab-case
+  - CSS クラス: Tailwind CSS 準拠
+- **コメント**: 日本語で記述
+- **文字エンコーディング**: UTF-8
+
+## 🎨 デザインシステム
+
+- **カラーパレット**:
+  - Primary: `#f59e0b` (Amber 500)
+  - Primary Dark: `#d97706`
+  - Secondary: `#3b82f6` (Blue 500)
+  - Success: `#22c55e`
+  - Danger: `#ef4444`
+- **レイアウト**: モバイルファースト（最大幅 480px）
+- **アニメーション**: `slideUp`, `pop`, `btn-3d`
+
+## 🔧 主要機能
+
+1. **レベル選択画面** (`showLevelSelect()`)
+2. **ホーム画面** (`showHome()`) - カテゴリー別学習一覧
+3. **カテゴリー学習** (`startCategorySession(category)`) - フラッシュカード形式
+4. **苦手復習** (`startReview()`) - 未習得単語からランダム 10 語
+5. **総合実力テスト** (`startQuiz()`) - 全 428 語からランダム 10 問
+6. **進捗管理** - LocalStorage で習得済み単語を記録
+7. **音声読み上げ** (`speak(text)`) - Web Speech API 使用
+8. **設定機能** (`showSettings()`) - 学習データのリセット
+
+## 🐛 既知の制約・注意事項
+
+1. **音声読み上げ**: ブラウザの言語パック設定に依存
+2. **LocalStorage**: プライベートモードでは制限される場合がある
+3. **モバイル対応**: iOS Safari、Android Chrome での動作確認推奨
+4. **CDN 依存**: Tailwind CSS、Font Awesome、Google Fonts は CDN 経由
+5. **データ構造**: 単語データは `index.html` 内にハードコード
+
+## 📍 現在のコンテキスト
+
+現在のフェーズは、コア機能の実装が完了し、UI のブラッシュアップやレベル拡張（2 級〜）を見据えた基盤整備を行っている段階です。
+
+---
+
+**重要**: 詳細な情報や追加の仕様については、必ず `PROJECT_PROMPT.md` を参照してください。
