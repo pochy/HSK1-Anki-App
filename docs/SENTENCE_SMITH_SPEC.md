@@ -342,9 +342,9 @@ function calculateDifficultyLevel(sentence: string): number {
 
 #### 4.3.2 テキスト読み上げ（TTS）
 
-- 完成時にネイティブ発音で文章を読み上げ
-- 言語に応じた音声エンジンを選択
-- 音量・速度の調整可能
+- **実装済み**: Web Speech API (`window.speechSynthesis`) を使用
+- 完成時に中国語（`zh-CN`）で文章を読み上げ
+- 読み上げ速度: 0.8倍速（聞き取りやすさ重視）
 
 ### 4.4 アニメーション
 
@@ -353,6 +353,13 @@ function calculateDifficultyLevel(sentence: string): number {
 - **カード切り替え**: スライドアニメーション
 - **結果表示**: フェードイン + スケールアニメーション
 - **アイテム表示**: 3D回転アニメーション
+
+#### 4.4.2 ゲームフィードバック
+
+- **コンボ表示**: 連続正解数を画面上部に表示（Combo xN）
+- **ヒートアップ**:
+  - Streak 2+: 炉がオレンジ色に燃え上がる（`orange-fire`）
+  - Streak 5+: 炉が青い炎に包まれる（`blue-fire`）
 
 #### 4.4.2 インタラクション
 

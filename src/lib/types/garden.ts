@@ -242,4 +242,3 @@ export interface Notification {
   priority: "low" | "medium" | "high";
   timestamp: number;
 }
-

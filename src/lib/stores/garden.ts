@@ -252,10 +252,7 @@ function updateStatistics(
     (p) => !p.status.withered && p.status.hydration > 0
   ).length;
   const witheredPlants = plants.filter((p) => p.status.withered).length;
-  const totalHydration = plants.reduce(
-    (sum, p) => sum + p.status.hydration,
-    0
-  );
+  const totalHydration = plants.reduce((sum, p) => sum + p.status.hydration, 0);
   const averageHydration =
     plants.length > 0 ? totalHydration / plants.length : 100;
   const totalExperience = plants.reduce(
@@ -270,8 +267,7 @@ function updateStatistics(
     (sum, p) => sum + p.metadata.total_water_count,
     0
   );
-  const perfectWaterRatio =
-    totalWater > 0 ? totalPerfectWater / totalWater : 0;
+  const perfectWaterRatio = totalWater > 0 ? totalPerfectWater / totalWater : 0;
 
   return {
     total_plants: plants.length,
@@ -308,4 +304,3 @@ if (browser) {
     updatePlantHydration();
   }, 60000); // 60秒
 }
-

@@ -12,4 +12,3 @@ export type WordItem = {
   example?: string;
   exampleMeaning?: string;
 };
-

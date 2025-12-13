@@ -95,8 +95,8 @@ const createInitialCity = (): City => {
       show_warnings: true,
       animation_speed: 1.0,
       sound_enabled: true,
-      initial_review_interval: 1,      // 新規カードの初期復習間隔（日）
-      decay_rate_multiplier: 1.0,       // 減衰率の倍率
+      initial_review_interval: 1, // 新規カードの初期復習間隔（日）
+      decay_rate_multiplier: 1.0, // 減衰率の倍率
     },
     level: 1,
     population: 0,
@@ -171,9 +171,7 @@ export const addCardFromWord = (wordId: number, buildingId?: string) => {
   if (!word) return;
 
   // 既にカードが存在するかチェック
-  const existingCard = currentCards.find(
-    (c) => c.content.wordId === wordId
-  );
+  const existingCard = currentCards.find((c) => c.content.wordId === wordId);
 
   if (existingCard) {
     // 既に存在する場合は施設に追加（まだ追加されていない場合）
@@ -186,7 +184,7 @@ export const addCardFromWord = (wordId: number, buildingId?: string) => {
   // 新しいカードを作成
   const now = Date.now();
   const today = new Date(now).toISOString().split("T")[0];
-  
+
   // 都市設定から初期復習間隔を取得
   const initialInterval = currentCity.settings.initial_review_interval || 1;
   const nextReview = new Date(now);
@@ -280,10 +278,7 @@ export const addCardToBuilding = (cardId: string, buildingId: string) => {
 };
 
 // アクション: カードを施設から削除
-export const removeCardFromBuilding = (
-  cardId: string,
-  buildingId: string
-) => {
+export const removeCardFromBuilding = (cardId: string, buildingId: string) => {
   const currentCity = get(city);
   const building = currentCity.buildings.find(
     (b) => b.building_id === buildingId
@@ -604,4 +599,3 @@ if (browser) {
     updateAllBuildingMetrics();
   }, 60000); // 60秒
 }
-

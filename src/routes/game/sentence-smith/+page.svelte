@@ -32,6 +32,7 @@
   let currentResult = $state<CardResult | null>(null);
   let feedbackMessage = $state("");
   let feedbackType = $state<"success" | "error" | "info">("info");
+  let sessionStreak = $state(0);
 
   // エフェクト用の状態
   let showParticles = $state(false);
@@ -97,7 +98,9 @@
   function playSound(type: "place" | "success" | "error" | "forge") {
     if (typeof window === "undefined" || !window.AudioContext) return;
 
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -109,9 +112,15 @@
         // 金属的な「チン」という音
         oscillator.type = "sine";
         oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          400,
+          audioContext.currentTime + 0.1
+        );
         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + 0.1
+        );
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.1);
         break;
@@ -119,10 +128,19 @@
         // 爽快な「パリーン」という金属音
         oscillator.type = "sine";
         oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.15);
-        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          1200,
+          audioContext.currentTime + 0.15
+        );
+        oscillator.frequency.exponentialRampToValueAtTime(
+          800,
+          audioContext.currentTime + 0.3
+        );
         gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + 0.3
+        );
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.3);
         break;
@@ -130,9 +148,15 @@
         // 鈍い「ガチャン」という音
         oscillator.type = "sawtooth";
         oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          100,
+          audioContext.currentTime + 0.2
+        );
         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + 0.2
+        );
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.2);
         break;
@@ -140,9 +164,15 @@
         // 鍛造音（低い音から高い音へ）
         oscillator.type = "sine";
         oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          600,
+          audioContext.currentTime + 0.2
+        );
         gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + 0.2
+        );
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.2);
         break;
@@ -168,12 +198,20 @@
     }, 1000);
   }
 
-  // 火花エフェクト
   function createSparkles() {
     showSparkles = true;
     setTimeout(() => {
       showSparkles = false;
     }, 800);
+  }
+
+  function speakSentence(text: string) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "zh-CN";
+      utterance.rate = 0.8;
+      window.speechSynthesis.speak(utterance);
+    }
   }
 
   function handleTokenClick(token: Token, source: "materials" | "anvil") {
@@ -290,6 +328,8 @@
     showResult = true;
     feedbackMessage = "鍛造成功！";
     feedbackType = "success";
+    sessionStreak++;
+    speakSentence(currentCard.original_sentence);
   }
 
   function handleFailure() {
@@ -315,6 +355,7 @@
     showResult = true;
     feedbackMessage = "鍛造失敗... 素材が崩れ落ちた。";
     feedbackType = "error";
+    sessionStreak = 0;
   }
 
   function onNext() {
@@ -344,8 +385,13 @@
       </button>
       <span class="font-bold text-primary">言葉の鍛冶屋</span>
     </div>
-    <div class="text-sm font-mono text-gray-500">
-      {timer}s
+    <div class="text-sm font-mono text-gray-500 flex items-center gap-3">
+      {#if sessionStreak > 1}
+        <span class="font-bold text-orange-500 animate-pulse">
+          Combo x{sessionStreak} 🔥
+        </span>
+      {/if}
+      <span>{timer}s</span>
     </div>
   </div>
 
@@ -380,9 +426,13 @@
       <div
         class="bg-white p-4 sm:p-6 rounded-xl border-2 w-full min-h-[180px] sm:min-h-[200px] flex flex-wrap gap-2 sm:gap-3 justify-center items-center content-center relative shadow-sm transition-all duration-300 {anvilGlow
           ? 'border-green-400 shadow-lg shadow-green-200'
-          : showShake
-            ? 'border-red-400 shadow-lg shadow-red-200 animate-shake'
-            : 'border-gray-200'}"
+          : sessionStreak >= 5
+            ? 'blue-fire'
+            : sessionStreak >= 2
+              ? 'orange-fire'
+              : showShake
+                ? 'border-red-400 shadow-lg shadow-red-200 animate-shake'
+                : 'border-gray-200'}"
       >
         <div
           class="absolute -top-3 left-4 bg-slate-50 px-2 text-gray-500 text-xs uppercase tracking-widest border border-gray-200 rounded"
@@ -391,18 +441,23 @@
         </div>
         <!-- 火花エフェクト -->
         {#if showSparkles}
-          <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+          <div
+            class="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
+          >
             {#each Array(15) as _, i}
               <div
                 class="absolute sparkle"
-                style="left: {Math.random() * 100}%; top: {Math.random() * 100}%; animation-delay: {Math.random() * 0.3}s;"
+                style="left: {Math.random() * 100}%; top: {Math.random() *
+                  100}%; animation-delay: {Math.random() * 0.3}s;"
               ></div>
             {/each}
           </div>
         {/if}
         <!-- パーティクルエフェクト -->
         {#if showParticles}
-          <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+          <div
+            class="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
+          >
             {#each particles as particle}
               <div
                 class="absolute particle"
@@ -449,7 +504,9 @@
     <div
       class="flex flex-col justify-start items-center bg-white p-4 rounded-2xl border border-gray-200 shadow-sm mb-6"
     >
-      <div class="text-gray-500 text-xs uppercase tracking-widest mb-4 font-bold">
+      <div
+        class="text-gray-500 text-xs uppercase tracking-widest mb-4 font-bold"
+      >
         Materials
       </div>
       <div class="flex flex-wrap justify-center gap-2 sm:gap-3 w-full">
@@ -480,16 +537,24 @@
       >
         <div class="mb-4">
           {#if currentResult.rating === "broken"}
-            <div class="text-5xl sm:text-6xl text-gray-400 mb-2 animate-shake-icon">
+            <div
+              class="text-5xl sm:text-6xl text-gray-400 mb-2 animate-shake-icon"
+            >
               <i class="fas fa-heart-crack"></i>
             </div>
-            <h3 class="text-xl sm:text-2xl font-bold text-gray-500">Broken...</h3>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-500">
+              Broken...
+            </h3>
           {:else}
-            <div class="text-5xl sm:text-6xl text-primary mb-2 animate-success-icon">
+            <div
+              class="text-5xl sm:text-6xl text-primary mb-2 animate-success-icon"
+            >
               <i class="fas fa-shield-halved"></i>
             </div>
             <!-- Placeholder icon -->
-            <h3 class="text-xl sm:text-2xl font-bold text-primary uppercase animate-glow">
+            <h3
+              class="text-xl sm:text-2xl font-bold text-primary uppercase animate-glow"
+            >
               {currentResult.rating}!
             </h3>
           {/if}
@@ -499,7 +564,9 @@
           <p class="text-base sm:text-lg font-medium px-2 break-words">
             {currentCard.original_sentence}
           </p>
-          <div class="flex justify-center gap-4 text-xs sm:text-sm text-gray-500 flex-wrap">
+          <div
+            class="flex justify-center gap-4 text-xs sm:text-sm text-gray-500 flex-wrap"
+          >
             <span>Time: {currentResult.time_taken}s</span>
             <span>Score: {currentResult.item_created.quality_score}</span>
           </div>
@@ -608,6 +675,24 @@
     animation: pulse-slow 2s ease-in-out infinite;
   }
 
+  /* Blue Fire Effect for High Streak */
+  .blue-fire {
+    box-shadow:
+      0 0 15px #3b82f6,
+      0 0 30px #2563eb,
+      inset 0 0 10px #60a5fa;
+    border-color: #60a5fa !important;
+  }
+
+  /* Orange Fire Effect for Medium Streak */
+  .orange-fire {
+    box-shadow:
+      0 0 15px #f97316,
+      0 0 30px #ea580c,
+      inset 0 0 10px #fdba74;
+    border-color: #fdba74 !important;
+  }
+
   /* 火花エフェクト */
   .sparkle {
     width: 4px;
@@ -636,7 +721,12 @@
   .particle {
     width: 6px;
     height: 6px;
-    background: radial-gradient(circle, #f59e0b 0%, #fbbf24 50%, transparent 100%);
+    background: radial-gradient(
+      circle,
+      #f59e0b 0%,
+      #fbbf24 50%,
+      transparent 100%
+    );
     border-radius: 50%;
     animation: particle 1s ease-out forwards;
   }
@@ -668,7 +758,8 @@
   }
 
   .animate-success-icon {
-    animation: success-icon 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: success-icon 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+      forwards;
   }
 
   /* 失敗アイコンアニメーション */
@@ -696,7 +787,9 @@
       text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
     }
     50% {
-      text-shadow: 0 0 20px rgba(245, 158, 11, 0.8), 0 0 30px rgba(245, 158, 11, 0.6);
+      text-shadow:
+        0 0 20px rgba(245, 158, 11, 0.8),
+        0 0 30px rgba(245, 158, 11, 0.6);
     }
   }
 

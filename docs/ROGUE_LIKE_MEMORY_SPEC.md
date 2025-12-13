@@ -3,6 +3,7 @@
 ## 1. ゲーム概要
 
 ### 1.1 基本情報
+
 - **ゲーム名**: 忘却のダンジョン (Rogue-like Memory)
 - **ジャンル**: ダンジョン探索RPG / ハックアンドスラッシュ / ローグライク
 - **学習対象**: 一問一答形式の知識全般、資格試験の過去問
@@ -10,9 +11,11 @@
 - **プレイ時間**: 1セッション 15-30分
 
 ### 1.2 コアコンセプト
+
 プレイヤーは「忘却のダンジョン」に挑む冒険者です。最大の特徴は、装備している武器・防具・魔法が「学習カード」そのものである点です。時間が経過するにつれ、装備は「錆び（忘却）」ていき、攻撃力や防御力が低下します。ダンジョン内での戦闘（クイズ）こそが、装備を研ぎ澄ます唯一の手段です。
 
 ### 1.3 学習目標
+
 - 能動的な想起練習
 - リスク管理の学習
 - 戦略的思考の養成
@@ -26,88 +29,88 @@
 
 ```typescript
 interface Equipment {
-  item_id: string;                     // ユニークID（例: "sword_math_formula_01"）
-  name: string;                        // アイテム名
-  type: EquipmentType;                 // 装備タイプ
-  base_stats: BaseStats;               // 基本ステータス
-  condition: Condition;               // 状態（錆び具合）
-  dynamic_stats: DynamicStats;        // 動的ステータス（現在値）
-  card_content: CardContent;           // カード内容
-  srs_data: SRSData;                   // SRSデータ
-  metadata: ItemMetadata;              // メタデータ
+  item_id: string; // ユニークID（例: "sword_math_formula_01"）
+  name: string; // アイテム名
+  type: EquipmentType; // 装備タイプ
+  base_stats: BaseStats; // 基本ステータス
+  condition: Condition; // 状態（錆び具合）
+  dynamic_stats: DynamicStats; // 動的ステータス（現在値）
+  card_content: CardContent; // カード内容
+  srs_data: SRSData; // SRSデータ
+  metadata: ItemMetadata; // メタデータ
 }
 
-type EquipmentType = 
-  | "weapon"      // 武器
-  | "armor"       // 防具
-  | "accessory"   // アクセサリー
-  | "spell";      // 魔法
+type EquipmentType =
+  | "weapon" // 武器
+  | "armor" // 防具
+  | "accessory" // アクセサリー
+  | "spell"; // 魔法
 
 interface BaseStats {
-  attack: number;                      // 基本攻撃力
-  defense: number;                     // 基本防御力
-  magic_power?: number;                // 魔法力（魔法のみ）
-  attribute: Attribute;               // 属性（科目）
-  rarity: Rarity;                      // レアリティ
+  attack: number; // 基本攻撃力
+  defense: number; // 基本防御力
+  magic_power?: number; // 魔法力（魔法のみ）
+  attribute: Attribute; // 属性（科目）
+  rarity: Rarity; // レアリティ
 }
 
-type Attribute = 
-  | "logic"        // 論理（数学、物理）
-  | "language"     // 言語（英語、国語）
-  | "history"      // 歴史
-  | "science"      // 科学
-  | "art"          // 芸術
-  | "general";     // 一般知識
+type Attribute =
+  | "logic" // 論理（数学、物理）
+  | "language" // 言語（英語、国語）
+  | "history" // 歴史
+  | "science" // 科学
+  | "art" // 芸術
+  | "general"; // 一般知識
 
-type Rarity = 
-  | "common"      // 普通
-  | "uncommon"    // 珍しい
-  | "rare"         // レア
-  | "epic"         // エピック
-  | "legendary";  // 伝説
+type Rarity =
+  | "common" // 普通
+  | "uncommon" // 珍しい
+  | "rare" // レア
+  | "epic" // エピック
+  | "legendary"; // 伝説
 
 interface Condition {
-  sharpness: number;                   // 切れ味（0.0 - 1.0）
-  durability: number;                  // 耐久度（0-100）
-  status_label: StatusLabel;           // 状態ラベル
-  last_used: number;                   // 最終使用時刻（Unix timestamp）
-  decay_rate: number;                   // 減衰率（%/時間）
+  sharpness: number; // 切れ味（0.0 - 1.0）
+  durability: number; // 耐久度（0-100）
+  status_label: StatusLabel; // 状態ラベル
+  last_used: number; // 最終使用時刻（Unix timestamp）
+  decay_rate: number; // 減衰率（%/時間）
 }
 
-type StatusLabel = 
-  | "Sharp"      // 切れ味良好
-  | "Dull"       // 鈍い
-  | "Rusty"      // 錆びている
-  | "Broken";    // 壊れている
+type StatusLabel =
+  | "Sharp" // 切れ味良好
+  | "Dull" // 鈍い
+  | "Rusty" // 錆びている
+  | "Broken"; // 壊れている
 
 interface DynamicStats {
-  current_attack: number;              // 現在の攻撃力
-  current_defense: number;             // 現在の防御力
-  current_magic_power?: number;        // 現在の魔法力
+  current_attack: number; // 現在の攻撃力
+  current_defense: number; // 現在の防御力
+  current_magic_power?: number; // 現在の魔法力
 }
 
 interface CardContent {
-  question: string;                    // 問題
-  answer: string;                      // 答え
-  options?: string[];                  // 選択肢（オプション）
-  category: string;                    // カテゴリー
-  difficulty: number;                  // 難易度（1-10）
+  question: string; // 問題
+  answer: string; // 答え
+  options?: string[]; // 選択肢（オプション）
+  category: string; // カテゴリー
+  difficulty: number; // 難易度（1-10）
 }
 
 interface SRSData {
-  next_review: string;                 // 次回復習日（ISO 8601）
-  interval: number;                    // 間隔（日）
-  ease_factor: number;                 // 難易度係数
-  review_count: number;                // 復習回数
-  last_review_date?: string;           // 最終復習日
-  stability: number;                   // 安定性
+  next_review: string; // 次回復習日（ISO 8601）
+  interval: number; // 間隔（日）
+  ease_factor: number; // 難易度係数
+  review_count: number; // 復習回数
+  last_review_date?: string; // 最終復習日
+  stability: number; // 安定性
 }
 
 interface ItemMetadata {
-  obtained_date: string;               // 獲得日
-  total_uses: number;                  // 総使用回数
-  critical_hits: number;                // クリティカルヒット数
-  perfect_recalls: number;             // 完璧な想起回数
+  obtained_date: string; // 獲得日
+  total_uses: number; // 総使用回数
+  critical_hits: number; // クリティカルヒット数
+  perfect_recalls: number; // 完璧な想起回数
 }
 ```
 
@@ -115,42 +118,42 @@ interface ItemMetadata {
 
 ```typescript
 interface Player {
-  player_id: string;                   // プレイヤーID
-  name: string;                        // プレイヤー名
-  level: number;                       // レベル
-  experience: number;                   // 経験値
-  stats: PlayerStats;                  // ステータス
-  equipment: EquipmentSlot;            // 装備スロット
-  inventory: Equipment[];               // インベントリ
-  current_dungeon: DungeonProgress;    // 現在のダンジョン進行状況
-  achievements: Achievement[];         // アチーブメント
+  player_id: string; // プレイヤーID
+  name: string; // プレイヤー名
+  level: number; // レベル
+  experience: number; // 経験値
+  stats: PlayerStats; // ステータス
+  equipment: EquipmentSlot; // 装備スロット
+  inventory: Equipment[]; // インベントリ
+  current_dungeon: DungeonProgress; // 現在のダンジョン進行状況
+  achievements: Achievement[]; // アチーブメント
 }
 
 interface PlayerStats {
-  max_hp: number;                      // 最大HP
-  current_hp: number;                  // 現在のHP
-  max_mp: number;                      // 最大MP
-  current_mp: number;                  // 現在のMP
-  strength: number;                    // 筋力（装備の攻撃力に影響）
-  vitality: number;                    // 体力（装備の防御力に影響）
-  intelligence: number;                // 知性（魔法力に影響）
-  luck: number;                        // 運（クリティカル率に影響）
+  max_hp: number; // 最大HP
+  current_hp: number; // 現在のHP
+  max_mp: number; // 最大MP
+  current_mp: number; // 現在のMP
+  strength: number; // 筋力（装備の攻撃力に影響）
+  vitality: number; // 体力（装備の防御力に影響）
+  intelligence: number; // 知性（魔法力に影響）
+  luck: number; // 運（クリティカル率に影響）
 }
 
 interface EquipmentSlot {
-  weapon: Equipment | null;            // 武器スロット
-  armor: Equipment | null;             // 防具スロット
-  accessory: Equipment | null;         // アクセサリースロット
-  spell: Equipment | null;             // 魔法スロット
+  weapon: Equipment | null; // 武器スロット
+  armor: Equipment | null; // 防具スロット
+  accessory: Equipment | null; // アクセサリースロット
+  spell: Equipment | null; // 魔法スロット
 }
 
 interface DungeonProgress {
-  dungeon_id: string;                  // ダンジョンID
-  floor: number;                       // 現在の階層
-  room: number;                       // 現在の部屋
-  enemies_defeated: number;            // 倒した敵数
-  treasures_found: number;             // 見つけた宝箱数
-  start_time: number;                  // 開始時刻
+  dungeon_id: string; // ダンジョンID
+  floor: number; // 現在の階層
+  room: number; // 現在の部屋
+  enemies_defeated: number; // 倒した敵数
+  treasures_found: number; // 見つけた宝箱数
+  start_time: number; // 開始時刻
 }
 ```
 
@@ -158,41 +161,41 @@ interface DungeonProgress {
 
 ```typescript
 interface Enemy {
-  enemy_id: string;                     // 敵ID
-  name: string;                        // 敵名
-  type: EnemyType;                     // 敵タイプ
-  stats: EnemyStats;                   // ステータス
-  attribute: Attribute;                // 属性
-  floor: number;                       // 出現階層
-  rewards: Rewards;                     // 報酬
-  behavior: EnemyBehavior;             // 行動パターン
+  enemy_id: string; // 敵ID
+  name: string; // 敵名
+  type: EnemyType; // 敵タイプ
+  stats: EnemyStats; // ステータス
+  attribute: Attribute; // 属性
+  floor: number; // 出現階層
+  rewards: Rewards; // 報酬
+  behavior: EnemyBehavior; // 行動パターン
 }
 
-type EnemyType = 
-  | "slime"           // スライム
-  | "goblin"          // ゴブリン
-  | "skeleton"        // スケルトン
-  | "wizard"          // ウィザード
-  | "boss";           // ボス
+type EnemyType =
+  | "slime" // スライム
+  | "goblin" // ゴブリン
+  | "skeleton" // スケルトン
+  | "wizard" // ウィザード
+  | "boss"; // ボス
 
 interface EnemyStats {
-  hp: number;                          // HP
-  attack: number;                      // 攻撃力
-  defense: number;                     // 防御力
-  speed: number;                      // 速度
-  weakness?: Attribute;                // 弱点属性
+  hp: number; // HP
+  attack: number; // 攻撃力
+  defense: number; // 防御力
+  speed: number; // 速度
+  weakness?: Attribute; // 弱点属性
 }
 
 interface Rewards {
-  experience: number;                  // 経験値
-  gold: number;                        // ゴールド
-  item_drop_chance: number;            // アイテムドロップ率（%）
-  possible_items: string[];           // ドロップ可能アイテムID
+  experience: number; // 経験値
+  gold: number; // ゴールド
+  item_drop_chance: number; // アイテムドロップ率（%）
+  possible_items: string[]; // ドロップ可能アイテムID
 }
 
 interface EnemyBehavior {
-  attack_pattern: AttackPattern[];     // 攻撃パターン
-  special_ability?: SpecialAbility;    // 特殊能力
+  attack_pattern: AttackPattern[]; // 攻撃パターン
+  special_ability?: SpecialAbility; // 特殊能力
 }
 
 interface AttackPattern {
@@ -206,116 +209,116 @@ interface AttackPattern {
 
 ```typescript
 interface Dungeon {
-  dungeon_id: string;                  // ダンジョンID
-  name: string;                        // ダンジョン名
-  theme: DungeonTheme;                 // テーマ
-  total_floors: number;                // 総階層数
-  floors: Floor[];                     // 階層データ
-  boss: Enemy;                         // ボス敵
-  rewards: DungeonRewards;             // クリア報酬
+  dungeon_id: string; // ダンジョンID
+  name: string; // ダンジョン名
+  theme: DungeonTheme; // テーマ
+  total_floors: number; // 総階層数
+  floors: Floor[]; // 階層データ
+  boss: Enemy; // ボス敵
+  rewards: DungeonRewards; // クリア報酬
 }
 
-type DungeonTheme = 
-  | "ancient_ruins"    // 古代遺跡
-  | "crystal_cave"     // 水晶洞窟
-  | "dark_forest"      // 暗黒の森
-  | "tower"            // 塔
-  | "labyrinth";       // 迷宮
+type DungeonTheme =
+  | "ancient_ruins" // 古代遺跡
+  | "crystal_cave" // 水晶洞窟
+  | "dark_forest" // 暗黒の森
+  | "tower" // 塔
+  | "labyrinth"; // 迷宮
 
 interface Floor {
-  floor_number: number;                // 階層番号
-  rooms: Room[];                       // 部屋リスト
-  enemy_pool: string[];                // 敵プール（敵ID）
-  treasure_pool: string[];             // 宝箱プール（アイテムID）
-  difficulty_multiplier: number;       // 難易度倍率
+  floor_number: number; // 階層番号
+  rooms: Room[]; // 部屋リスト
+  enemy_pool: string[]; // 敵プール（敵ID）
+  treasure_pool: string[]; // 宝箱プール（アイテムID）
+  difficulty_multiplier: number; // 難易度倍率
 }
 
 interface Room {
-  room_id: string;                     // 部屋ID
-  type: RoomType;                      // 部屋タイプ
-  enemies?: Enemy[];                   // 敵（戦闘部屋）
-  treasure?: Treasure;                 // 宝箱（宝箱部屋）
-  event?: Event;                       // イベント（イベント部屋）
+  room_id: string; // 部屋ID
+  type: RoomType; // 部屋タイプ
+  enemies?: Enemy[]; // 敵（戦闘部屋）
+  treasure?: Treasure; // 宝箱（宝箱部屋）
+  event?: Event; // イベント（イベント部屋）
 }
 
-type RoomType = 
-  | "combat"       // 戦闘
-  | "treasure"     // 宝箱
-  | "rest"         // 休憩
-  | "event"        // イベント
-  | "boss";        // ボス
+type RoomType =
+  | "combat" // 戦闘
+  | "treasure" // 宝箱
+  | "rest" // 休憩
+  | "event" // イベント
+  | "boss"; // ボス
 
 interface Treasure {
-  treasure_id: string;                 // 宝箱ID
-  type: TreasureType;                  // 宝箱タイプ
-  items: Equipment[];                  // 中身（アイテム）
-  gold: number;                        // ゴールド
-  opened: boolean;                     // 開封済みフラグ
+  treasure_id: string; // 宝箱ID
+  type: TreasureType; // 宝箱タイプ
+  items: Equipment[]; // 中身（アイテム）
+  gold: number; // ゴールド
+  opened: boolean; // 開封済みフラグ
 }
 
-type TreasureType = 
-  | "wooden"      // 木製
-  | "iron"        // 鉄製
-  | "golden"      // 金製
-  | "legendary";  // 伝説
+type TreasureType =
+  | "wooden" // 木製
+  | "iron" // 鉄製
+  | "golden" // 金製
+  | "legendary"; // 伝説
 ```
 
 ### 2.5 戦闘データ構造
 
 ```typescript
 interface CombatSession {
-  session_id: string;                  // セッションID
-  player: Player;                      // プレイヤー
-  enemy: Enemy;                        // 敵
-  turn: number;                        // ターン数
-  actions: CombatAction[];            // 行動履歴
-  result?: CombatResult;               // 結果
-  start_time: number;                  // 開始時刻
+  session_id: string; // セッションID
+  player: Player; // プレイヤー
+  enemy: Enemy; // 敵
+  turn: number; // ターン数
+  actions: CombatAction[]; // 行動履歴
+  result?: CombatResult; // 結果
+  start_time: number; // 開始時刻
 }
 
 interface CombatAction {
-  actor: "player" | "enemy";          // 行動者
-  action_type: ActionType;             // 行動タイプ
-  equipment_used?: Equipment;          // 使用装備
-  quiz_result?: QuizResult;            // クイズ結果
-  damage_dealt?: number;               // 与えたダメージ
-  damage_taken?: number;               // 受けたダメージ
-  critical?: boolean;                  // クリティカルフラグ
-  timestamp: number;                   // タイムスタンプ
+  actor: "player" | "enemy"; // 行動者
+  action_type: ActionType; // 行動タイプ
+  equipment_used?: Equipment; // 使用装備
+  quiz_result?: QuizResult; // クイズ結果
+  damage_dealt?: number; // 与えたダメージ
+  damage_taken?: number; // 受けたダメージ
+  critical?: boolean; // クリティカルフラグ
+  timestamp: number; // タイムスタンプ
 }
 
-type ActionType = 
-  | "attack"      // 攻撃
-  | "defend"      // 防御
-  | "spell"       // 魔法
-  | "item"        // アイテム使用
-  | "flee";       // 逃走
+type ActionType =
+  | "attack" // 攻撃
+  | "defend" // 防御
+  | "spell" // 魔法
+  | "item" // アイテム使用
+  | "flee"; // 逃走
 
 interface QuizResult {
-  question: string;                    // 問題
-  user_answer: string;                 // ユーザー回答
-  correct_answer: string;              // 正解
-  is_correct: boolean;                 // 正誤
-  time_taken: number;                  // 回答時間（秒）
-  rating: QuizRating;                  // 評価
+  question: string; // 問題
+  user_answer: string; // ユーザー回答
+  correct_answer: string; // 正解
+  is_correct: boolean; // 正誤
+  time_taken: number; // 回答時間（秒）
+  rating: QuizRating; // 評価
 }
 
 type QuizRating = "perfect" | "good" | "ok" | "poor";
 
 interface CombatResult {
-  victory: boolean;                    // 勝利フラグ
-  experience_gained: number;           // 獲得経験値
-  gold_gained: number;                 // 獲得ゴールド
-  items_dropped: Equipment[];          // ドロップアイテム
+  victory: boolean; // 勝利フラグ
+  experience_gained: number; // 獲得経験値
+  gold_gained: number; // 獲得ゴールド
+  items_dropped: Equipment[]; // ドロップアイテム
   equipment_updates: EquipmentUpdate[]; // 装備更新
-  duration: number;                    // 戦闘時間（秒）
+  duration: number; // 戦闘時間（秒）
 }
 
 interface EquipmentUpdate {
-  equipment_id: string;                // 装備ID
-  sharpness_before: number;            // 更新前の切れ味
-  sharpness_after: number;            // 更新後の切れ味
-  recall_critical: boolean;            // 想起クリティカルフラグ
+  equipment_id: string; // 装備ID
+  sharpness_before: number; // 更新前の切れ味
+  sharpness_after: number; // 更新後の切れ味
+  recall_critical: boolean; // 想起クリティカルフラグ
 }
 ```
 
@@ -330,22 +333,20 @@ function calculateCurrentSharpness(
   equipment: Equipment,
   currentTime: number
 ): number {
-  const timeSinceLastUsed = (currentTime - equipment.condition.last_used) / 3600; // 時間単位
+  const timeSinceLastUsed =
+    (currentTime - equipment.condition.last_used) / 3600; // 時間単位
   const decayAmount = timeSinceLastUsed * equipment.condition.decay_rate;
   const newSharpness = Math.max(0, equipment.condition.sharpness - decayAmount);
-  
+
   return newSharpness;
 }
 
-function updateDecayRate(
-  stability: number,
-  review_count: number
-): number {
+function updateDecayRate(stability: number, review_count: number): number {
   // 安定性が高いほど、復習回数が多いほど減衰率が低い
   const baseDecayRate = 2.0; // 基本減衰率（%/時間）
   const stabilityModifier = Math.max(0.1, 1.0 / (stability / 10));
   const reviewModifier = Math.max(0.5, 1.0 / (review_count / 10));
-  
+
   return baseDecayRate * stabilityModifier * reviewModifier;
 }
 
@@ -358,13 +359,13 @@ function updateStatusLabel(sharpness: number): StatusLabel {
 
 function calculateDynamicStats(equipment: Equipment): DynamicStats {
   const sharpness = equipment.condition.sharpness;
-  
+
   return {
     current_attack: Math.floor(equipment.base_stats.attack * sharpness),
     current_defense: Math.floor(equipment.base_stats.defense * sharpness),
-    current_magic_power: equipment.base_stats.magic_power 
+    current_magic_power: equipment.base_stats.magic_power
       ? Math.floor(equipment.base_stats.magic_power * sharpness)
-      : undefined
+      : undefined,
   };
 }
 ```
@@ -381,74 +382,79 @@ function executePlayerAttack(
   let damage = 0;
   let critical = false;
   let sharpnessUpdate = equipment.condition.sharpness;
-  
+
   if (quizResult.is_correct) {
     // 正解時
-    const baseDamage = player.equipment.weapon?.dynamic_stats.current_attack || 0;
+    const baseDamage =
+      player.equipment.weapon?.dynamic_stats.current_attack || 0;
     const ratingMultiplier = {
       perfect: 1.5,
       good: 1.2,
       ok: 1.0,
-      poor: 0.8
+      poor: 0.8,
     }[quizResult.rating];
-    
+
     damage = Math.floor(baseDamage * ratingMultiplier);
-    
+
     // 想起クリティカル（Recall Critical）
     const isRecallCritical = checkRecallCritical(equipment, quizResult);
     if (isRecallCritical) {
       damage = Math.floor(damage * 2.5);
       critical = true;
-      
+
       // HP回復
       player.stats.current_hp = Math.min(
         player.stats.max_hp,
         player.stats.current_hp + Math.floor(damage * 0.1)
       );
     }
-    
+
     // 装備を研ぎ澄ます
     sharpnessUpdate = 1.0;
     equipment.condition.sharpness = 1.0;
     equipment.condition.status_label = "Sharp";
     equipment.condition.last_used = Date.now();
-    
+
     // SRS更新
     updateSRSAfterCombat(equipment, quizResult);
-    
   } else {
     // 不正解時
     damage = 0;
     critical = false;
-    
+
     // 装備の耐久度が下がる
     equipment.condition.durability = Math.max(
       0,
       equipment.condition.durability - 10
     );
-    
+
     // 切れ味も少し下がる
     sharpnessUpdate = Math.max(0, equipment.condition.sharpness - 0.1);
     equipment.condition.sharpness = sharpnessUpdate;
     equipment.condition.status_label = updateStatusLabel(sharpnessUpdate);
-    
+
     // プレイヤーがダメージを受ける
     const enemyDamage = Math.floor(enemy.stats.attack * 0.5);
-    player.stats.current_hp = Math.max(0, player.stats.current_hp - enemyDamage);
+    player.stats.current_hp = Math.max(
+      0,
+      player.stats.current_hp - enemyDamage
+    );
   }
-  
+
   // 敵のHPを減らす
   enemy.stats.hp = Math.max(0, enemy.stats.hp - damage);
-  
+
   return {
     actor: "player",
     action_type: "attack",
     equipment_used: equipment,
     quiz_result: quizResult,
     damage_dealt: damage,
-    damage_taken: quizResult.is_correct ? 0 : Math.floor(enemy.stats.attack * 0.5),
+    damage_taken: quizResult.is_correct
+      ? 0
+      : Math.floor(enemy.stats.attack * 0.5),
     critical: critical,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 
@@ -461,7 +467,7 @@ function checkRecallCritical(
   const isForgotten = sharpness >= 0.3 && sharpness <= 0.4;
   const isCorrect = quizResult.is_correct;
   const isQuick = quizResult.time_taken <= 3; // 3秒以内
-  
+
   return isForgotten && isCorrect && isQuick;
 }
 
@@ -470,7 +476,7 @@ function updateSRSAfterCombat(
   quizResult: QuizResult
 ): void {
   const rating = quizResult.rating;
-  
+
   switch (rating) {
     case "perfect":
       equipment.srs_data.interval *= 2.5;
@@ -497,19 +503,21 @@ function updateSRSAfterCombat(
       );
       break;
   }
-  
+
   // 次回復習日の計算
   const nextReviewDate = new Date();
-  nextReviewDate.setDate(nextReviewDate.getDate() + equipment.srs_data.interval);
+  nextReviewDate.setDate(
+    nextReviewDate.getDate() + equipment.srs_data.interval
+  );
   equipment.srs_data.next_review = nextReviewDate.toISOString();
   equipment.srs_data.review_count++;
-  
+
   // 減衰率の更新
   equipment.condition.decay_rate = updateDecayRate(
     equipment.srs_data.stability,
     equipment.srs_data.review_count
   );
-  
+
   // メタデータ更新
   equipment.metadata.total_uses++;
   if (quizResult.rating === "perfect") {
@@ -521,21 +529,18 @@ function updateSRSAfterCombat(
 ### 3.3 敵の行動システム
 
 ```typescript
-function executeEnemyAttack(
-  enemy: Enemy,
-  player: Player
-): CombatAction {
+function executeEnemyAttack(enemy: Enemy, player: Player): CombatAction {
   const baseDamage = enemy.stats.attack;
   const defense = player.equipment.armor?.dynamic_stats.current_defense || 0;
   const actualDamage = Math.max(1, baseDamage - Math.floor(defense * 0.5));
-  
+
   player.stats.current_hp = Math.max(0, player.stats.current_hp - actualDamage);
-  
+
   return {
     actor: "enemy",
     action_type: "attack",
     damage_dealt: actualDamage,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 }
 ```
@@ -549,19 +554,19 @@ function generateDungeon(
   playerLevel: number
 ): Dungeon {
   const floors: Floor[] = [];
-  
+
   for (let i = 1; i <= totalFloors; i++) {
     const floor: Floor = {
       floor_number: i,
       rooms: generateRooms(i, playerLevel),
       enemy_pool: getEnemyPool(i, theme),
       treasure_pool: getTreasurePool(i),
-      difficulty_multiplier: 1 + (i - 1) * 0.2
+      difficulty_multiplier: 1 + (i - 1) * 0.2,
     };
-    
+
     floors.push(floor);
   }
-  
+
   return {
     dungeon_id: generateId(),
     name: getDungeonName(theme),
@@ -569,64 +574,64 @@ function generateDungeon(
     total_floors: totalFloors,
     floors: floors,
     boss: generateBoss(totalFloors, theme),
-    rewards: generateDungeonRewards(totalFloors)
+    rewards: generateDungeonRewards(totalFloors),
   };
 }
 
 function generateRooms(floor: number, playerLevel: number): Room[] {
   const roomCount = 5 + Math.floor(floor / 2);
   const rooms: Room[] = [];
-  
+
   for (let i = 0; i < roomCount; i++) {
     const roomType = determineRoomType(i, roomCount);
-    
+
     let room: Room;
     switch (roomType) {
       case "combat":
         room = {
           room_id: generateId(),
           type: "combat",
-          enemies: generateEnemies(floor, playerLevel)
+          enemies: generateEnemies(floor, playerLevel),
         };
         break;
       case "treasure":
         room = {
           room_id: generateId(),
           type: "treasure",
-          treasure: generateTreasure(floor)
+          treasure: generateTreasure(floor),
         };
         break;
       case "rest":
         room = {
           room_id: generateId(),
-          type: "rest"
+          type: "rest",
         };
         break;
       case "event":
         room = {
           room_id: generateId(),
           type: "event",
-          event: generateEvent(floor)
+          event: generateEvent(floor),
         };
         break;
       default:
         room = {
           room_id: generateId(),
           type: "combat",
-          enemies: generateEnemies(floor, playerLevel)
+          enemies: generateEnemies(floor, playerLevel),
         };
     }
-    
+
     rooms.push(room);
   }
-  
+
   return rooms;
 }
 
 function determineRoomType(index: number, total: number): RoomType {
   // 最後の部屋は必ずボス
   if (index === total - 1) return "boss";
-  
+
   const rand = Math.random();
   if (rand < 0.5) return "combat";
   if (rand < 0.7) return "treasure";
@@ -696,17 +701,20 @@ function determineRoomType(index: number, total: number): RoomType {
 ### 4.3 視覚効果
 
 #### 4.3.1 装備の視覚表現
+
 - **Sharp（切れ味良好）**: ピカピカに光っている
 - **Dull（鈍い）**: ややくすんでいる
 - **Rusty（錆びている）**: 茶色の錆エフェクト
 - **Broken（壊れている）**: ひび割れエフェクト
 
 #### 4.3.2 戦闘エフェクト
+
 - **正解時**: 剣の錆がパリーンと弾け飛び、眩しい光とともに敵を切り裂く
 - **想起クリティカル**: 特大の光とパーティクル、画面全体のフラッシュ
 - **不正解時**: 攻撃が外れ、プレイヤーがダメージを受けるアニメーション
 
 #### 4.3.3 ダメージ表示
+
 - ダメージ数値が飛び散る
 - クリティカル時は金色の大きな数字
 - HPバーの減少アニメーション
@@ -748,12 +756,12 @@ function determineRoomType(index: number, total: number): RoomType {
 ### 6.1 装備の減衰率
 
 | 安定性 | 復習回数 | 減衰率（%/時間） |
-|-------|---------|----------------|
-| 5     | 0-5     | 2.0            |
-| 10    | 6-10    | 1.5            |
-| 20    | 11-20   | 1.0            |
-| 30    | 21-30   | 0.7            |
-| 50+   | 31+     | 0.5            |
+| ------ | -------- | ---------------- |
+| 5      | 0-5      | 2.0              |
+| 10     | 6-10     | 1.5              |
+| 20     | 11-20    | 1.0              |
+| 30     | 21-30    | 0.7              |
+| 50+    | 31+      | 0.5              |
 
 ### 6.2 想起クリティカル条件
 
@@ -773,20 +781,20 @@ function calculateDamage(
   isCritical: boolean
 ): number {
   let damage = baseAttack * sharpness;
-  
+
   const ratingMultiplier = {
     perfect: 1.5,
     good: 1.2,
     ok: 1.0,
-    poor: 0.8
+    poor: 0.8,
   }[rating];
-  
+
   damage *= ratingMultiplier;
-  
+
   if (isCritical) {
     damage *= 2.5;
   }
-  
+
   return Math.floor(damage);
 }
 ```
@@ -809,17 +817,17 @@ function calculateAttributeBonus(
     history: ["language", "general"],
     science: ["logic", "general"],
     art: ["language", "history"],
-    general: []
+    general: [],
   };
-  
+
   if (compatibility[equipmentAttribute]?.includes(enemyAttribute)) {
     return 1.2; // 20%ダメージ増加
   }
-  
+
   if (enemyAttribute === equipmentAttribute) {
     return 1.1; // 10%ダメージ増加
   }
-  
+
   return 1.0;
 }
 ```
@@ -877,4 +885,3 @@ function calculateAttributeBonus(
 - FSRSアルゴリズム
 - ローグライクゲームのベストプラクティス
 - RPGバランス調整の理論
-
