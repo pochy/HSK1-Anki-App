@@ -13,8 +13,9 @@
 **タイプ**: 静的サイト（SvelteKit + adapter-static）  
 **目的**: 新 HSK（2021 年改訂版）の中国語単語学習を支援するモバイルフレンドリーなアプリ  
 **対応レベル**: HSK 1級（428語）と HSK 2級（332語）
-  - **HSK 1級**: 入門語彙 150語 + 頻出・生活語句 278語 = 428語
-  - **HSK 2級**: 基礎語彙 150語 + 頻出・生活語句 182語 = 332語
+
+- **HSK 1級**: 入門語彙 150語 + 頻出・生活語句 278語 = 428語
+- **HSK 2級**: 基礎語彙 150語 + 頻出・生活語句 182語 = 332語
 
 ## 🏗 アーキテクチャ
 
@@ -85,16 +86,17 @@ HSK1-Anki-App/
 
 ```typescript
 type WordItem = {
-  id: number;              // ユニークID（101-1405など）
-  char: string;            // 中国語（簡体字）
-  pinyin: string;          // ピンイン（声調記号付き）
-  meaning: string;        // 日本語訳
-  category: string;        // カテゴリー名
-  examples?: Array<{       // 例文（配列形式、推奨）
+  id: number; // ユニークID（101-1405など）
+  char: string; // 中国語（簡体字）
+  pinyin: string; // ピンイン（声調記号付き）
+  meaning: string; // 日本語訳
+  category: string; // カテゴリー名
+  examples?: Array<{
+    // 例文（配列形式、推奨）
     chinese: string;
     japanese: string;
   }>;
-  example?: string;        // 例文（中国語、旧形式・互換性のため）
+  example?: string; // 例文（中国語、旧形式・互換性のため）
   exampleMeaning?: string; // 例文の日本語訳（旧形式・互換性のため）
 };
 ```
@@ -104,6 +106,7 @@ type WordItem = {
 各レベルの単語は、品詞やテーマごとにカテゴリーに分類されています。カテゴリーはデータファイル（`src/lib/data/hsk1.js`, `hsk2.js`）内の各単語の `category` プロパティで定義されており、アプリケーション内で動的にグループ化されます。
 
 主なカテゴリー例：
+
 - **代名詞** - 我、你、他、她 など
 - **数詞・量詞** - 一〜十、个、岁 など
 - **名詞** - 家族・場所・職業・時間・物 など
@@ -121,20 +124,21 @@ type WordItem = {
 
 ```typescript
 // 主要なストア
-masteredIds: Writable<number[]>;        // 習得済み単語IDの配列（全レベル共通）
-currentLevel: Writable<number>;         // 現在選択中のHSKレベル（1, 2）
-headerTitle: Writable<string>;           // ヘッダータイトル
-showBottomNav: Writable<boolean>;        // ボトムナビゲーション表示フラグ
-currentCategory: Writable<string>;       // 現在選択中のカテゴリー
-muted: Writable<boolean>;               // 音声読み上げミュート状態
-totalWords: Writable<number>;            // 総単語数
-learnedWords: Writable<number>;          // 習得済み単語数
-searchQuery: Writable<string>;          // 検索クエリ（単語リスト用）
-showSettings: Writable<boolean>;         // 設定モーダル表示フラグ
+masteredIds: Writable<number[]>; // 習得済み単語IDの配列（全レベル共通）
+currentLevel: Writable<number>; // 現在選択中のHSKレベル（1, 2）
+headerTitle: Writable<string>; // ヘッダータイトル
+showBottomNav: Writable<boolean>; // ボトムナビゲーション表示フラグ
+currentCategory: Writable<string>; // 現在選択中のカテゴリー
+muted: Writable<boolean>; // 音声読み上げミュート状態
+totalWords: Writable<number>; // 総単語数
+learnedWords: Writable<number>; // 習得済み単語数
+searchQuery: Writable<string>; // 検索クエリ（単語リスト用）
+showSettings: Writable<boolean>; // 設定モーダル表示フラグ
 customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンドラ
 ```
 
 各ページでは、Svelte 5 の `$state` を使用してローカル状態を管理：
+
 - `currentIndex`: 現在の学習/クイズインデックス
 - `score`: クイズスコア（0-100）
 - `learningQueue`: 学習キュー（単語オブジェクトの配列）
@@ -209,6 +213,71 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
   - **List**: `/list/` に遷移（単語リスト表示）
 - アクティブなタブはオレンジ色でハイライト表示
 
+### 9. ゲームモード（`/game/` - `src/routes/game/`）
+
+#### 9.1 ゲーム一覧（`/game/` - `src/routes/game/+page.svelte`）
+
+- 利用可能なゲームの一覧表示
+- 現在実装済み:
+  - **言葉の鍛冶屋（Sentence Smith）**: 構文構築パズルゲーム
+
+#### 9.2 言葉の鍛冶屋（`/game/sentence-smith/` - `src/routes/game/sentence-smith/+page.svelte`）
+
+- **ゲーム概要**: バラバラに砕けた単語（トークン）を正しい順序で配置し、文章を完成させるパズルゲーム
+- **ゲームフロー**:
+  1. 素材置き場（下部）からトークンを選択
+  2. 金床（中央）の空スロットに配置
+  3. 全てのトークンを配置したら「FORGE」ボタンで鍛造
+  4. 正解なら成功、間違いなら失敗として結果を表示
+- **SRS連携**: FSRSアルゴリズムを使用した間隔反復学習に対応
+- **評価システム**: 時間と正確性に基づいて「legendary」「epic」「rare」「broken」の4段階で評価
+- **進捗管理**: 各文章の復習間隔と難易度係数を自動調整
+
+#### 9.3 ゲームエフェクトと効果音
+
+**視覚エフェクト**:
+
+- **トークン配置時**:
+  - スケールアニメーション（`tokenPlace`）
+  - 正しい位置に配置された場合の緑色グローエフェクト
+  - マテリアルボタンのホバー時の拡大アニメーション
+- **鍛造時（成功）**:
+  - パーティクルエフェクト（30個の金色パーティクルが舞い散る）
+  - 火花エフェクト（15個の火花が回転しながら拡散）
+  - アンビルエリアの緑色グローとシャドウ強化
+- **鍛造時（失敗）**:
+  - 振動アニメーション（`shake`）
+  - アンビルエリアの赤色グローとシャドウ強化
+- **ハンマーボタン**:
+  - ハンマーアイコンの回転アニメーション（`hammer`）
+  - ボタンのパルスアニメーション（`pulse-slow`）
+  - ホバー時の拡大とシャドウ強化
+- **結果モーダル**:
+  - 成功時: アイコンの回転とスケールアニメーション（`success-icon`）、テキストのグローエフェクト（`glow`）
+  - 失敗時: アイコンの振動アニメーション（`shake-icon`）
+- **フィードバックメッセージ**: メッセージ表示時のスケールアニメーション（`feedback`）
+
+**効果音（Web Audio API）**:
+
+- **配置音** (`playSound("place")`): トークンを配置時に「チン」という金属的な音（800Hz → 400Hz）
+- **鍛造音** (`playSound("forge")`): FORGEボタン押下時の低音から高音への音（300Hz → 600Hz）
+- **成功音** (`playSound("success")`): 正解時の「パリーン」という爽快な金属音（600Hz → 1200Hz → 800Hz）
+- **失敗音** (`playSound("error")`): 間違い時の「ガチャン」という鈍い音（200Hz → 100Hz、sawtooth波形）
+
+**実装技術**:
+
+- **Web Audio API**: `AudioContext`、`OscillatorNode`、`GainNode` を使用して効果音を生成
+- **CSS アニメーション**: `@keyframes` を使用した各種アニメーション
+- **Svelte トランジション**: `scale`、`fly`、`fade` を使用したスムーズなトランジション
+- **パーティクルシステム**: ランダムな位置と方向でパーティクルを生成・アニメーション
+
+**ゲーム性向上のポイント**:
+
+- 即座の視覚・聴覚フィードバックによる操作感の向上
+- 成功時の派手なエフェクトによる達成感の演出
+- 失敗時の明確なフィードバックによる学習効果の向上
+- アニメーションによる操作の直感性向上
+
 ## 🎨 UI/UX 特徴
 
 ### デザインシステム
@@ -224,6 +293,7 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
   - `slideUp`: フェードイン + 上方向スライド
   - `pop`: スケール + フェードイン
   - `btn-3d`: ボタン押下時の 3D 効果
+  - ゲームモード専用アニメーション（詳細は「主要機能 > ゲームモード」を参照）
 
 ### コンポーネント
 
@@ -264,6 +334,13 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 
 - **Web Speech API**: 各ページで `speechSynthesis` を使用
 - **ミュート状態**: `muted` ストアで管理（LocalStorage に保存）
+
+### ゲームエフェクトと効果音
+
+- **Web Audio API**: ゲームモードで効果音を生成（`AudioContext`、`OscillatorNode`、`GainNode` を使用）
+- **CSS アニメーション**: `@keyframes` を使用した各種視覚エフェクト
+- **パーティクルシステム**: 成功時のパーティクルエフェクト（ランダムな位置と方向で生成）
+- **リアルタイムフィードバック**: 操作に応じた即座の視覚・聴覚フィードバック
 
 ### 進捗管理
 
@@ -355,6 +432,8 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 6. **オフライン対応**: Service Worker による PWA 化
 7. **多言語対応**: 英語、中国語（繁体字）など
 8. **ゲームモード**: 既に `src/routes/game/` が存在（Sentence Smith など）
+   - 効果音とエフェクトによるゲーム性の向上が実装済み
+   - 他のゲームモードの追加も可能
 
 ## 📍 現在のコンテキスト
 

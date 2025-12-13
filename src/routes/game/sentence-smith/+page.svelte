@@ -21,20 +21,39 @@
   import { goto } from "$app/navigation";
 
   // State for current card
-  let materials: Token[] = [];
-  let anvilSlots: (Token | null)[] = [];
+  let materials = $state<Token[]>([]);
+  let anvilSlots = $state<(Token | null)[]>([]);
 
-  let timer = 0;
+  let timer = $state(0);
   let timerInterval: any;
   let isChecking = false;
-  let showResult = false;
-  let currentResult: CardResult | null = null;
-  let feedbackMessage = "";
-  let feedbackType: "success" | "error" | "info" = "info";
+  let showResult = $state(false);
+  let currentResult = $state<CardResult | null>(null);
+  let feedbackMessage = $state("");
+  let feedbackType = $state<"success" | "error" | "info">("info");
 
-  $: currentCard = $gameSession.cards[$gameSession.current_card_index];
-  $: progress =
-    (($gameSession.current_card_index + 1) / $gameSession.cards.length) * 100;
+  // エフェクト用の状態
+  let showParticles = $state(false);
+  let showSparkles = $state(false);
+  let showShake = $state(false);
+  let anvilGlow = $state(false);
+  let particles = $state<
+    Array<{
+      id: number;
+      x: number;
+      y: number;
+      delay: number;
+      tx: number;
+      ty: number;
+    }>
+  >([]);
+
+  let currentCard = $derived(
+    $gameSession.cards[$gameSession.current_card_index]
+  );
+  let progress = $derived(
+    (($gameSession.current_card_index + 1) / $gameSession.cards.length) * 100
+  );
 
   onMount(() => {
     $headerTitle = "言葉の鍛冶屋";
@@ -50,9 +69,11 @@
   });
 
   // Init card when index changes
-  $: if (currentCard) {
-    setupCard();
-  }
+  $effect(() => {
+    if (currentCard) {
+      setupCard();
+    }
+  });
 
   function setupCard() {
     clearInterval(timerInterval);
@@ -71,6 +92,89 @@
     feedbackMessage = "";
   }
 
+  // 効果音生成関数
+  function playSound(type: "place" | "success" | "error" | "forge") {
+    if (typeof window === "undefined" || !window.AudioContext) return;
+
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    switch (type) {
+      case "place":
+        // 金属的な「チン」という音
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+        break;
+      case "success":
+        // 爽快な「パリーン」という金属音
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.15);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.3);
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.3);
+        break;
+      case "error":
+        // 鈍い「ガチャン」という音
+        oscillator.type = "sawtooth";
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.2);
+        break;
+      case "forge":
+        // 鍛造音（低い音から高い音へ）
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.2);
+        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.2);
+        break;
+    }
+  }
+
+  // パーティクル生成
+  function createParticles(count: number = 20) {
+    particles = [];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        delay: Math.random() * 0.5,
+        tx: (Math.random() - 0.5) * 100, // ランダムなX方向の移動
+        ty: -80 - Math.random() * 40, // 上方向への移動
+      });
+    }
+    showParticles = true;
+    setTimeout(() => {
+      showParticles = false;
+    }, 1000);
+  }
+
+  // 火花エフェクト
+  function createSparkles() {
+    showSparkles = true;
+    setTimeout(() => {
+      showSparkles = false;
+    }, 800);
+  }
+
   function handleTokenClick(token: Token, source: "materials" | "anvil") {
     if (showResult) return;
 
@@ -80,11 +184,18 @@
       if (emptyIndex !== -1) {
         anvilSlots[emptyIndex] = token;
         materials = materials.filter((t) => t.id !== token.id);
+        playSound("place");
+        // 正しい位置に配置された場合の視覚フィードバック
+        anvilGlow = true;
+        setTimeout(() => {
+          anvilGlow = false;
+        }, 300);
       }
     } else {
       // Return to materials
       anvilSlots = anvilSlots.map((t) => (t && t.id === token.id ? null : t));
       materials = [...materials, token];
+      playSound("place");
     }
   }
 
@@ -93,10 +204,16 @@
     if (anvilSlots.some((s) => s === null)) {
       feedbackMessage = "全ての素材を配置してください！";
       feedbackType = "error";
+      playSound("error");
+      showShake = true;
+      setTimeout(() => {
+        showShake = false;
+      }, 500);
       return;
     }
 
     clearInterval(timerInterval);
+    playSound("forge");
 
     // Construct sentence from slots
     const formedSentence = anvilSlots.map((t) => t?.text).join("");
@@ -105,9 +222,21 @@
     const isCorrect = formedSentence === currentCard.original_sentence;
 
     if (isCorrect) {
-      handleSuccess();
+      // 成功エフェクト
+      createParticles(30);
+      createSparkles();
+      playSound("success");
+      setTimeout(() => {
+        handleSuccess();
+      }, 500);
     } else {
-      handleFailure();
+      // 失敗エフェクト
+      playSound("error");
+      showShake = true;
+      setTimeout(() => {
+        showShake = false;
+        handleFailure();
+      }, 500);
     }
   }
 
@@ -236,7 +365,11 @@
       class:text-green-500={feedbackType === "success"}
       class:text-gray-500={feedbackType === "info"}
     >
-      <p class="text-sm font-medium">
+      <p
+        class="text-sm font-medium transition-all duration-300 {feedbackMessage
+          ? 'animate-feedback'
+          : ''}"
+      >
         {feedbackMessage || "言葉を正しい順序で並べ、武器を鍛え上げろ"}
       </p>
     </div>
@@ -244,19 +377,45 @@
     <!-- Anvil Area -->
     <div class="flex flex-col justify-center items-center mb-4">
       <div
-        class="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-200 w-full min-h-[180px] sm:min-h-[200px] flex flex-wrap gap-2 sm:gap-3 justify-center items-center content-center relative shadow-sm"
+        class="bg-white p-4 sm:p-6 rounded-xl border-2 w-full min-h-[180px] sm:min-h-[200px] flex flex-wrap gap-2 sm:gap-3 justify-center items-center content-center relative shadow-sm transition-all duration-300 {anvilGlow
+          ? 'border-green-400 shadow-lg shadow-green-200'
+          : showShake
+            ? 'border-red-400 shadow-lg shadow-red-200 animate-shake'
+            : 'border-gray-200'}"
       >
         <div
           class="absolute -top-3 left-4 bg-slate-50 px-2 text-gray-500 text-xs uppercase tracking-widest border border-gray-200 rounded"
         >
           Anvil
         </div>
+        <!-- 火花エフェクト -->
+        {#if showSparkles}
+          <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+            {#each Array(15) as _, i}
+              <div
+                class="absolute sparkle"
+                style="left: {Math.random() * 100}%; top: {Math.random() * 100}%; animation-delay: {Math.random() * 0.3}s;"
+              ></div>
+            {/each}
+          </div>
+        {/if}
+        <!-- パーティクルエフェクト -->
+        {#if showParticles}
+          <div class="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+            {#each particles as particle}
+              <div
+                class="absolute particle"
+                style="left: {particle.x}%; top: {particle.y}%; animation-delay: {particle.delay}s; --tx: {particle.tx}px; --ty: {particle.ty}px;"
+              ></div>
+            {/each}
+          </div>
+        {/if}
         {#each anvilSlots as token, i}
           {#if token}
             <button
               in:scale={{ duration: 200 }}
               out:scale={{ duration: 150 }}
-              class="bg-amber-100 text-gray-800 px-4 py-3 sm:px-5 sm:py-3 rounded-lg shadow-sm border border-amber-200 font-bold text-base sm:text-lg active:scale-95 transition-all touch-manipulation min-h-[44px] hover:bg-amber-50"
+              class="bg-amber-100 text-gray-800 px-4 py-3 sm:px-5 sm:py-3 rounded-lg shadow-sm border border-amber-200 font-bold text-base sm:text-lg active:scale-95 transition-all touch-manipulation min-h-[44px] hover:bg-amber-50 relative z-10 animate-token-place"
               onclick={() => handleTokenClick(token, "anvil")}
             >
               {token.text}
@@ -274,10 +433,10 @@
     <div class="py-4 flex justify-center mb-4">
       {#if !showResult}
         <button
-          class="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-10 rounded-full shadow-lg shadow-orange-200 transform active:scale-95 transition-all flex items-center gap-2 touch-manipulation min-h-[48px] w-full max-w-xs"
+          class="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-10 rounded-full shadow-lg shadow-orange-200 transform active:scale-95 transition-all flex items-center gap-2 touch-manipulation min-h-[48px] w-full max-w-xs hover:shadow-xl hover:scale-105 animate-pulse-slow"
           onclick={forge}
         >
-          <i class="fas fa-hammer"></i>
+          <i class="fas fa-hammer animate-hammer"></i>
           <span class="tracking-widest">FORGE</span>
         </button>
       {:else}
@@ -298,7 +457,7 @@
             in:fly={{ y: 20, duration: 300 }}
             out:scale={{ duration: 200 }}
             animate:flip={{ duration: 300 }}
-            class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 sm:px-5 sm:py-3 rounded-lg border border-gray-200 shadow-sm font-medium active:scale-95 transition-all touch-manipulation min-h-[44px] text-sm sm:text-base"
+            class="bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-3 sm:px-5 sm:py-3 rounded-lg border border-gray-200 shadow-sm font-medium active:scale-95 transition-all touch-manipulation min-h-[44px] text-sm sm:text-base hover:shadow-md hover:scale-105"
             onclick={() => handleTokenClick(token, "materials")}
           >
             {token.text}
@@ -320,16 +479,16 @@
       >
         <div class="mb-4">
           {#if currentResult.rating === "broken"}
-            <div class="text-5xl sm:text-6xl text-gray-400 mb-2">
+            <div class="text-5xl sm:text-6xl text-gray-400 mb-2 animate-shake-icon">
               <i class="fas fa-heart-crack"></i>
             </div>
             <h3 class="text-xl sm:text-2xl font-bold text-gray-500">Broken...</h3>
           {:else}
-            <div class="text-5xl sm:text-6xl text-primary mb-2 animate-bounce">
+            <div class="text-5xl sm:text-6xl text-primary mb-2 animate-success-icon">
               <i class="fas fa-shield-halved"></i>
             </div>
             <!-- Placeholder icon -->
-            <h3 class="text-xl sm:text-2xl font-bold text-primary uppercase">
+            <h3 class="text-xl sm:text-2xl font-bold text-primary uppercase animate-glow">
               {currentResult.rating}!
             </h3>
           {/if}
@@ -370,24 +529,184 @@
   }
 
   /* アニメーション最適化 */
-  @keyframes slideUp {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
+
+  /* 振動アニメーション */
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
     }
-    to {
-      transform: translateY(0);
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-5px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(5px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  /* トークン配置アニメーション */
+  @keyframes tokenPlace {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
       opacity: 1;
     }
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.3s ease-out forwards;
+  .animate-token-place {
+    animation: tokenPlace 0.3s ease-out;
   }
 
-  @keyframes pop {
+  /* ハンマーアニメーション */
+  @keyframes hammer {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(-15deg);
+    }
+    75% {
+      transform: rotate(15deg);
+    }
+  }
+
+  .animate-hammer {
+    animation: hammer 1s ease-in-out infinite;
+  }
+
+  /* パルスアニメーション（遅い） */
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+
+  /* 火花エフェクト */
+  .sparkle {
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #fbbf24 0%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle 0.8s ease-out forwards;
+  }
+
+  @keyframes sparkle {
     0% {
-      transform: scale(0.95);
+      transform: scale(0) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5) rotate(180deg);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(0) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  /* パーティクルエフェクト */
+  .particle {
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #f59e0b 0%, #fbbf24 50%, transparent 100%);
+    border-radius: 50%;
+    animation: particle 1s ease-out forwards;
+  }
+
+  @keyframes particle {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--tx, 0px), var(--ty, -100px)) scale(0);
+      opacity: 0;
+    }
+  }
+
+  /* 成功アイコンアニメーション */
+  @keyframes success-icon {
+    0% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.3) rotate(180deg);
+    }
+    100% {
+      transform: scale(1) rotate(360deg);
+      opacity: 1;
+    }
+  }
+
+  .animate-success-icon {
+    animation: success-icon 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  /* 失敗アイコンアニメーション */
+  @keyframes shake-icon {
+    0%,
+    100% {
+      transform: translateX(0) rotate(0deg);
+    }
+    25% {
+      transform: translateX(-10px) rotate(-5deg);
+    }
+    75% {
+      transform: translateX(10px) rotate(5deg);
+    }
+  }
+
+  .animate-shake-icon {
+    animation: shake-icon 0.6s ease-in-out;
+  }
+
+  /* グローエフェクト */
+  @keyframes glow {
+    0%,
+    100% {
+      text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+    50% {
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.8), 0 0 30px rgba(245, 158, 11, 0.6);
+    }
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  /* フィードバックメッセージアニメーション */
+  @keyframes feedback {
+    0% {
+      transform: scale(0.9);
       opacity: 0;
     }
     50% {
@@ -399,7 +718,7 @@
     }
   }
 
-  .animate-pop {
-    animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  .animate-feedback {
+    animation: feedback 0.4s ease-out;
   }
 </style>
