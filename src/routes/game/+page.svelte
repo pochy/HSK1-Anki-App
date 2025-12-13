@@ -17,6 +17,14 @@
       color: "bg-blue-100 text-blue-600",
       route: "/quiz",
     },
+    {
+      id: "sentence-smith",
+      title: "言葉の鍛冶屋",
+      description: "構文構築パズル",
+      icon: "fa-hammer",
+      color: "bg-amber-100 text-amber-600",
+      route: "/game/sentence-smith",
+    },
   ];
 </script>
 
@@ -64,4 +72,3 @@
     animation: slide-up 0.4s ease-out forwards;
   }
 </style>
-
