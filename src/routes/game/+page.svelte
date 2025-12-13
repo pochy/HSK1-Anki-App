@@ -33,6 +33,14 @@
       color: "bg-green-100 text-green-600",
       route: "/game/garden-of-memory",
     },
+    {
+      id: "rogue-like-memory",
+      title: "忘却のダンジョン",
+      description: "ローグライクRPG",
+      icon: "fa-gavel",
+      color: "bg-purple-100 text-purple-600",
+      route: "/game/rogue-like-memory",
+    },
   ];
 </script>
 

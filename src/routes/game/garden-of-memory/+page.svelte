@@ -17,20 +17,30 @@
   import { masteredIds } from "$lib/stores/app";
   import { calculateCurrentHydration } from "$lib/utils/garden";
 
-  let showAddPlantModal = false;
-  let showPlantDetail = false;
-  let userAnswer = "";
-  let quizStartTime = 0;
-  let quizAttempts = 0;
-  let showQuiz = false;
-  let showWateringEffect = false;
-  let showSuccessEffect = false;
-  let showErrorEffect = false;
-  let showEvolutionEffect = false;
-  let particles: Array<{ id: number; x: number; y: number; vx: number; vy: number; life: number }> = [];
-  let particleIdCounter = 0;
+  let showAddPlantModal = $state(false);
+  let showPlantDetail = $state(false);
+  let userAnswer = $state("");
+  let quizStartTime = $state(0);
+  let quizAttempts = $state(0);
+  let showQuiz = $state(false);
+  let showWateringEffect = $state(false);
+  let showSuccessEffect = $state(false);
+  let showErrorEffect = $state(false);
+  let showEvolutionEffect = $state(false);
+  let particles = $state<Array<{ id: number; x: number; y: number; vx: number; vy: number; life: number }>>([]);
+  let particleIdCounter = $state(0);
+  let quizInputRef = $state<HTMLInputElement | null>(null);
   // 音声設定（ミュート状態を反映）
-  $: soundEnabled = !$muted;
+  let soundEnabled = $derived(!$muted);
+
+  // クイズ表示時にフォーカスを設定
+  $effect(() => {
+    if (showQuiz && quizInputRef) {
+      setTimeout(() => {
+        quizInputRef?.focus();
+      }, 100);
+    }
+  });
 
   onMount(() => {
     $headerTitle = "記憶の庭";
@@ -140,8 +150,10 @@
   }
 
   // 警告レベルの植物を取得
-  $: warningPlants = $garden.plants.filter(
-    (p) => getCurrentHydration(p) <= 20 && !p.status.withered
+  let warningPlants = $derived(
+    $garden.plants.filter(
+      (p) => getCurrentHydration(p) <= 20 && !p.status.withered
+    )
   );
 
   // 効果音生成関数
@@ -392,14 +404,26 @@
     {@const hydration = getCurrentHydration(plant)}
     <div
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      role="button"
+      tabindex="0"
       onclick={() => {
         showPlantDetail = false;
         showQuiz = false;
       }}
+      onkeydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          showPlantDetail = false;
+          showQuiz = false;
+        }
+      }}
     >
       <div
         class="bg-white rounded-2xl p-6 w-full max-w-md animate-pop"
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
         onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
       >
         {#if !showQuiz}
           <!-- 植物詳細ビュー -->
@@ -504,18 +528,19 @@
             </div>
 
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">
+              <label for="quiz-answer-input" class="block text-sm font-medium text-gray-700 mb-2">
                 答えを入力してください
               </label>
               <input
+                id="quiz-answer-input"
                 type="text"
                 bind:value={userAnswer}
+                bind:this={quizInputRef}
                 onkeydown={(e) => {
                   if (e.key === "Enter") submitQuiz();
                 }}
                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:outline-none text-lg"
                 placeholder="中国語を入力"
-                autofocus
               />
             </div>
 
@@ -564,11 +589,22 @@
   {#if showAddPlantModal}
     <div
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      role="button"
+      tabindex="0"
       onclick={() => (showAddPlantModal = false)}
+      onkeydown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          showAddPlantModal = false;
+        }
+      }}
     >
       <div
         class="bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col animate-pop"
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
         onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
       >
         <h3 class="text-xl font-bold text-gray-800 mb-4">単語を選んで植物を追加</h3>
         <div class="flex-1 overflow-y-auto">
