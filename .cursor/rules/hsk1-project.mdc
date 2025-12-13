@@ -18,76 +18,95 @@ alwaysApply: true
 
 ## 📋 プロジェクト概要
 
-- **プロジェクト名**: 新 HSK1 級 スピードマスター
-- **タイプ**: シングルページ Web アプリケーション（SPA）
-- **目的**: 新 HSK1 級（2021 年改訂版）の中国語単語学習を支援するモバイルフレンドリーなアプリ
-- **総単語数**: 428 語（HSK1 級指定語句 150 語 + 頻出・生活語句 278 語）
+- **プロジェクト名**: 新 HSK スピードマスター
+- **タイプ**: 静的サイト（SvelteKit + adapter-static）
+- **目的**: 新 HSK（2021 年改訂版）の中国語単語学習を支援するモバイルフレンドリーなアプリ
+- **対応レベル**: HSK 1級（428語）と HSK 2級（332語）
+  - **HSK 1級**: 入門語彙 150語 + 頻出・生活語句 278語 = 428語
+  - **HSK 2級**: 基礎語彙 150語 + 頻出・生活語句 182語 = 332語
 
 ## 🏗 技術スタック
 
-- **フロントエンド**: 純粋な HTML5 + Vanilla JavaScript（フレームワーク不使用）
-- **スタイリング**: Tailwind CSS（CDN 経由）
-- **フォント**: Noto Sans JP/SC、Quicksand
-- **アイコン**: Font Awesome 6.4.0（CDN 経由）
+- **フレームワーク**: [SvelteKit](https://kit.svelte.dev/) 2.49.1
+- **UI フレームワーク**: [Svelte](https://svelte.dev/) 5.45.6
+- **言語**: [TypeScript](https://www.typescriptlang.org/) 5.9.3
+- **ビルドツール**: [Vite](https://vitejs.dev/) 7.2.6
+- **スタイリング**: [Tailwind CSS](https://tailwindcss.com/) 3.4.17
+- **アダプター**: @sveltejs/adapter-static（静的サイト生成）
 - **音声合成**: Web Speech API（`speechSynthesis`）
 - **データ永続化**: LocalStorage API（`localStorage`）
 
 ## 📊 データ構造
 
-### 単語データ（`hskData`配列）
+### 単語データ（`WordItem`型）
 
-```javascript
-{
-  id: Number,              // ユニークID（101-1405）
-  char: String,            // 中国語（簡体字）
-  pinyin: String,         // ピンイン（声調記号付き）
-  meaning: String,        // 日本語訳
-  category: String,       // カテゴリー名
-  example: String,        // 例文（中国語）
-  exampleMeaning: String  // 例文の日本語訳
-}
+データファイル: `src/lib/data/hsk1.js`, `src/lib/data/hsk2.js`
+
+```typescript
+type WordItem = {
+  id: number; // ユニークID（101-1405など）
+  char: string; // 中国語（簡体字）
+  pinyin: string; // ピンイン（声調記号付き）
+  meaning: string; // 日本語訳
+  category: string; // カテゴリー名
+  examples?: Array<{
+    // 例文（配列形式、推奨）
+    chinese: string;
+    japanese: string;
+  }>;
+  example?: string; // 例文（中国語、旧形式・互換性のため）
+  exampleMeaning?: string; // 例文の日本語訳（旧形式・互換性のため）
+};
 ```
 
-### アプリケーション状態（`app.state`）
+### アプリケーション状態（Svelteストア）
 
-```javascript
-{
-  mode: String,              // 'levelSelect' | 'levelHome' | 'learn' | 'quiz' | 'list'
-  currentIndex: Number,      // 現在の学習/クイズインデックス
-  score: Number,            // クイズスコア（0-100）
-  learningQueue: Array,     // 学習キュー（単語オブジェクトの配列）
-  quizQueue: Array,         // クイズキュー（問題オブジェクトの配列）
-  masteredIds: Array,       // 習得済み単語IDの配列
-  currentCategory: String,  // 現在選択中のカテゴリー
-  quizAnswered: Boolean,    // クイズ回答済みフラグ
-  muted: Boolean,           // 音声読み上げミュート状態
-  currentLevel: Number      // 現在選択中のHSKレベル（1, 2, ...）
-}
+ストアファイル: `src/lib/stores/app.ts`
+
+```typescript
+// 主要なストア
+masteredIds: Writable<number[]>; // 習得済み単語IDの配列
+currentLevel: Writable<number>; // 現在選択中のHSKレベル（1, 2）
+headerTitle: Writable<string>; // ヘッダータイトル
+showBottomNav: Writable<boolean>; // ボトムナビゲーション表示フラグ
+currentCategory: Writable<string>; // 現在選択中のカテゴリー
+muted: Writable<boolean>; // 音声読み上げミュート状態
+totalWords: Writable<number>; // 総単語数
+learnedWords: Writable<number>; // 習得済み単語数
+searchQuery: Writable<string>; // 検索クエリ
+showSettings: Writable<boolean>; // 設定モーダル表示フラグ
+customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンドラ
 ```
 
 ### LocalStorage キー
 
-- `hsk1_mastered_ids`: 習得済み単語 ID の配列（JSON 文字列）
+- `hsk1_mastered_ids`: 習得済み単語 ID の配列（JSON 文字列、全レベル共通）
+- `hsk1_muted`: 音声読み上げミュート状態（`"true"` / `"false"`）
 
 ## ⚖️ AI コーディング規約（厳守事項）
 
 コードを提案・修正する際は以下のルールを**厳守**してください：
 
-1. **No External Dependencies**: 新たな npm パッケージやバンドラを導入しない。すべて `index.html` 内で完結させる。
-2. **Mobile First**: スマホでの操作性（タップ領域、レイアウト）を最優先する。
-3. **Robustness**: `hskData` の構造を破壊しない。`localStorage` エラーのハンドリングを考慮する。
-4. **UI/UX**: Tailwind CSS を活用し、モダンで直感的な（アプリライクな）デザインを維持する。
-5. **Language**: コード内のコメントと UI 文言は「日本語」を使用する。
+1. **SvelteKit 規約**: SvelteKit のルーティング、ストア、コンポーネント規約に従う。
+2. **TypeScript**: 型安全性を保つ。`any` の使用は避け、適切な型定義を使用する。
+3. **Mobile First**: スマホでの操作性（タップ領域、レイアウト）を最優先する。
+4. **Robustness**: `WordItem` 型の構造を破壊しない。`localStorage` エラーのハンドリングを考慮する。
+5. **UI/UX**: Tailwind CSS を活用し、モダンで直感的な（アプリライクな）デザインを維持する。
+6. **Language**: コード内のコメントと UI 文言は「日本語」を使用する。
+7. **Svelte 5**: Svelte 5 の `$state`, `$derived`, `$effect` などの新しいリアクティビティ API を使用する。
 
 ## 📝 コード規約・スタイル
 
 - **インデント**: 2 スペース
 - **命名規則**:
-  - 関数/メソッド: camelCase
-  - DOM 要素 ID: kebab-case
+  - 関数/メソッド/変数: camelCase
+  - コンポーネント: PascalCase（例: `Header.svelte`）
+  - 型/インターフェース: PascalCase（例: `WordItem`）
+  - ファイル名: kebab-case（例: `app.ts`, `word.ts`）
   - CSS クラス: Tailwind CSS 準拠
 - **コメント**: 日本語で記述
 - **文字エンコーディング**: UTF-8
+- **Svelte コンポーネント**: `<script lang="ts">` を使用し、TypeScript で記述
 
 ## 🎨 デザインシステム
 
@@ -102,28 +121,64 @@ alwaysApply: true
 
 ## 🔧 主要機能
 
-1. **レベル選択画面** (`showLevelSelect()`)
-2. **ホーム画面** (`showLevelHome()`) - カテゴリー別学習一覧
-3. **カテゴリー学習** (`startCategorySession(category)`) - フラッシュカード形式
-4. **苦手復習** (`startReview()`) - 未習得単語からランダム 10 語
-5. **総合実力テスト** (`startQuiz()`) - 全 428 語からランダム 10 問
-6. **単語リスト** (`showWordList()`) - カテゴリー別に全単語を一覧表示
-7. **固定ボトムナビゲーション** - Cards、Quiz、List タブで主要機能にアクセス
-8. **進捗管理** - LocalStorage で習得済み単語を記録
-9. **音声読み上げ** (`speak(text)`) - Web Speech API 使用
-10. **設定機能** (`showSettings()`) - 学習データのリセット
+1. **レベル選択画面** (`/` - `src/routes/+page.svelte`) - HSK 1級/2級を選択
+2. **カテゴリー学習** (`/cards/` - `src/routes/cards/+page.svelte`) - フラッシュカード形式で学習
+3. **総合実力テスト** (`/quiz/` - `src/routes/quiz/+page.svelte`) - ランダム 10 問のクイズ
+4. **単語リスト** (`/list/` - `src/routes/list/+page.svelte`) - カテゴリー別に全単語を一覧表示・検索
+5. **固定ボトムナビゲーション** (`src/lib/components/BottomNav.svelte`) - Cards、Quiz、List タブで主要機能にアクセス
+6. **進捗管理** - LocalStorage で習得済み単語を記録（全レベル共通）
+7. **音声読み上げ** - Web Speech API 使用（各ページで実装）
+8. **設定機能** (`src/lib/components/SettingsModal.svelte`) - 学習データのリセット
 
 ## 🐛 既知の制約・注意事項
 
-1. **音声読み上げ**: ブラウザの言語パック設定に依存
+1. **音声読み上げ**: ブラウザの言語パック設定に依存。中国語（zh-CN）の音声パックが必要
 2. **LocalStorage**: プライベートモードでは制限される場合がある
 3. **モバイル対応**: iOS Safari、Android Chrome での動作確認推奨
-4. **CDN 依存**: Tailwind CSS、Font Awesome、Google Fonts は CDN 経由
-5. **データ構造**: 単語データは `index.html` 内にハードコード
+4. **静的サイト**: `adapter-static` を使用。全ページが `prerender: true` で事前レンダリングされる
+5. **データ構造**: 単語データは `src/lib/data/hsk1.js` と `hsk2.js` に定義
+6. **ルーティング**: `trailingSlash = "always"` を有効化。URL は `/cards/`, `/quiz/`, `/list/` 形式
+
+## 📁 プロジェクト構成
+
+```text
+HSK1-Anki-App/
+├── src/
+│   ├── lib/
+│   │   ├── components/      # Svelte コンポーネント
+│   │   │   ├── Header.svelte
+│   │   │   ├── BottomNav.svelte
+│   │   │   └── SettingsModal.svelte
+│   │   ├── data/            # 単語データ
+│   │   │   ├── hsk1.js      # HSK 1級データ（428語）
+│   │   │   └── hsk2.js      # HSK 2級データ（332語）
+│   │   ├── stores/          # Svelte ストア（状態管理）
+│   │   │   └── app.ts
+│   │   ├── types/           # TypeScript 型定義
+│   │   │   └── word.ts
+│   │   └── utils/           # ユーティリティ関数
+│   ├── routes/              # ページルート
+│   │   ├── +page.svelte     # ホーム（レベル選択）
+│   │   ├── +layout.svelte   # レイアウト
+│   │   ├── cards/           # カテゴリー学習
+│   │   │   └── +page.svelte
+│   │   ├── quiz/            # クイズ
+│   │   │   └── +page.svelte
+│   │   └── list/            # 単語リスト
+│   │       └── +page.svelte
+│   └── app.css              # グローバルスタイル
+├── build/                   # ビルド出力（生成）
+├── static/                  # 静的ファイル
+├── package.json
+├── svelte.config.ts
+├── vite.config.ts
+├── tailwind.config.js
+└── README.md
+```
 
 ## 📍 現在のコンテキスト
 
-現在のフェーズは、コア機能の実装が完了し、UI のブラッシュアップやレベル拡張（2 級〜）を見据えた基盤整備を行っている段階です。
+現在のフェーズは、SvelteKit への移行が完了し、HSK 1級と2級の両方をサポートする基盤が整備されています。UI のブラッシュアップや追加機能（ゲームモードなど）の実装が進行中です。
 
 ---
 
