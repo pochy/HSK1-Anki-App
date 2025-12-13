@@ -215,7 +215,8 @@
         currentCategory: 'all',
         quizAnswered: false,
         muted: false,
-        currentLevel: 1
+        currentLevel: 1,
+        searchQuery: ''
       },
       init: function () {
         this.setDynamicTitle();
@@ -546,7 +547,12 @@
                     </button>
                     <div class="text-sm text-gray-400 font-bold mb-2 tracking-widest uppercase">HSK ${this.state.currentLevel}</div>
                     <div class="text-6xl font-bold text-gray-800 mb-2 chinese-text mt-4">${item.char}</div>
-                    <div class="text-2xl text-primary font-serif mb-6">${item.pinyin}</div>
+                    <div class="text-2xl text-primary font-serif mb-6 flex items-center justify-center gap-2">
+                        ${item.pinyin}
+                        <button onclick="app.speak('${item.char}')" class="text-primary hover:text-primary-dark transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-50">
+                            <i class="fas fa-volume-up text-sm"></i>
+                        </button>
+                    </div>
                     <div class="w-12 h-1 bg-gray-100 mx-auto mb-6 rounded-full"></div>
                     <div class="text-2xl font-bold text-gray-700">${item.meaning}</div>
                 </div>
@@ -643,7 +649,12 @@
         } else if (q.type === 2) {
           headerContent = `
                 <div class="text-5xl font-bold text-gray-800 chinese-text mb-2">${q.target.char}</div>
-                <div class="text-gray-400 font-serif">${q.target.pinyin}</div>
+                <div class="text-gray-400 font-serif flex items-center justify-center gap-2">
+                    ${q.target.pinyin}
+                    <button onclick="app.speak('${q.target.char}')" class="text-gray-400 hover:text-primary transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-50">
+                        <i class="fas fa-volume-up text-sm"></i>
+                    </button>
+                </div>
                 <div class="text-gray-500 text-sm mt-4 font-bold">意味を選んでください</div>
             `;
         } else {
@@ -876,6 +887,23 @@
         this.updateActiveNav('list');
       },
 
+      filterWords: function (items, query) {
+        if (!query || query.trim() === '') {
+          return items;
+        }
+        const lowerQuery = query.toLowerCase().trim();
+        return items.filter(item => {
+          return item.char.toLowerCase().includes(lowerQuery) ||
+            item.pinyin.toLowerCase().includes(lowerQuery) ||
+            item.meaning.toLowerCase().includes(lowerQuery);
+        });
+      },
+
+      handleSearch: function (query) {
+        this.state.searchQuery = query;
+        this.showWordList();
+      },
+
       showWordList: function () {
         this.state.mode = 'list';
         const currentData = this.getCurrentData();
@@ -884,20 +912,65 @@
         this.toggleBottomNav(false);
         this.updateHeaderStats();
 
+        // 検索クエリでフィルタリング
+        const filteredData = this.filterWords(currentData, this.state.searchQuery);
+
         // カテゴリーごとにグループ化
-        const categories = [...new Set(currentData.map(item => item.category))];
+        const categories = [...new Set(filteredData.map(item => item.category))];
         const groupedData = {};
         categories.forEach(cat => {
-          groupedData[cat] = currentData.filter(item => item.category === cat);
+          groupedData[cat] = filteredData.filter(item => item.category === cat);
         });
 
         let listHtml = '<div class="p-4 pb-24 animate-slide-up">';
 
-        categories.forEach(cat => {
-          const items = groupedData[cat];
-          const learnedCount = items.filter(i => this.state.masteredIds.includes(i.id)).length;
+        // 検索エリア
+        listHtml += `
+          <div class="mb-6">
+            <div class="relative">
+              <input 
+                type="text" 
+                id="search-input" 
+                placeholder="中国語・ピンイン・意味で検索..." 
+                value="${this.state.searchQuery || ''}"
+                oninput="app.handleSearch(this.value)"
+                class="w-full px-4 py-3 pl-12 pr-10 bg-white border-2 border-gray-200 rounded-2xl text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary transition"
+              />
+              <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              ${this.state.searchQuery ? `
+                <button 
+                  onclick="app.handleSearch('')"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-200 flex items-center justify-center transition"
+                >
+                  <i class="fas fa-times text-sm"></i>
+                </button>
+              ` : ''}
+            </div>
+            ${this.state.searchQuery ? `
+              <div class="mt-2 text-sm text-gray-500">
+                検索結果: <span class="font-bold text-primary">${filteredData.length}</span> 語
+              </div>
+            ` : ''}
+          </div>
+        `;
 
+        // 検索結果が0件の場合
+        if (this.state.searchQuery && filteredData.length === 0) {
           listHtml += `
+            <div class="text-center py-12">
+              <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-search text-gray-400 text-2xl"></i>
+              </div>
+              <p class="text-gray-500 font-bold mb-2">検索結果が見つかりませんでした</p>
+              <p class="text-sm text-gray-400">別のキーワードで検索してください</p>
+            </div>
+          `;
+        } else {
+          categories.forEach(cat => {
+            const items = groupedData[cat];
+            const learnedCount = items.filter(i => this.state.masteredIds.includes(i.id)).length;
+
+            listHtml += `
             <div class="mb-6">
               <div class="flex items-center justify-between mb-3 px-2">
                 <h3 class="font-bold text-gray-700 text-lg flex items-center">
@@ -910,13 +983,18 @@
               </div>
               <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 ${items.map((item, idx) => {
-            const isMastered = this.state.masteredIds.includes(item.id);
-            return `
+              const isMastered = this.state.masteredIds.includes(item.id);
+              return `
                     <div class="flex items-center justify-between p-4 ${idx < items.length - 1 ? 'border-b border-gray-100' : ''} ${isMastered ? 'bg-green-50/50' : ''}">
                       <div class="flex-1">
                         <div class="flex items-center mb-1">
                           <span class="text-2xl font-bold text-gray-800 chinese-text mr-3">${item.char}</span>
-                          <span class="text-sm text-primary font-serif">${item.pinyin}</span>
+                          <span class="text-sm text-primary font-serif flex items-center gap-1">
+                            ${item.pinyin}
+                            <button onclick="app.speak('${item.char.replace(/'/g, "\\'")}')" class="text-primary hover:text-primary-dark transition w-5 h-5 rounded-full flex items-center justify-center hover:bg-orange-50">
+                              <i class="fas fa-volume-up text-xs"></i>
+                            </button>
+                          </span>
                           ${isMastered ? '<i class="fas fa-check-circle text-green-500 ml-2"></i>' : ''}
                         </div>
                         <div class="text-sm text-gray-600">${item.meaning}</div>
@@ -926,11 +1004,12 @@
                       </button>
                     </div>
                   `;
-          }).join('')}
+            }).join('')}
               </div>
             </div>
           `;
-        });
+          });
+        }
 
         listHtml += '</div>';
         this.setViewHtml(listHtml);
