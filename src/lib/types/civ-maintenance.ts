@@ -125,6 +125,7 @@ export interface BuildingMetadata {
   maintenance_count: number;           // メンテナンス回数
   upgrade_count: number;               // アップグレード回数
   category: string;                    // カテゴリー
+  last_decay_time?: number;            // 最終減衰時刻（テスト用）
 }
 
 // 施設データ
@@ -271,6 +272,8 @@ export interface CitySettings {
   show_warnings: boolean;               // 警告表示
   animation_speed: number;              // アニメーション速度
   sound_enabled: boolean;               // 音声効果
+  initial_review_interval: number;      // 新規カードの初期復習間隔（日）
+  decay_rate_multiplier: number;       // 減衰率の倍率（1.0が標準）
 }
 
 // 都市データ

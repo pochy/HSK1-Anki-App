@@ -1,5 +1,6 @@
 <script lang="ts">
   import { showSettings, masteredIds, muted } from "$lib/stores/app";
+  import { city, updateCitySettings } from "$lib/stores/civ-maintenance";
   import { fade } from "svelte/transition";
   import { browser } from "$app/environment";
   import type { TransitionConfig } from "svelte/transition";
@@ -88,6 +89,80 @@
               : 'translate-x-6'}"
           ></span>
         </button>
+      </div>
+
+      <!-- 文明維持シミュレーション設定 -->
+      <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+        <div class="flex items-center mb-4">
+          <div
+            class="w-10 h-10 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mr-3"
+          >
+            <i class="fas fa-city"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-800">文明維持シミュレーション</div>
+            <div class="text-xs text-gray-500">
+              復習間隔などの設定を変更できます
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label
+              for="initial-interval"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              新規カードの初期復習間隔
+            </label>
+            <div class="flex items-center gap-3">
+              <input
+                id="initial-interval"
+                type="number"
+                min="1"
+                max="30"
+                value={$city.settings.initial_review_interval || 1}
+                onchange={(e) => {
+                  const value = parseInt(e.currentTarget.value) || 1;
+                  updateCitySettings({ initial_review_interval: value });
+                }}
+                class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-center font-bold"
+              />
+              <span class="text-sm text-gray-600 w-8">日</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              新しく追加したカードの最初の復習間隔（1-30日）
+            </p>
+          </div>
+
+          <div>
+            <label
+              for="decay-multiplier"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
+              減衰率の倍率
+            </label>
+            <div class="flex items-center gap-3">
+              <input
+                id="decay-multiplier"
+                type="number"
+                min="0.1"
+                max="5.0"
+                step="0.1"
+                value={$city.settings.decay_rate_multiplier || 1.0}
+                onchange={(e) => {
+                  const value = parseFloat(e.currentTarget.value) || 1.0;
+                  updateCitySettings({ decay_rate_multiplier: value });
+                }}
+                class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-center font-bold"
+              />
+              <span class="text-sm text-gray-600 w-12">倍</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              カードの減衰速度を調整（1.0が標準、大きいほど早く減衰）
+            </p>
+          </div>
+        </div>
       </div>
 
       <div class="p-4 bg-red-50 rounded-xl border border-red-100">

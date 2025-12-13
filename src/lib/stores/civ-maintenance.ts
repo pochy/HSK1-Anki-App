@@ -95,6 +95,8 @@ const createInitialCity = (): City => {
       show_warnings: true,
       animation_speed: 1.0,
       sound_enabled: true,
+      initial_review_interval: 1,      // 新規カードの初期復習間隔（日）
+      decay_rate_multiplier: 1.0,       // 減衰率の倍率
     },
     level: 1,
     population: 0,
@@ -184,8 +186,11 @@ export const addCardFromWord = (wordId: number, buildingId?: string) => {
   // 新しいカードを作成
   const now = Date.now();
   const today = new Date(now).toISOString().split("T")[0];
+  
+  // 都市設定から初期復習間隔を取得
+  const initialInterval = currentCity.settings.initial_review_interval || 1;
   const nextReview = new Date(now);
-  nextReview.setDate(nextReview.getDate() + 1);
+  nextReview.setDate(nextReview.getDate() + initialInterval);
 
   const newCard: Card = {
     card_id: generateId(),
@@ -201,7 +206,7 @@ export const addCardFromWord = (wordId: number, buildingId?: string) => {
     status: "active",
     srs_data: {
       next_review: nextReview.toISOString().split("T")[0],
-      interval: 1,
+      interval: initialInterval,
       ease_factor: 2.5,
       review_count: 0,
       stability: 1,
@@ -426,8 +431,35 @@ export const performMaintenance = (
     });
   }
 
+  // カードストアを更新（メンテナンス後のカード状態を反映）
+  cards.update((cardList) =>
+    cardList.map((c) => {
+      const updatedCard = cardsToReview.find((cr) => cr.card_id === c.card_id);
+      return updatedCard ? updatedCard : c;
+    })
+  );
+
+  // 最新のカードデータを取得
+  const updatedCards = get(cards);
+
+  // 施設のカード参照を最新のカード状態に同期
+  for (const cardRef of building.cards) {
+    const card = updatedCards.find((c) => c.card_id === cardRef.id);
+    if (card) {
+      // カードの状態を更新
+      updateCardStatus(card, now);
+      // 貢献度を再計算
+      const contribution = calculateCardContribution(card, now);
+      cardRef.contribution = contribution;
+      cardRef.status = card.status;
+      cardRef.warning = card.warning;
+      cardRef.next_review = card.next_review;
+      cardRef.last_review = card.last_review;
+    }
+  }
+
   // 施設メトリクスの更新
-  updateBuildingMetrics(building, currentCards, now);
+  updateBuildingMetrics(building, updatedCards, now);
   const maintenanceAfter = building.metrics.maintenance_level;
 
   // リソースの獲得
@@ -556,6 +588,14 @@ export const resetCity = () => {
     cards.set([]);
     selectedBuilding.set(null);
   }
+};
+
+// アクション: 都市設定を更新
+export const updateCitySettings = (settings: Partial<City["settings"]>) => {
+  city.update((c) => ({
+    ...c,
+    settings: { ...c.settings, ...settings },
+  }));
 };
 
 // 定期的なメトリクス更新（1分ごと）

@@ -114,12 +114,8 @@ export function calculateMaintenanceLevel(
   cards: Card[],
   currentTime: number
 ): number {
-  const activeCards = building.cards.filter((c) => c.status === "active");
-  if (activeCards.length === 0) return 0;
-
-  // 各カードの貢献度を計算
-  let totalContribution = 0;
-  for (const cardRef of activeCards) {
+  // 全てのカード参照を最新の状態に更新
+  for (const cardRef of building.cards) {
     const card = cards.find((c) => c.card_id === cardRef.id);
     if (!card) continue;
 
@@ -131,10 +127,26 @@ export function calculateMaintenanceLevel(
     cardRef.contribution = contribution;
     cardRef.status = card.status;
     cardRef.warning = card.warning;
-    totalContribution += contribution;
   }
 
-  // 平均貢献度を維持レベルとして使用
+  // アクティブカードのみを対象に維持レベルを計算
+  const activeCards = building.cards.filter((c) => c.status === "active");
+  if (activeCards.length === 0) {
+    // アクティブカードがない場合、全カードの平均を使用
+    if (building.cards.length === 0) return 0;
+    const totalContribution = building.cards.reduce(
+      (sum, c) => sum + c.contribution,
+      0
+    );
+    const averageContribution = totalContribution / building.cards.length;
+    return Math.max(0, Math.min(1, averageContribution / 100));
+  }
+
+  // アクティブカードの平均貢献度を維持レベルとして使用
+  const totalContribution = activeCards.reduce(
+    (sum, c) => sum + c.contribution,
+    0
+  );
   const averageContribution = totalContribution / activeCards.length;
   return Math.max(0, Math.min(1, averageContribution / 100));
 }
@@ -193,11 +205,37 @@ export function updateBuildingMetrics(
   cards: Card[],
   currentTime: number
 ): void {
-  // 維持レベルの更新
-  building.metrics.maintenance_level = calculateMaintenanceLevel(
+  // テスト用: 時間ベースの減衰を適用（10秒で1%減）
+  if (!building.metadata.last_decay_time) {
+    building.metadata.last_decay_time = currentTime;
+  }
+  
+  const timeSinceLastDecay = (currentTime - building.metadata.last_decay_time) / 1000; // 秒
+  const decayInterval = 10; // 10秒
+  const decayAmount = 0.01; // 1%
+  
+  if (timeSinceLastDecay >= decayInterval) {
+    const decayCount = Math.floor(timeSinceLastDecay / decayInterval);
+    const currentMaintenance = building.metrics.maintenance_level;
+    // 維持レベルを減らす（最小0）
+    building.metrics.maintenance_level = Math.max(
+      0,
+      currentMaintenance - decayCount * decayAmount
+    );
+    building.metadata.last_decay_time = currentTime - (timeSinceLastDecay % decayInterval) * 1000;
+  }
+  
+  // 維持レベルの更新（カードベースの計算）
+  const cardBasedLevel = calculateMaintenanceLevel(
     building,
     cards,
     currentTime
+  );
+  
+  // テスト用: 時間ベースの減衰とカードベースの計算の小さい方を採用
+  building.metrics.maintenance_level = Math.min(
+    building.metrics.maintenance_level,
+    cardBasedLevel
   );
 
   // アクティブカード数の更新
@@ -415,5 +453,67 @@ export function getBuildingEmoji(buildingType: BuildingType): string {
  */
 export function generateId(): string {
   return `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * 維持レベルが0%になるまでの推定日数を計算
+ */
+export function calculateDaysUntilZero(
+  building: Building,
+  cards: Card[],
+  currentTime: number
+): number | null {
+  if (building.cards.length === 0) return null;
+
+  // 現在の維持レベルを取得
+  const currentLevel = calculateMaintenanceLevel(building, cards, currentTime);
+  if (currentLevel <= 0) return 0;
+
+  // 各カードが0になるまでの日数を計算
+  const daysUntilZeroList: number[] = [];
+
+  for (const cardRef of building.cards) {
+    const card = cards.find((c) => c.card_id === cardRef.id);
+    if (!card) continue;
+
+    const daysSinceReview = calculateDaysSinceReview(card);
+    const expectedInterval = card.srs_data.interval;
+    
+    // 現在の貢献度を計算
+    const currentContribution = calculateCardContribution(card, currentTime);
+    
+    if (currentContribution <= 0) {
+      daysUntilZeroList.push(0);
+      continue;
+    }
+
+    // 貢献度が0になるまでの日数を推定
+    // 大幅に遅れた場合の式: contribution = 40 - (daysSinceReview - expectedInterval * 1.5) * 5
+    // これを逆算: daysUntilZero = (40 - contribution) / 5 + expectedInterval * 1.5 - daysSinceReview
+    
+    let daysUntilZero = 0;
+    
+    if (daysSinceReview <= expectedInterval * 1.5) {
+      // まだ大幅に遅れていない場合
+      // 大幅に遅れるまでの日数 + 0になるまでの日数
+      const daysUntilSevereDelay = expectedInterval * 1.5 - daysSinceReview;
+      // 大幅に遅れた後、0になるまでの日数（最大ボーナス30を考慮）
+      const maxContribution = currentContribution + 30; // ボーナス最大値
+      const daysFromSevereToZero = maxContribution / 5; // 1日あたり5ポイント減衰
+      daysUntilZero = daysUntilSevereDelay + daysFromSevereToZero;
+    } else {
+      // 既に大幅に遅れている場合
+      // 現在の貢献度から0になるまでの日数（ボーナスを除いた基本値）
+      const baseContribution = Math.max(0, currentContribution - 30); // ボーナスを除く
+      daysUntilZero = baseContribution / 5; // 1日あたり5ポイント減衰
+    }
+
+    daysUntilZeroList.push(Math.max(0, daysUntilZero));
+  }
+
+  if (daysUntilZeroList.length === 0) return null;
+
+  // 最短の日数を返す（最も早く0になるカード）
+  return Math.min(...daysUntilZeroList);
 }
 

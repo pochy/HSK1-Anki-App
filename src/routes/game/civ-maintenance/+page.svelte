@@ -27,6 +27,7 @@
   import {
     getBuildingEmoji,
     calculateQuizRating,
+    calculateDaysUntilZero,
   } from "$lib/utils/civ-maintenance";
   import { hsk1 } from "$lib/data/hsk1.js";
   import { hsk2 } from "$lib/data/hsk2.js";
@@ -552,6 +553,27 @@
                 <span class="font-bold">{building.metrics.happiness}/100</span>
               </div>
             </div>
+
+            {#each [calculateDaysUntilZero(building, $cards, Date.now())] as daysUntilZero}
+              {#if daysUntilZero !== null && daysUntilZero > 0}
+                <div
+                  class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3"
+                >
+                  <div class="flex items-center text-xs text-amber-700">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span>
+                      復習しない場合、約
+                      <span class="font-bold">
+                        {daysUntilZero < 1
+                          ? Math.round(daysUntilZero * 24) + "時間"
+                          : Math.round(daysUntilZero) + "日"}
+                      </span>
+                      で維持レベルが0%になります
+                    </span>
+                  </div>
+                </div>
+              {/if}
+            {/each}
 
             <div class="flex gap-2 mb-4">
               <button
