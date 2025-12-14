@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>HSK スピードマスター | 中国語学習</title>
+    <script src="words/hsk1.js"></script>
+    <script src="words/hsk2.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Quicksand:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+        background-color: #f8fafc;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .chinese-text {
+        font-family: "Noto Sans SC", sans-serif;
+      }
+
+      .app-container {
+        max-width: 480px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Colors */
+      :root {
+        --primary: #f59e0b;
+        /* Amber 500 */
+        --primary-dark: #d97706;
+        --secondary: #3b82f6;
+        /* Blue 500 */
+        --success: #22c55e;
+        --danger: #ef4444;
+        --surface: #ffffff;
+        --bg: #f8fafc;
+      }
+
+      .text-primary {
+        color: var(--primary);
+      }
+
+      .bg-primary {
+        background-color: var(--primary);
+      }
+
+      /* Custom Buttons */
+      .btn-3d {
+        transition: all 0.1s;
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1);
+        position: relative;
+        top: 0;
+      }
+
+      .btn-3d:active {
+        top: 4px;
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+      }
+
+      .card-shadow {
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Animations */
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .animate-slide-up {
+        animation: slideUp 0.3s ease-out forwards;
+      }
+
+      @keyframes pop {
+        0% {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+
+        50% {
+          transform: scale(1.05);
+        }
+
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .animate-pop {
+        animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      }
+
+      /* Scrollbar hide */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Progress Bar */
+      .progress-fill {
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Toggle Switch */
+      .toggle-checkbox:checked {
+        right: 0;
+        border-color: #f59e0b;
+      }
+
+      .toggle-checkbox:checked + .toggle-label {
+        background-color: #f59e0b;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app-container">
+      <!-- Header -->
+      <header
+        id="app-header"
+        class="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 z-20 shrink-0"
+      >
+        <button
+          id="back-btn"
+          class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 invisible transition"
+        >
+          <i class="fas fa-chevron-left text-xl"></i>
+        </button>
+        <h1
+          id="header-title"
+          class="font-bold text-lg text-gray-700 tracking-wide"
+        >
+          HSK学習
+        </h1>
+        <div
+          id="header-stats"
+          class="text-sm font-bold text-gray-400 flex items-center gap-1"
+        >
+          <!-- Stats injected here -->
+        </div>
+        <button
+          id="settings-btn"
+          class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition"
+          onclick="app.showSettings()"
+        >
+          <i class="fas fa-cog text-lg"></i>
+        </button>
+      </header>
+
+      <!-- Main Content -->
+      <main
+        id="main-view"
+        class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50 pb-16"
+      >
+        <!-- Views will be injected here -->
+      </main>
+
+      <!-- Bottom Navigation (Contextual) -->
+      <div
+        id="bottom-nav"
+        class="p-4 bg-white border-t border-gray-100 shrink-0 hidden z-20"
+      >
+        <!-- Buttons injected here -->
+      </div>
+
+      <!-- Fixed Bottom Navigation -->
+      <nav
+        id="fixed-bottom-nav"
+        class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30 max-w-[480px] mx-auto shadow-lg"
+      >
+        <div class="grid grid-cols-3 h-16">
+          <button
+            id="nav-cards"
+            onclick="app.navigateToCards()"
+            class="flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-all active:bg-gray-50 relative"
+          >
+            <i class="fas fa-layer-group text-xl mb-1"></i>
+            <span class="text-xs font-medium">Cards</span>
+          </button>
+          <button
+            id="nav-quiz"
+            onclick="app.navigateToQuiz()"
+            class="flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-all active:bg-gray-50 relative"
+          >
+            <i class="fas fa-gamepad text-xl mb-1"></i>
+            <span class="text-xs font-medium">Quiz</span>
+          </button>
+          <button
+            id="nav-list"
+            onclick="app.navigateToList()"
+            class="flex flex-col items-center justify-center text-gray-400 hover:text-primary transition-all active:bg-gray-50 relative"
+          >
+            <i class="fas fa-list text-xl mb-1"></i>
+            <span class="text-xs font-medium">List</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Overlay & Modals -->
+      <div
+        id="overlay"
+        class="absolute inset-0 bg-black/50 z-40 hidden opacity-0 transition-opacity duration-300"
+        onclick="app.closeModal()"
+      ></div>
+      <div
+        id="modal"
+        class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 z-50 transform translate-y-full transition-transform duration-300 pb-10"
+      >
+        <!-- Modal content -->
+      </div>
+    </div>
+
+    <script>
+      // App Logic
+      const app = {
+        state: {
+          mode: "levelSelect",
+          currentIndex: 0,
+          score: 0,
+          learningQueue: [],
+          quizQueue: [],
+          masteredIds: [],
+          currentCategory: "all",
+          quizAnswered: false,
+          muted: false,
+          currentLevel: 1,
+          searchQuery: "",
+        },
+        init: function () {
+          this.setDynamicTitle();
+          this.cacheEls();
+          this.loadProgress();
+          this.showLevelSelect();
+          this.initVoices();
+        },
+
+        cacheEls: function () {
+          this.els = {
+            headerTitle: document.getElementById("header-title"),
+            headerStats: document.getElementById("header-stats"),
+            backBtn: document.getElementById("back-btn"),
+            mainView: document.getElementById("main-view"),
+            bottomNav: document.getElementById("bottom-nav"),
+            fixedBottomNav: document.getElementById("fixed-bottom-nav"),
+            navCards: document.getElementById("nav-cards"),
+            navQuiz: document.getElementById("nav-quiz"),
+            navList: document.getElementById("nav-list"),
+            overlay: document.getElementById("overlay"),
+            modal: document.getElementById("modal"),
+          };
+        },
+
+        setDynamicTitle: function () {
+          document.title = `HSK スピードマスター | 中国語学習`;
+        },
+
+        setHeaderTitle: function (title) {
+          this.els.headerTitle.innerText = title;
+        },
+
+        setBackButton: function ({ visible, onClick } = {}) {
+          if (visible) this.els.backBtn.classList.remove("invisible");
+          else this.els.backBtn.classList.add("invisible");
+          this.els.backBtn.onclick = onClick || null;
+        },
+
+        setViewHtml: function (html) {
+          this.els.mainView.innerHTML = html;
+        },
+
+        initVoices: function () {
+          if (!("speechSynthesis" in window)) return;
+          const pickVoice = () => {
+            const voices = window.speechSynthesis.getVoices();
+            this._zhVoice =
+              voices.find((v) => v.lang === "zh-CN") ||
+              voices.find((v) => v.lang?.startsWith("zh")) ||
+              null;
+          };
+          pickVoice();
+          window.speechSynthesis.onvoiceschanged = pickVoice;
+        },
+
+        shuffle: function (arr) {
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          return arr;
+        },
+
+        sample: function (arr, n) {
+          return this.shuffle([...arr]).slice(0, n);
+        },
+
+        loadProgress: function () {
+          const saved = localStorage.getItem("hsk1_mastered_ids");
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            this.state.masteredIds = Array.isArray(parsed)
+              ? [...new Set(parsed)]
+              : [];
+          }
+          const muted = localStorage.getItem("hsk1_muted");
+          if (muted !== null) {
+            this.state.muted = muted === "true";
+          }
+        },
+
+        saveProgress: function () {
+          localStorage.setItem(
+            "hsk1_mastered_ids",
+            JSON.stringify(this.state.masteredIds),
+          );
+          this.updateHeaderStats();
+        },
+
+        updateHeaderStats: function () {
+          const currentData = this.getCurrentData();
+          const total = currentData.length;
+          const learned = this.state.masteredIds.filter((id) =>
+            currentData.some((item) => item.id === id),
+          ).length;
+          const percentage = Math.round((learned / total) * 100);
+
+          this.els.headerStats.innerHTML = `
+            <div class="flex flex-col items-end">
+                <span class="text-xs text-gray-400">習得率</span>
+                <span class="text-primary text-base">${percentage}%</span>
+            </div>
+            <div class="w-10 h-10 ml-2 relative flex items-center justify-center">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path class="text-gray-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                    <path class="text-yellow-400 progress-fill" stroke-dasharray="${percentage}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                </svg>
+                <i class="fas fa-medal absolute text-yellow-500 text-xs"></i>
+            </div>
+        `;
+        },
+
+        getCurrentData: function () {
+          if (this.state.currentLevel === 1) {
+            return hskData;
+          } else if (this.state.currentLevel === 2) {
+            return hsk2Data;
+          }
+          return hskData;
+        },
+
+        showLevelSelect: function () {
+          this.state.mode = "levelSelect";
+          this.setBackButton({ visible: false });
+          this.setHeaderTitle("HSK学習アプリ");
+          this.toggleBottomNav(false);
+          this.els.headerStats.innerHTML = "";
+          // ナビゲーションタブをリセット
+          this.updateActiveNav("");
+
+          this.setViewHtml(`
+            <div class="p-6 pb-24 animate-slide-up flex flex-col items-center">
+                <h2 class="text-2xl font-bold text-gray-700 mb-6 mt-4">レベルを選択</h2>
+                <div class="grid grid-cols-2 gap-4 w-full">
+                    <button onclick="app.selectLevel(1)" class="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-6 rounded-2xl shadow-lg transform transition active:scale-95 flex flex-col items-center justify-center h-40 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                            <i class="fas fa-dragon text-6xl"></i>
+                        </div>
+                        <span class="text-3xl font-bold mb-2">1級</span>
+                        <span class="text-xs opacity-90">入門 (450語)</span>
+                        <div class="mt-3 bg-white/20 px-3 py-1 rounded-full text-xs">学習する</div>
+                    </button>
+
+                    ${[2, 3, 4, 5, 6]
+                      .map((level) => {
+                        const hasData =
+                          level === 2 && hsk2Data && hsk2Data.length > 0;
+                        return `
+                        <button onclick="app.selectLevel(${level})" class="${hasData ? "bg-gradient-to-br from-blue-400 to-indigo-500 text-white" : "bg-white border-2 border-gray-100 text-gray-400"} p-6 rounded-2xl shadow-sm transform transition active:scale-95 flex flex-col items-center justify-center h-40 ${hasData ? "shadow-lg relative overflow-hidden group" : ""}">
+                            ${hasData ? '<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition"><i class="fas fa-book text-6xl"></i></div>' : ""}
+                            <span class="text-2xl font-bold mb-2">${level}級</span>
+                            <span class="text-xs ${hasData ? "opacity-90" : ""}">${hasData ? `基礎${hsk2Data.length + 150}語` : "准备中..."}</span>
+                            ${hasData ? '<div class="mt-3 bg-white/20 px-3 py-1 rounded-full text-xs">学習する</div>' : ""}
+                        </button>
+                    `;
+                      })
+                      .join("")}
+                </div>
+            </div>
+        `);
+        },
+
+        selectLevel: function (level) {
+          if (level === 1) {
+            this.state.currentLevel = 1;
+            this.showLevelHome();
+          } else if (level === 2 && hsk2Data && hsk2Data.length > 0) {
+            this.state.currentLevel = 2;
+            this.showLevelHome();
+          } else {
+            alert(
+              `HSK${level}級コースは現在準備中です。\nまずは1級から始めましょう！`,
+            );
+          }
+        },
+
+        showLevelHome: function () {
+          this.state.mode = "levelHome";
+          this.setBackButton({
+            visible: true,
+            onClick: () => app.showLevelSelect(),
+          });
+          const currentData = this.getCurrentData();
+          this.setHeaderTitle(`HSK${this.state.currentLevel}級`);
+          this.toggleBottomNav(false);
+          this.updateHeaderStats();
+          this.updateActiveNav("cards");
+
+          const categories = [
+            ...new Set(currentData.map((item) => item.category)),
+          ];
+
+          this.setViewHtml(`
+            <div class="p-6 pb-24 animate-slide-up">
+                <div class="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-3xl p-6 text-white mb-8 shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-bold mb-1">HSK${this.state.currentLevel}級 合格への道</h2>
+                        <p class="opacity-90 text-sm mb-4">全${currentData.length}語完全対応</p>
+                        <button onclick="app.startReview()" class="bg-white text-orange-500 px-6 py-2 rounded-full font-bold text-sm shadow-md active:scale-95 transition">
+                            <i class="fas fa-sync-alt mr-1"></i> 苦手復習
+                        </button>
+                    </div>
+                    <i class="fas fa-dragon absolute -bottom-4 -right-4 text-8xl opacity-20 transform rotate-12"></i>
+                </div>
+
+                <h3 class="font-bold text-gray-700 mb-4 px-2 border-l-4 border-primary">カテゴリー別学習</h3>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    ${categories
+                      .map((cat) => {
+                        const catItems = currentData.filter(
+                          (i) => i.category === cat,
+                        );
+                        const learnedCount = catItems.filter((i) =>
+                          this.state.masteredIds.includes(i.id),
+                        ).length;
+                        const progress = Math.round(
+                          (learnedCount / catItems.length) * 100,
+                        );
+
+                        return `
+                        <div onclick="app.startCategorySession('${cat}')" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 active:bg-gray-50 transition cursor-pointer flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl mr-4">
+                                    ${this.getCategoryIcon(cat)}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-800">${cat}</div>
+                                    <div class="text-xs text-gray-400">${catItems.length}単語</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs font-bold ${progress === 100 ? "text-green-500" : "text-gray-400"}">${progress}%</span>
+                                <div class="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                                    <div class="h-full bg-primary" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                      })
+                      .join("")}
+                </div>
+                
+                <div class="mt-8">
+                    <button onclick="app.startQuiz()" class="w-full bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 active:translate-y-1 transition btn-3d">
+                        <i class="fas fa-gamepad mr-2"></i> 総合実力テスト (ランダム10問)
+                    </button>
+                </div>
+            </div>
+        `);
+        },
+
+        getCategoryIcon: function (cat) {
+          if (cat.includes("名詞")) return '<i class="fas fa-cube"></i>';
+          if (cat.includes("動詞")) return '<i class="fas fa-running"></i>';
+          if (cat.includes("形容詞")) return '<i class="fas fa-star"></i>';
+          if (cat.includes("代名詞")) return '<i class="fas fa-user"></i>';
+          if (cat.includes("数詞")) return '<i class="fas fa-calculator"></i>';
+          if (cat.includes("食べ物")) return '<i class="fas fa-utensils"></i>';
+          if (cat.includes("時間") || cat.includes("カレンダー"))
+            return '<i class="fas fa-clock"></i>';
+          if (cat.includes("場所"))
+            return '<i class="fas fa-map-marker-alt"></i>';
+          if (cat.includes("自然")) return '<i class="fas fa-tree"></i>';
+          if (cat.includes("定型") || cat.includes("フレーズ"))
+            return '<i class="fas fa-comments"></i>';
+          return '<i class="fas fa-book"></i>';
+        },
+
+        startCategorySession: function (category) {
+          const currentData = this.getCurrentData();
+          const items = currentData.filter((i) => i.category === category);
+          this.state.learningQueue = items.sort((a, b) => {
+            const aMastered = this.state.masteredIds.includes(a.id);
+            const bMastered = this.state.masteredIds.includes(b.id);
+            return aMastered - bMastered;
+          });
+
+          this.state.mode = "learn";
+          this.state.currentIndex = 0;
+          this.setBackButton({
+            visible: true,
+            onClick: () => app.showLevelHome(),
+          });
+          this.setHeaderTitle(category);
+          this.showLearnCard();
+        },
+
+        startReview: function () {
+          const currentData = this.getCurrentData();
+          const unmastered = currentData.filter(
+            (i) => !this.state.masteredIds.includes(i.id),
+          );
+          if (unmastered.length === 0) {
+            alert("素晴らしい！全ての単語を学習済みです。");
+            return;
+          }
+          this.state.learningQueue = this.sample(unmastered, 10);
+          this.state.mode = "learn";
+          this.state.currentIndex = 0;
+          this.setBackButton({
+            visible: true,
+            onClick: () => app.showLevelHome(),
+          });
+          this.setHeaderTitle("苦手復習");
+          this.showLearnCard();
+        },
+
+        showLearnCard: function () {
+          const item = this.state.learningQueue[this.state.currentIndex];
+          const isMastered = this.state.masteredIds.includes(item.id);
+
+          // 例文データを取得（後方互換性のため、examples配列があればそれを使用、なければ既存のexample/exampleMeaningを使用）
+          let examples = [];
+          if (
+            item.examples &&
+            Array.isArray(item.examples) &&
+            item.examples.length > 0
+          ) {
+            examples = item.examples;
+          } else if (item.example && item.exampleMeaning) {
+            // 既存の形式を配列に変換
+            examples = [
+              { chinese: item.example, japanese: item.exampleMeaning },
+            ];
+          }
+
+          // 例文を最大3つまで表示
+          const examplesToShow = examples.slice(0, 3);
+          const examplesHtml = examplesToShow
+            .map((ex, idx) => {
+              const chinese = ex.chinese || ex.example || "";
+              const japanese = ex.japanese || ex.exampleMeaning || "";
+              // HTMLエスケープとJavaScript文字列エスケープ
+              const escapeHtml = (str) => {
+                const div = document.createElement("div");
+                div.textContent = str;
+                return div.innerHTML;
+              };
+              const escapeJs = (str) => {
+                return str
+                  .replace(/\\/g, "\\\\")
+                  .replace(/'/g, "\\'")
+                  .replace(/"/g, '\\"')
+                  .replace(/\n/g, "\\n");
+              };
+              const chineseEscaped = escapeHtml(chinese);
+              const japaneseEscaped = escapeHtml(japanese);
+              const chineseJsEscaped = escapeJs(chinese);
+              return `
+            <div class="flex items-start ${idx < examplesToShow.length - 1 ? "mb-4" : ""}">
+              <div class="bg-blue-50 text-blue-500 rounded-lg p-2 mr-3 shrink-0">
+                <i class="fas fa-quote-left"></i>
+              </div>
+              <div class="flex-1">
+                <div class="text-lg text-gray-800 chinese-text mb-1 flex items-center cursor-pointer" onclick="app.speak('${chineseJsEscaped}')">
+                  ${chineseEscaped} 
+                  <i class="fas fa-volume-up ml-2 text-xs text-gray-300"></i>
+                </div>
+                <div class="text-sm text-gray-500">${japaneseEscaped}</div>
+              </div>
+            </div>
+          `;
+            })
+            .join("");
+
+          this.setViewHtml(`
+            <div class="h-full flex flex-col items-center justify-center p-6 animate-pop pb-24">
+                <div class="w-full bg-white rounded-3xl p-8 text-center card-shadow mb-6 border border-slate-100 relative overflow-hidden">
+                    ${isMastered ? '<div class="absolute top-0 left-0 bg-green-100 text-green-600 px-3 py-1 rounded-br-xl text-xs font-bold"><i class="fas fa-check-circle"></i> 習得済</div>' : ""}
+                    <button onclick="app.speak('${item.char}')" class="absolute top-4 right-4 text-gray-300 hover:text-primary transition w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-50">
+                        <i class="fas fa-volume-up text-2xl"></i>
+                    </button>
+                    <div class="text-sm text-gray-400 font-bold mb-2 tracking-widest uppercase">HSK ${this.state.currentLevel}</div>
+                    <div class="text-6xl font-bold text-gray-800 mb-2 chinese-text mt-4">${item.char}</div>
+                    <div class="text-2xl text-primary font-serif mb-6 flex items-center justify-center gap-2">
+                        ${item.pinyin}
+                        <button onclick="app.speak('${item.char}')" class="text-primary hover:text-primary-dark transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-50">
+                            <i class="fas fa-volume-up text-sm"></i>
+                        </button>
+                    </div>
+                    <div class="w-12 h-1 bg-gray-100 mx-auto mb-6 rounded-full"></div>
+                    <div class="text-2xl font-bold text-gray-700">${item.meaning}</div>
+                </div>
+                <div class="w-full bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                    ${examplesHtml}
+                </div>
+            </div>
+        `);
+
+          const nav = this.els.bottomNav;
+          nav.classList.remove("hidden");
+          nav.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="app.markAsMastered(${item.id}, false)" class="bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl btn-3d">
+                    <i class="fas fa-redo mr-2"></i> まだ
+                </button>
+                <button onclick="app.markAsMastered(${item.id}, true)" class="bg-primary text-white font-bold py-4 rounded-2xl btn-3d shadow-orange-200">
+                    <i class="fas fa-check mr-2"></i> 覚えた
+                </button>
+            </div>
+        `;
+          setTimeout(() => app.speak(item.char), 300);
+        },
+
+        markAsMastered: function (id, learned) {
+          if (learned) {
+            if (!this.state.masteredIds.includes(id)) {
+              this.state.masteredIds.push(id);
+              this.saveProgress();
+            }
+          } else {
+            this.state.masteredIds = this.state.masteredIds.filter(
+              (mid) => mid !== id,
+            );
+            this.saveProgress();
+          }
+          this.state.currentIndex++;
+          if (this.state.currentIndex >= this.state.learningQueue.length) {
+            this.showSessionComplete();
+          } else {
+            this.showLearnCard();
+          }
+        },
+
+        showSessionComplete: function () {
+          this.toggleBottomNav(false);
+          this.setViewHtml(`
+            <div class="h-full flex flex-col items-center justify-center p-6 text-center animate-pop">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-green-500 text-4xl mb-6">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">セッション完了！</h2>
+                <p class="text-gray-500 mb-8">着実に力がついていますね。</p>
+                <button onclick="app.showLevelHome()" class="bg-primary text-white font-bold py-3 px-8 rounded-full shadow-lg btn-3d">
+                    メニューに戻る
+                </button>
+            </div>
+        `);
+        },
+
+        startQuiz: function () {
+          this.state.mode = "quiz";
+          this.state.score = 0;
+          this.state.currentIndex = 0;
+          this.state.quizAnswered = false;
+          this.setHeaderTitle("クイズ");
+          const currentData = this.getCurrentData();
+          const pool = this.sample(currentData, 10);
+          this.state.quizQueue = pool.map((item) =>
+            this.generateQuestion(item),
+          );
+          this.setBackButton({
+            visible: true,
+            onClick: () => app.showLevelHome(),
+          });
+          this.toggleBottomNav(false);
+          this.updateActiveNav("quiz");
+          this.showQuizCard();
+        },
+
+        generateQuestion: function (target) {
+          const type = Math.floor(Math.random() * 3) + 1;
+          const currentData = this.getCurrentData();
+          const distractors = this.sample(
+            currentData.filter((d) => d.id !== target.id),
+            3,
+          );
+          const options = this.shuffle([target, ...distractors]);
+          return { target, type, options };
+        },
+
+        showQuizCard: function () {
+          const q = this.state.quizQueue[this.state.currentIndex];
+          this.state.quizAnswered = false;
+          let headerContent = "";
+          if (q.type === 1) {
+            headerContent = `
+                <div class="w-20 h-20 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-3xl mb-4 cursor-pointer hover:bg-blue-200 transition" onclick="app.speak('${q.target.char}')">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+                <div class="text-gray-500 font-bold">何と言いましたか？</div>
+            `;
+            setTimeout(() => app.speak(q.target.char), 300);
+          } else if (q.type === 2) {
+            headerContent = `
+                <div class="text-5xl font-bold text-gray-800 chinese-text mb-2">${q.target.char}</div>
+                <div class="text-gray-400 font-serif flex items-center justify-center gap-2">
+                    ${q.target.pinyin}
+                    <button onclick="app.speak('${q.target.char}')" class="text-gray-400 hover:text-primary transition w-8 h-8 rounded-full flex items-center justify-center hover:bg-orange-50">
+                        <i class="fas fa-volume-up text-sm"></i>
+                    </button>
+                </div>
+                <div class="text-gray-500 text-sm mt-4 font-bold">意味を選んでください</div>
+            `;
+          } else {
+            headerContent = `
+                <div class="text-2xl font-bold text-gray-800 mb-4">${q.target.meaning}</div>
+                <div class="text-gray-500 text-sm font-bold">中国語を選んでください</div>
+            `;
+          }
+          const optionsHtml = q.options
+            .map((opt, idx) => {
+              const label =
+                q.type === 1 || q.type === 2
+                  ? opt.meaning
+                  : `<span class="chinese-text font-bold text-lg">${opt.char}</span>`;
+              return `
+                <button data-id="${opt.id}" onclick="app.checkAnswer(this)" class="option-btn w-full bg-white p-4 rounded-xl mb-3 text-left font-bold text-gray-600 shadow-sm border-2 border-transparent hover:border-gray-100 relative overflow-hidden transition-all active:scale-95">
+                    <span class="inline-block w-6 h-6 bg-gray-100 rounded-full text-xs text-gray-400 text-center leading-6 mr-3">${idx + 1}</span>
+                    ${label}
+                </button>
+            `;
+            })
+            .join("");
+          this.setViewHtml(`
+            <div class="flex flex-col items-center justify-center min-h-full p-6 animate-slide-up">
+                <div class="flex-1 flex flex-col items-center justify-center w-full mb-6">
+                    ${headerContent}
+                </div>
+                <div class="w-full">
+                    ${optionsHtml}
+                </div>
+                <div class="h-10"></div>
+            </div>
+        `);
+        },
+
+        checkAnswer: function (btn) {
+          if (this.state.quizAnswered) return;
+          this.state.quizAnswered = true;
+          const q = this.state.quizQueue[this.state.currentIndex];
+          const id = Number(btn.dataset.id);
+          const isCorrect = id === q.target.id;
+          if (isCorrect) {
+            btn.classList.add(
+              "border-green-500",
+              "bg-green-50",
+              "text-green-700",
+            );
+            this.state.score += 10;
+            app.speak("太棒了");
+          } else {
+            btn.classList.add("border-red-500", "bg-red-50", "text-red-700");
+            const correctBtn = document.querySelector(
+              `.option-btn[data-id="${q.target.id}"]`,
+            );
+            if (correctBtn)
+              correctBtn.classList.add(
+                "border-green-500",
+                "bg-green-50",
+                "text-green-700",
+              );
+          }
+          setTimeout(() => {
+            this.state.currentIndex++;
+            if (this.state.currentIndex >= this.state.quizQueue.length) {
+              this.showQuizResult();
+            } else {
+              this.showQuizCard();
+            }
+          }, 1200);
+        },
+
+        showQuizResult: function () {
+          this.setViewHtml(`
+            <div class="h-full flex flex-col items-center justify-center p-6 text-center animate-pop">
+                <div class="text-6xl mb-4">🏆</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">クイズ終了！</h2>
+                <div class="text-5xl font-bold text-primary mb-6">${this.state.score}<span class="text-lg text-gray-400 ml-2">/ 100</span></div>
+                <button onclick="app.showLevelHome()" class="w-full bg-white border-2 border-gray-100 text-gray-600 font-bold py-3 rounded-xl mb-3">
+                    ホームに戻る
+                </button>
+                <button onclick="app.startQuiz()" class="w-full bg-primary text-white font-bold py-3 rounded-xl btn-3d">
+                    もう一度挑戦
+                </button>
+            </div>
+        `);
+        },
+
+        toggleBottomNav: function (show) {
+          const nav = this.els.bottomNav;
+          if (show) nav.classList.remove("hidden");
+          else nav.classList.add("hidden");
+        },
+
+        speak: function (text) {
+          if (this.state.muted) return;
+          if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = "zh-CN";
+            u.rate = 0.8;
+            if (this._zhVoice) u.voice = this._zhVoice;
+            window.speechSynthesis.speak(u);
+          }
+        },
+
+        openModal: function (content) {
+          this.els.modal.innerHTML = content;
+          this.els.overlay.classList.remove("hidden");
+          setTimeout(() => {
+            this.els.overlay.classList.remove("opacity-0");
+            this.els.overlay.classList.add("opacity-100");
+            this.els.modal.classList.remove("translate-y-full");
+          }, 10);
+        },
+
+        closeModal: function () {
+          this.els.overlay.classList.add("opacity-0");
+          this.els.modal.classList.add("translate-y-full");
+          setTimeout(() => {
+            this.els.overlay.classList.add("hidden");
+          }, 300);
+        },
+
+        saveSettings: function () {
+          localStorage.setItem("hsk1_muted", this.state.muted.toString());
+        },
+
+        toggleMute: function () {
+          this.state.muted = !this.state.muted;
+          this.saveSettings();
+          this.renderSettings();
+        },
+
+        resetProgress: function () {
+          if (
+            confirm(
+              "学習データをリセットしますか？\nこの操作は取り消せません。",
+            )
+          ) {
+            localStorage.removeItem("hsk1_mastered_ids");
+            this.state.masteredIds = [];
+            this.saveProgress();
+            this.closeModal();
+            if (this.state.mode === "home") {
+              this.showHome();
+            } else if (this.state.mode === "levelSelect") {
+              this.showLevelSelect();
+            }
+          }
+        },
+
+        renderSettings: function () {
+          const content = `
+          <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">設定</h2>
+            <p class="text-sm text-gray-500">アプリの動作をカスタマイズできます</p>
+          </div>
+          <div class="space-y-6">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-volume-${this.state.muted ? "mute" : "up"}"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-800">音声読み上げ</div>
+                  <div class="text-xs text-gray-500">${this.state.muted ? "オフ" : "オン"}</div>
+                </div>
+              </div>
+              <button onclick="app.toggleMute()" class="relative w-14 h-8 ${this.state.muted ? "bg-gray-400" : "bg-primary"} rounded-full transition-colors duration-200">
+                <span class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-200 ${this.state.muted ? "translate-x-0" : "translate-x-6"}"></span>
+              </button>
+            </div>
+            <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+              <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-trash-alt"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-800">学習状況をリセット</div>
+                  <div class="text-xs text-gray-500">習得済み単語の記録を削除します</div>
+                </div>
+              </div>
+              <button onclick="app.resetProgress()" class="w-full bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition btn-3d">
+                <i class="fas fa-exclamation-triangle mr-2"></i>リセットする
+              </button>
+            </div>
+          </div>
+          <div class="mt-8 pt-6 border-t border-gray-200">
+            <button onclick="app.closeModal()" class="w-full bg-gray-100 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-200 transition">
+              閉じる
+            </button>
+          </div>
+        `;
+          this.openModal(content);
+        },
+
+        showSettings: function () {
+          this.renderSettings();
+        },
+
+        updateActiveNav: function (activeTab) {
+          // すべてのタブをリセット
+          [this.els.navCards, this.els.navQuiz, this.els.navList].forEach(
+            (btn) => {
+              if (btn) {
+                btn.classList.remove(
+                  "text-primary",
+                  "font-bold",
+                  "bg-orange-50",
+                );
+                btn.classList.add("text-gray-400");
+              }
+            },
+          );
+
+          // アクティブなタブをハイライト
+          if (activeTab === "cards" && this.els.navCards) {
+            this.els.navCards.classList.remove("text-gray-400");
+            this.els.navCards.classList.add(
+              "text-primary",
+              "font-bold",
+              "bg-orange-50",
+            );
+          } else if (activeTab === "quiz" && this.els.navQuiz) {
+            this.els.navQuiz.classList.remove("text-gray-400");
+            this.els.navQuiz.classList.add(
+              "text-primary",
+              "font-bold",
+              "bg-orange-50",
+            );
+          } else if (activeTab === "list" && this.els.navList) {
+            this.els.navList.classList.remove("text-gray-400");
+            this.els.navList.classList.add(
+              "text-primary",
+              "font-bold",
+              "bg-orange-50",
+            );
+          }
+        },
+
+        navigateToCards: function () {
+          if (this.state.mode === "levelSelect") {
+            // レベルが選択されていない場合は、デフォルトでレベル1を選択
+            this.state.currentLevel = 1;
+            this.showLevelHome();
+          } else {
+            this.showLevelHome();
+          }
+          this.updateActiveNav("cards");
+        },
+
+        navigateToQuiz: function () {
+          if (this.state.mode === "levelSelect") {
+            // レベルが選択されていない場合は、デフォルトでレベル1を選択
+            this.state.currentLevel = 1;
+            this.showLevelHome();
+          }
+          this.startQuiz();
+          this.updateActiveNav("quiz");
+        },
+
+        navigateToList: function () {
+          if (this.state.mode === "levelSelect") {
+            // レベルが選択されていない場合は、デフォルトでレベル1を選択
+            this.state.currentLevel = 1;
+          }
+          this.showWordList();
+          this.updateActiveNav("list");
+        },
+
+        filterWords: function (items, query) {
+          if (!query || query.trim() === "") {
+            return items;
+          }
+          const lowerQuery = query.toLowerCase().trim();
+          return items.filter((item) => {
+            return (
+              item.char.toLowerCase().includes(lowerQuery) ||
+              item.pinyin.toLowerCase().includes(lowerQuery) ||
+              item.meaning.toLowerCase().includes(lowerQuery)
+            );
+          });
+        },
+
+        handleSearch: function (query) {
+          this.state.searchQuery = query;
+          this.showWordList();
+        },
+
+        showWordList: function () {
+          this.state.mode = "list";
+          const currentData = this.getCurrentData();
+          this.setBackButton({
+            visible: true,
+            onClick: () => app.showLevelHome(),
+          });
+          this.setHeaderTitle(`単語リスト - HSK${this.state.currentLevel}級`);
+          this.toggleBottomNav(false);
+          this.updateHeaderStats();
+
+          // 検索クエリでフィルタリング
+          const filteredData = this.filterWords(
+            currentData,
+            this.state.searchQuery,
+          );
+
+          // カテゴリーごとにグループ化
+          const categories = [
+            ...new Set(filteredData.map((item) => item.category)),
+          ];
+          const groupedData = {};
+          categories.forEach((cat) => {
+            groupedData[cat] = filteredData.filter(
+              (item) => item.category === cat,
+            );
+          });
+
+          let listHtml = '<div class="p-4 pb-24 animate-slide-up">';
+
+          // 検索エリア
+          listHtml += `
+          <div class="mb-6">
+            <div class="relative">
+              <input 
+                type="text" 
+                id="search-input" 
+                placeholder="中国語・ピンイン・意味で検索..." 
+                value="${this.state.searchQuery || ""}"
+                oninput="app.handleSearch(this.value)"
+                class="w-full px-4 py-3 pl-12 pr-10 bg-white border-2 border-gray-200 rounded-2xl text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary transition"
+              />
+              <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              ${
+                this.state.searchQuery
+                  ? `
+                <button 
+                  onclick="app.handleSearch('')"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-200 flex items-center justify-center transition"
+                >
+                  <i class="fas fa-times text-sm"></i>
+                </button>
+              `
+                  : ""
+              }
+            </div>
+            ${
+              this.state.searchQuery
+                ? `
+              <div class="mt-2 text-sm text-gray-500">
+                検索結果: <span class="font-bold text-primary">${filteredData.length}</span> 語
+              </div>
+            `
+                : ""
+            }
+          </div>
+        `;
+
+          // 検索結果が0件の場合
+          if (this.state.searchQuery && filteredData.length === 0) {
+            listHtml += `
+            <div class="text-center py-12">
+              <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-search text-gray-400 text-2xl"></i>
+              </div>
+              <p class="text-gray-500 font-bold mb-2">検索結果が見つかりませんでした</p>
+              <p class="text-sm text-gray-400">別のキーワードで検索してください</p>
+            </div>
+          `;
+          } else {
+            categories.forEach((cat) => {
+              const items = groupedData[cat];
+              const learnedCount = items.filter((i) =>
+                this.state.masteredIds.includes(i.id),
+              ).length;
+
+              listHtml += `
+            <div class="mb-6">
+              <div class="flex items-center justify-between mb-3 px-2">
+                <h3 class="font-bold text-gray-700 text-lg flex items-center">
+                  <span class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center text-sm mr-2">
+                    ${this.getCategoryIcon(cat)}
+                  </span>
+                  ${cat}
+                </h3>
+                <span class="text-xs text-gray-400">${learnedCount}/${items.length}</span>
+              </div>
+              <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                ${items
+                  .map((item, idx) => {
+                    const isMastered = this.state.masteredIds.includes(item.id);
+                    return `
+                    <div class="flex items-center justify-between p-4 ${idx < items.length - 1 ? "border-b border-gray-100" : ""} ${isMastered ? "bg-green-50/50" : ""}">
+                      <div class="flex-1">
+                        <div class="flex items-center mb-1">
+                          <span class="text-2xl font-bold text-gray-800 chinese-text mr-3">${item.char}</span>
+                          <span class="text-sm text-primary font-serif flex items-center gap-1">
+                            ${item.pinyin}
+                            <button onclick="app.speak('${item.char.replace(/'/g, "\\'")}')" class="text-primary hover:text-primary-dark transition w-5 h-5 rounded-full flex items-center justify-center hover:bg-orange-50">
+                              <i class="fas fa-volume-up text-xs"></i>
+                            </button>
+                          </span>
+                          ${isMastered ? '<i class="fas fa-check-circle text-green-500 ml-2"></i>' : ""}
+                        </div>
+                        <div class="text-sm text-gray-600">${item.meaning}</div>
+                      </div>
+                      <button onclick="app.speak('${item.char.replace(/'/g, "\\'")}')" class="ml-3 w-10 h-10 rounded-full bg-gray-100 text-gray-400 hover:text-primary hover:bg-orange-50 flex items-center justify-center transition">
+                        <i class="fas fa-volume-up"></i>
+                      </button>
+                    </div>
+                  `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+          `;
+            });
+          }
+
+          listHtml += "</div>";
+          this.setViewHtml(listHtml);
+        },
+      };
+
+      // Start
+      app.init();
+    </script>
+  </body>
+</html>
