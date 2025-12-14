@@ -97,7 +97,7 @@
 
     <!-- Legacy Version Link -->
     <a
-      href="{base}/legacy/"
+      href="{base}/legacy/index.html"
       target="_blank"
       class="w-full bg-gray-50 p-4 rounded-2xl shadow-sm border border-gray-200 flex items-center hover:shadow-md transition-all active:scale-98 text-left"
     >

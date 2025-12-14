@@ -13,5 +13,5 @@
     "noEmit": true
   },
   "include": ["src/**/*.js", "src/**/*.ts", "src/**/*.svelte"],
-  "exclude": ["node_modules", "build", ".svelte-kit", "legacy"]
+  "exclude": ["node_modules", "build", ".svelte-kit"]
 }
