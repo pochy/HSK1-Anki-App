@@ -7,9 +7,6 @@ build/
 .svelte-kit/
 dist/
 
-# Legacy files
-legacy/
-
 # Config files that shouldn't be formatted
 *.config.js
 *.config.ts

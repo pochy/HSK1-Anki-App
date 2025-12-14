@@ -94,6 +94,26 @@
         </div>
       </button>
     {/each}
+
+    <!-- Legacy Version Link -->
+    <a
+      href="{base}/legacy/"
+      target="_blank"
+      class="w-full bg-gray-50 p-4 rounded-2xl shadow-sm border border-gray-200 flex items-center hover:shadow-md transition-all active:scale-98 text-left"
+    >
+      <div
+        class="bg-gray-200 text-gray-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl mr-4 shrink-0"
+      >
+        <i class="fas fa-history"></i>
+      </div>
+      <div class="flex-1">
+        <div class="font-bold text-gray-700">旧バージョン</div>
+        <div class="text-xs text-gray-400">レガシー版を見る</div>
+      </div>
+      <div class="ml-4 text-gray-400">
+        <i class="fas fa-external-link-alt"></i>
+      </div>
+    </a>
   </div>
 </div>
 
