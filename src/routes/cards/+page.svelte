@@ -308,7 +308,7 @@
       <!-- Quiz Button -->
       <div class="mt-8">
         <button
-          onclick={() => goto(`${base}/quiz`)}
+          onclick={() => goto(`${base}/game/quiz`)}
           class="w-full bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 active:translate-y-1 transition btn-3d"
         >
           <i class="fas fa-gamepad mr-2"></i> 総合実力テスト (ランダム10問)
