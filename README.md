@@ -306,10 +306,6 @@ npm run format:check
 
 MIT License
 
-## 🗂 旧実装（legacy）
-
-`legacy/` 配下に、初期版（単一 `index.html` の Vanilla JS 実装）を残しています。現在のアプリ本体は SvelteKit 版（`src/`）です。
-
 ## 🙏 クレジット
 
 - フォント: [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC) / [Noto Serif SC](https://fonts.google.com/noto/specimen/Noto+Serif+SC)
