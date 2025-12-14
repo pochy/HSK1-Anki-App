@@ -33,25 +33,69 @@ HSK1-Anki-App/
 │   │   │   ├── hsk1.js      # HSK 1級データ（428語）
 │   │   │   └── hsk2.js      # HSK 2級データ（332語）
 │   │   ├── stores/          # Svelte ストア（状態管理）
-│   │   │   └── app.ts
+│   │   │   ├── app.ts
+│   │   │   ├── civ-maintenance.ts
+│   │   │   ├── garden.ts
+│   │   │   ├── rogue-like-memory.ts
+│   │   │   └── sentence-smith.ts
 │   │   ├── types/           # TypeScript 型定義
-│   │   │   └── word.ts
+│   │   │   ├── word.ts
+│   │   │   ├── civ-maintenance.ts
+│   │   │   ├── garden.ts
+│   │   │   ├── rogue-like-memory.ts
+│   │   │   └── sentence-smith.ts
 │   │   └── utils/           # ユーティリティ関数
+│   │       ├── fsrs.ts
+│   │       ├── civ-maintenance.ts
+│   │       ├── garden.ts
+│   │       ├── rogue-like-memory.ts
+│   │       └── sentence-generator.ts
 │   ├── routes/              # ページルート
 │   │   ├── +page.svelte     # ホーム（レベル選択）
 │   │   ├── +layout.svelte   # レイアウト
+│   │   ├── +layout.ts       # レイアウト設定
 │   │   ├── cards/           # カテゴリー学習
 │   │   │   └── +page.svelte
-│   │   ├── quiz/            # クイズ
-│   │   │   └── +page.svelte
+│   │   ├── game/            # ゲームモード
+│   │   │   ├── +page.svelte # ゲーム一覧
+│   │   │   ├── quiz/        # 総合実力テスト
+│   │   │   │   └── +page.svelte
+│   │   │   ├── sentence-smith/      # 言葉の鍛冶屋
+│   │   │   │   └── +page.svelte
+│   │   │   ├── garden-of-memory/    # 記憶の庭
+│   │   │   │   └── +page.svelte
+│   │   │   ├── rogue-like-memory/   # 忘却のダンジョン
+│   │   │   │   └── +page.svelte
+│   │   │   └── civ-maintenance/      # 文明維持シミュレーション
+│   │   │       └── +page.svelte
+│   │   ├── legacy/          # レガシー版（旧バージョン）
+│   │   │   └── +page.ts     # リダイレクト用
 │   │   └── list/            # 単語リスト
 │   │       └── +page.svelte
+│   ├── hooks.server.ts      # サーバーサイドフック
 │   └── app.css              # グローバルスタイル
-├── build/                   # ビルド出力（生成）
 ├── static/                  # 静的ファイル
+│   ├── legacy/              # レガシー版のアセット
+│   │   ├── index.html
+│   │   └── words/
+│   ├── pwa-192x192.png      # PWA アイコン
+│   ├── pwa-512x512.png      # PWA アイコン
+│   └── robots.txt
+├── scripts/                 # ビルドスクリプト
+│   └── generate-icons.mjs   # PWA アイコン生成
+├── docs/                    # ゲーム仕様書
+│   ├── CIV_STYLE_MAINTENANCE_SPEC.md
+│   ├── GARDEN_OF_MEMORY_SPEC.md
+│   ├── ROGUE_LIKE_MEMORY_SPEC.md
+│   ├── SENTENCE_SMITH_SPEC.md
+│   └── GAME_SPEC.md
+├── .github/workflows/       # GitHub Actions
+│   └── pages.yml            # 自動デプロイワークフロー
+├── build/                   # ビルド出力（生成）
+├── legacy/                  # レガシー版のソース（static/legacy にコピー）
 ├── package.json
-├── svelte.config.ts
-├── vite.config.ts
+├── svelte.config.js         # SvelteKit 設定（JavaScript）
+├── vite.config.mts          # Vite 設定（TypeScript、PWA設定含む）
 ├── tailwind.config.js
 └── README.md
 ```
@@ -64,8 +108,10 @@ HSK1-Anki-App/
 - **ビルドツール**: [Vite](https://vitejs.dev/) 7.2.6
 - **スタイリング**: [Tailwind CSS](https://tailwindcss.com/) 3.4.17
 - **アダプター**: @sveltejs/adapter-static（静的サイト生成）
+- **PWA**: vite-plugin-pwa（Service Worker、Web App Manifest）
 - **音声合成**: Web Speech API（`speechSynthesis`）
 - **データ永続化**: LocalStorage API（`localStorage`）
+- **デプロイ**: GitHub Actions + GitHub Pages（base path: `/HSK1-Anki-App`）
 
 ### 設計パターン
 
@@ -168,7 +214,7 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 - 音声読み上げ機能（自動 + 手動）
 - リストビューとカードビューの切り替え
 
-### 3. 総合実力テスト（`/quiz/` - `src/routes/quiz/+page.svelte`）
+### 3. 総合実力テスト（`/game/quiz/` - `src/routes/game/quiz/+page.svelte`）
 
 - 選択したレベルの全単語からランダムに 10 問を出題
 - 問題タイプ（ランダム選択）:
@@ -177,6 +223,7 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
   - **タイプ 3**: 日本語意味 → 中国語を選択
 - 各問題 4 択（正解 1 つ + 誤答 3 つ）
 - スコア表示（10 点/問、満点 100 点）
+- ゲーム一覧（`/game/`）からアクセス可能
 
 ### 4. 単語リスト（`/list/` - `src/routes/list/+page.svelte`）
 
@@ -209,17 +256,22 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 - ページ下部に常に表示される固定ナビゲーション
 - 3つのタブ:
   - **Cards**: `/cards/` に遷移（カテゴリー別学習）
-  - **Quiz**: `/quiz/` に遷移（クイズ開始）
+  - **Game**: `/game/` に遷移（ゲーム一覧）
   - **List**: `/list/` に遷移（単語リスト表示）
 - アクティブなタブはオレンジ色でハイライト表示
+- すべてのパスは `base` パス（`/HSK1-Anki-App`）を考慮
 
 ### 9. ゲームモード（`/game/` - `src/routes/game/`）
 
 #### 9.1 ゲーム一覧（`/game/` - `src/routes/game/+page.svelte`）
 
 - 利用可能なゲームの一覧表示
-- 現在実装済み:
-  - **言葉の鍛冶屋（Sentence Smith）**: 構文構築パズルゲーム
+- 実装済みゲーム:
+  - **Quiz（総合実力テスト）**: `/game/quiz/` - ランダム 10 問のクイズ
+  - **言葉の鍛冶屋（Sentence Smith）**: `/game/sentence-smith/` - 構文構築パズルゲーム
+  - **記憶の庭（Garden of Memory）**: `/game/garden-of-memory/` - 育成シミュレーション
+  - **忘却のダンジョン（Rogue-like Memory）**: `/game/rogue-like-memory/` - ローグライクRPG
+  - **文明維持シミュレーション（Civ-Maintenance）**: `/game/civ-maintenance/` - 街づくり学習ゲーム
 
 #### 9.2 言葉の鍛冶屋（`/game/sentence-smith/` - `src/routes/game/sentence-smith/+page.svelte`）
 
@@ -278,6 +330,33 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 - 失敗時の明確なフィードバックによる学習効果の向上
 - アニメーションによる操作の直感性向上
 
+#### 9.4 その他のゲームモード
+
+各ゲームモードには専用のストア、型定義、ユーティリティ関数が用意されています：
+
+- `src/lib/stores/garden.ts` - 記憶の庭の状態管理
+- `src/lib/stores/rogue-like-memory.ts` - 忘却のダンジョンの状態管理
+- `src/lib/stores/civ-maintenance.ts` - 文明維持シミュレーションの状態管理
+- `src/lib/stores/sentence-smith.ts` - 言葉の鍛冶屋の状態管理
+
+詳細な仕様は `docs/` フォルダ内の各ゲーム仕様書を参照してください。
+
+### 10. レガシー版（`/legacy/` - `src/routes/legacy/+page.ts`）
+
+- 旧バージョン（Vanilla JS 実装）へのアクセス
+- `/legacy/` にアクセスすると、`static/legacy/index.html` にリダイレクト
+- ホームページから「旧バージョン」リンクでアクセス可能
+- `legacy/` フォルダの内容は `static/legacy/` にコピーされてビルドに含まれる
+
+### 11. Progressive Web App (PWA)
+
+- **Service Worker**: 自動更新機能付き（`vite-plugin-pwa`）
+- **Web App Manifest**: アプリ名、アイコン、テーマカラーなどを定義
+- **オフライン対応**: 一度アクセス後、オフラインでも利用可能
+- **インストール可能**: ホーム画面に追加可能
+- **アイコン生成**: `scripts/generate-icons.mjs` で SVG から PNG アイコンを自動生成
+- **キャッシュ戦略**: Google Fonts、CDNJS などの外部リソースをキャッシュ
+
 ## 🎨 UI/UX 特徴
 
 ### デザインシステム
@@ -322,7 +401,9 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 
 - **SvelteKit ルーティング**: ファイルベースルーティング（`src/routes/`）
 - **`goto()`**: `$app/navigation` からインポートしてページ遷移
+- **Base Path 対応**: `$app/paths` の `base` を使用してすべてのパスを生成（GitHub Pages 対応）
 - **カスタム戻るハンドラ**: `customBackHandler` ストアで各ページの戻る動作をカスタマイズ
+- **階層ナビゲーション**: ヘッダーの戻るボタンは常に1階層上に戻る
 
 ### データ取得
 
@@ -363,11 +444,22 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 
 4. **静的サイト**:
    - `adapter-static` を使用。全ページが `prerender: true` で事前レンダリングされる
-   - `trailingSlash = "always"` を有効化。URL は `/cards/`, `/quiz/`, `/list/` 形式
+   - `trailingSlash = "always"` を有効化。URL は `/cards/`, `/game/quiz/`, `/list/` 形式
+   - GitHub Pages のサブディレクトリ対応: `base` パス（`/HSK1-Anki-App`）を設定
 
 5. **データ構造**:
    - 単語データは `src/lib/data/hsk1.js` と `hsk2.js` に定義
    - 外部 JSON ファイルからの読み込みは未実装（必要に応じて実装可能）
+
+6. **PWA**:
+   - Service Worker は自動更新機能付き
+   - オフライン対応: 一度アクセス後、オフラインでも利用可能
+   - インストール可能: ホーム画面に追加可能
+
+7. **GitHub Pages デプロイ**:
+   - GitHub Actions で自動デプロイ（`.github/workflows/pages.yml`）
+   - `BASE_PATH` 環境変数で base path を設定（`/HSK1-Anki-App`）
+   - ビルド時に PWA アイコンを自動生成
 
 ## 🔄 開発時の注意点
 
@@ -429,15 +521,23 @@ customBackHandler: Writable<(() => void) | null>; // カスタム戻るハンド
 3. **クラウド同期**: 進捗データのクラウド保存
 4. **統計機能**: 学習時間、正答率などの詳細統計
 5. **復習アルゴリズム**: 間隔反復学習（FSRS など、既に `src/lib/utils/fsrs.ts` が存在）
-6. **オフライン対応**: Service Worker による PWA 化
-7. **多言語対応**: 英語、中国語（繁体字）など
-8. **ゲームモード**: 既に `src/routes/game/` が存在（Sentence Smith など）
+6. **多言語対応**: 英語、中国語（繁体字）など
+7. **ゲームモード**: 既に複数のゲームモードが実装済み
    - 効果音とエフェクトによるゲーム性の向上が実装済み
-   - 他のゲームモードの追加も可能
+   - 新しいゲームモードの追加も可能
+8. **PWA 機能強化**: プッシュ通知、バックグラウンド同期など
 
 ## 📍 現在のコンテキスト
 
-現在のフェーズは、SvelteKit への移行が完了し、HSK 1級と2級の両方をサポートする基盤が整備されています。UI のブラッシュアップや追加機能（ゲームモードなど）の実装が進行中です。
+現在のフェーズは、SvelteKit への移行が完了し、HSK 1級と2級の両方をサポートする基盤が整備されています。以下の機能が実装済みです：
+
+- ✅ PWA サポート（Service Worker、Web App Manifest）
+- ✅ GitHub Pages 対応（base path サポート）
+- ✅ 複数のゲームモード（Quiz、Sentence Smith、Garden of Memory、Rogue-like Memory、Civ-Maintenance）
+- ✅ レガシー版へのアクセス（`/legacy/`）
+- ✅ 自動デプロイ（GitHub Actions）
+
+UI のブラッシュアップや新しいゲームモードの追加が進行中です。
 
 ---
 
