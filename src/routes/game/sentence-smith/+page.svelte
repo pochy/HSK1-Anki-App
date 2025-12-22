@@ -20,6 +20,10 @@
   import { headerTitle, showBottomNav } from "$lib/stores/app";
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
+  import { hsk1 } from "$lib/data/hsk1";
+  import { hsk2 } from "$lib/data/hsk2";
+
+  const allWords = [...hsk1, ...hsk2];
 
   // State for current card
   let materials = $state<Token[]>([]);
@@ -214,28 +218,78 @@
     }
   }
 
+  /* Dialog Logic */
+  let selectedToken = $state<Token | null>(null);
+  let showTranslation = $state(false);
+
+  let wordData = $derived.by(() => {
+    const t = selectedToken;
+    return t ? allWords.find((w) => w.char === t.text) : null;
+  });
+
   function handleTokenClick(token: Token, source: "materials" | "anvil") {
     if (showResult) return;
 
     if (source === "materials") {
-      // Move to first empty slot in anvil
-      const emptyIndex = anvilSlots.findIndex((s) => s === null);
-      if (emptyIndex !== -1) {
-        anvilSlots[emptyIndex] = token;
-        materials = materials.filter((t) => t.id !== token.id);
-        playSound("place");
-        // 正しい位置に配置された場合の視覚フィードバック
-        anvilGlow = true;
-        setTimeout(() => {
-          anvilGlow = false;
-        }, 300);
+      // Punctuation should be placed immediately without dialog
+      const isPunctuation = /[。！？，、\.\?!,\s]/.test(token.text);
+
+      if (isPunctuation) {
+        // Move to first empty slot in anvil
+        const emptyIndex = anvilSlots.findIndex((s) => s === null);
+        if (emptyIndex !== -1) {
+          anvilSlots[emptyIndex] = token;
+          materials = materials.filter((t) => t.id !== token.id);
+          playSound("place");
+          anvilGlow = true;
+          setTimeout(() => {
+            anvilGlow = false;
+          }, 300);
+        }
+        return;
       }
+
+      // Open dialog instead of immediate place
+      selectedToken = token;
+      showTranslation = false; // Reset translation visibility
+      playSound("place"); // Optional: audio feedback for selection
     } else {
-      // Return to materials
+      // Return to materials (from anvil)
       anvilSlots = anvilSlots.map((t) => (t && t.id === token.id ? null : t));
       materials = [...materials, token];
       playSound("place");
     }
+  }
+
+  function confirmPlacement() {
+    if (!selectedToken) return;
+
+    // Move to first empty slot
+    const emptyIndex = anvilSlots.findIndex((s) => s === null);
+    if (emptyIndex !== -1) {
+      anvilSlots[emptyIndex] = selectedToken;
+      materials = materials.filter((t) => t.id !== selectedToken!.id);
+      playSound("place");
+      // Visual feedback
+      anvilGlow = true;
+      setTimeout(() => {
+        anvilGlow = false;
+      }, 300);
+    } else {
+      // Anvil full
+      feedbackMessage = "金床がいっぱいです！";
+      feedbackType = "error";
+      playSound("error");
+      showShake = true;
+      setTimeout(() => {
+        showShake = false;
+      }, 500);
+    }
+    selectedToken = null;
+  }
+
+  function closeDialog() {
+    selectedToken = null;
   }
 
   function forge() {
@@ -369,7 +423,7 @@
 </script>
 
 <div
-  class="flex flex-col items-center justify-center min-h-full p-4 bg-slate-50"
+  class="flex flex-col items-center justify-center min-h-full p-4 bg-slate-50 relative"
 >
   <!-- Header -->
   <div
@@ -524,6 +578,108 @@
       </div>
     </div>
   </div>
+
+  <!-- Word Card Dialog -->
+  {#if selectedToken}
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      transition:fade={{ duration: 200 }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <!-- Backdrop click to close -->
+      <button
+        class="absolute inset-0 w-full h-full cursor-default"
+        onclick={closeDialog}
+        aria-label="Close dialog"
+      ></button>
+
+      <div
+        class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl relative z-10 flex flex-col items-center"
+        in:scale={{ start: 0.95, duration: 200 }}
+      >
+        <div
+          class="text-xs text-gray-400 uppercase tracking-widest mb-2 font-bold"
+        >
+          Word Card
+        </div>
+
+        <div class="text-4xl font-bold text-gray-800 mb-2 text-center py-4">
+          {selectedToken.text}
+        </div>
+
+        <div class="flex gap-2 mb-4">
+          <span
+            class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-mono border border-gray-200"
+          >
+            {selectedToken.type}
+          </span>
+          {#if wordData}
+            <span
+              class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-mono border border-blue-100"
+            >
+              {wordData.pinyin}
+            </span>
+          {/if}
+        </div>
+
+        {#if wordData}
+          <!-- Word Actions - Only show if data found -->
+          <div class="flex gap-4 mb-6">
+            <button
+              class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-primary hover:text-white transition-all active:scale-95"
+              onclick={() => speakSentence(selectedToken!.text)}
+              title="Pronounce"
+            >
+              <i class="fas fa-volume-up text-xl"></i>
+            </button>
+            <button
+              class="w-12 h-12 flex items-center justify-center rounded-full transition-all active:scale-95 {showTranslation
+                ? 'bg-primary text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
+              onclick={() => (showTranslation = !showTranslation)}
+              title="Toggle Meaning"
+            >
+              <i class="fas fa-language text-xl"></i>
+            </button>
+          </div>
+
+          {#if showTranslation}
+            <div
+              class="mb-6 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-900 w-full animate-fade-in"
+              in:fly={{ y: 10, duration: 200 }}
+            >
+              <div
+                class="text-xs uppercase tracking-widest font-bold opacity-60 mb-1"
+              >
+                Meaning
+              </div>
+              <div class="text-lg font-medium">{wordData.meaning}</div>
+            </div>
+          {/if}
+        {:else}
+          <div class="mb-6 py-2 text-sm text-gray-400 italic">
+            No additional details available
+          </div>
+        {/if}
+
+        <div class="flex gap-3 w-full">
+          <button
+            class="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold rounded-xl transition-colors"
+            onclick={closeDialog}
+          >
+            Cancel
+          </button>
+          <button
+            class="flex-1 py-3 px-4 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl shadow-md shadow-orange-100 transition-all active:scale-95"
+            onclick={confirmPlacement}
+          >
+            Use
+          </button>
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Result Modal -->
   {#if showResult && currentResult}
@@ -795,6 +951,22 @@
 
   .animate-glow {
     animation: glow 2s ease-in-out infinite;
+  }
+
+  /* フェードインアニメーション */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
   }
 
   /* フィードバックメッセージアニメーション */
