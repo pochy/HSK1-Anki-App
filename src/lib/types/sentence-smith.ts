@@ -36,7 +36,9 @@ export type TokenType =
 export interface SRSData {
   next_review: string; // ISO 8601 date string
   interval: number; // Current interval in days
-  ease_factor: number; // Difficulty factor (Initial: 2.5)
+  ease_factor: number; // Difficulty factor (Initial: 2.5) - Legacy support
+  stability: number; // FSRS Stability (S) - Memory stability in days (R=0.9 at this point)
+  difficulty: number; // FSRS Difficulty (D) - 1-10 scale (1=easiest, 10=hardest)
   streak: number; // Consecutive correct answers
   last_review_date?: string; // Last review date
   review_count: number; // Total review count

@@ -15,6 +15,8 @@
     updateSRS,
     calculateQualityScore,
     determineRarity,
+    getTimeLimit,
+    getDaysSinceReview,
   } from "$lib/utils/fsrs";
   import type { Token, Rating, CardResult } from "$lib/types/sentence-smith";
   import { headerTitle, showBottomNav } from "$lib/stores/app";
@@ -37,6 +39,10 @@
   let feedbackMessage = $state("");
   let feedbackType = $state<"success" | "error" | "info">("info");
   let sessionStreak = $state(0);
+  let mistakes = $state(0); // Track mistakes for this card
+  let timeLimit = $state(0); // Time limit for current card
+  let showHint = $state(false); // Hint visibility
+  let hintIndex = $state(-1); // Index of token to hint
 
   // エフェクト用の状態
   let showParticles = $state(false);
@@ -61,6 +67,30 @@
     (($gameSession.current_card_index + 1) / $gameSession.cards.length) * 100
   );
 
+  // Real-time placement feedback
+  let placementFeedback = $derived.by(() => {
+    if (!currentCard || anvilSlots.length === 0) {
+      return { correctIndices: [], incorrectIndices: [] };
+    }
+    const correctIndices: number[] = [];
+    const incorrectIndices: number[] = [];
+
+    for (let i = 0; i < anvilSlots.length; i++) {
+      const slot = anvilSlots[i];
+      const expectedToken = currentCard.tokens[i];
+
+      if (slot && expectedToken) {
+        if (slot.id === expectedToken.id) {
+          correctIndices.push(i);
+        } else {
+          incorrectIndices.push(i);
+        }
+      }
+    }
+
+    return { correctIndices, incorrectIndices };
+  });
+
   onMount(() => {
     $headerTitle = "言葉の鍛冶屋";
     $showBottomNav = false; // Full screen mode
@@ -84,8 +114,27 @@
   function setupCard() {
     clearInterval(timerInterval);
     timer = 0;
+    mistakes = 0;
+    showHint = false;
+    hintIndex = -1;
+    timeLimit = getTimeLimit(currentCard.difficulty_level);
+
     timerInterval = setInterval(() => {
       timer++;
+      // Check time limit
+      if (timeLimit > 0 && timer >= timeLimit && !showResult) {
+        handleTimeUp();
+      }
+      // Show hint after 50% of time limit
+      if (
+        timeLimit > 0 &&
+        timer >= timeLimit * 0.5 &&
+        !showHint &&
+        !showResult &&
+        $gameSession.settings.enable_hints
+      ) {
+        showNextHint();
+      }
     }, 1000);
 
     // Prepare materials (shuffled)
@@ -96,6 +145,32 @@
     showResult = false;
     currentResult = null;
     feedbackMessage = "";
+  }
+
+  // Show hint for next correct token
+  function showNextHint() {
+    // Find first empty slot (which should be the next correct position)
+    for (let i = 0; i < anvilSlots.length; i++) {
+      if (!anvilSlots[i]) {
+        hintIndex = i;
+        showHint = true;
+        setTimeout(() => {
+          showHint = false;
+        }, 2000); // Show for 2 seconds
+        break;
+      }
+    }
+  }
+
+  // Handle time up
+  function handleTimeUp() {
+    clearInterval(timerInterval);
+    playSound("error");
+    showShake = true;
+    setTimeout(() => {
+      showShake = false;
+      handleFailure();
+    }, 500);
   }
 
   // 効果音生成関数
@@ -241,10 +316,8 @@
           anvilSlots[emptyIndex] = token;
           materials = materials.filter((t) => t.id !== token.id);
           playSound("place");
-          anvilGlow = true;
-          setTimeout(() => {
-            anvilGlow = false;
-          }, 300);
+          // Check if placement is correct
+          checkAndUpdateFeedback();
         }
         return;
       }
@@ -258,6 +331,20 @@
       anvilSlots = anvilSlots.map((t) => (t && t.id === token.id ? null : t));
       materials = [...materials, token];
       playSound("place");
+      checkAndUpdateFeedback();
+    }
+  }
+
+  // Check placement and update feedback
+  function checkAndUpdateFeedback() {
+    const { incorrectIndices } = placementFeedback;
+    if (incorrectIndices.length > 0) {
+      // Count mistakes when wrong token is placed
+      const previousMistakes = mistakes;
+      mistakes = incorrectIndices.length;
+      if (mistakes > previousMistakes) {
+        playSound("error");
+      }
     }
   }
 
@@ -270,6 +357,8 @@
       anvilSlots[emptyIndex] = selectedToken;
       materials = materials.filter((t) => t.id !== selectedToken!.id);
       playSound("place");
+      // Check if placement is correct
+      checkAndUpdateFeedback();
       // Visual feedback
       anvilGlow = true;
       setTimeout(() => {
@@ -308,6 +397,18 @@
     clearInterval(timerInterval);
     playSound("forge");
 
+    // Count mistakes by checking each position
+    let mistakeCount = 0;
+    for (let i = 0; i < anvilSlots.length; i++) {
+      const slot = anvilSlots[i];
+      const expectedToken = currentCard.tokens[i];
+      if (slot && expectedToken && slot.id !== expectedToken.id) {
+        mistakeCount++;
+      }
+    }
+
+    mistakes = mistakeCount;
+
     // Construct sentence from slots
     const formedSentence = anvilSlots.map((t) => t?.text).join("");
     // Basic check: reconstruction equals original?
@@ -336,18 +437,24 @@
   function handleSuccess() {
     const rating: Rating = calculateRating(
       timer,
-      0,
+      mistakes,
       currentCard.difficulty_level
-    ); // Assuming 0 mistakes logic for now
+    );
     const quality = calculateQualityScore(
       rating,
       timer,
       currentCard.difficulty_level
     );
 
-    // Update SRS
+    // Update SRS with FSRS algorithm
     const currentSRS = currentCard.srs_data;
-    const { interval, ease_factor } = updateSRS(currentSRS, rating);
+    const { interval, ease_factor, stability, difficulty } = updateSRS(
+      currentSRS,
+      rating
+    );
+
+    // Update streak
+    const newStreak = currentSRS.streak + 1;
 
     // Save SRS result (mapped by sentence string as ID substitute)
     srsStore.update((s) => ({
@@ -356,6 +463,9 @@
         ...currentSRS,
         interval,
         ease_factor,
+        stability,
+        difficulty,
+        streak: newStreak,
         last_review_date: new Date().toISOString(),
         review_count: currentSRS.review_count + 1,
         next_review: new Date(
@@ -364,16 +474,19 @@
       },
     }));
 
+    // Update session streak
+    sessionStreak = newStreak;
+
     currentResult = {
       card_id: currentCard.card_id,
       time_taken: timer,
-      mistakes: 0,
+      mistakes,
       rating,
       new_interval: interval,
       new_ease_factor: ease_factor,
       item_created: {
         type: "sword", // TODO: Determine based on complexity
-        rarity: determineRarity(quality, 5), // Mock streak
+        rarity: determineRarity(quality, newStreak),
         quality_score: quality,
         forged_date: new Date().toISOString(),
       },
@@ -382,22 +495,55 @@
     showResult = true;
     feedbackMessage = "鍛造成功！";
     feedbackType = "success";
-    sessionStreak++;
     speakSentence(currentCard.original_sentence);
   }
 
   function handleFailure() {
-    // Simple logic: just mark as broken/fail
-    // In a real game we might allow retries or show hints
-    const rating: Rating = "broken";
+    // Calculate rating based on mistakes and time
+    const rating: Rating = calculateRating(
+      timer,
+      mistakes,
+      currentCard.difficulty_level
+    );
+
+    // Update SRS with FSRS algorithm
+    const currentSRS = currentCard.srs_data;
+    const { interval, ease_factor, stability, difficulty } = updateSRS(
+      currentSRS,
+      rating
+    );
+
+    // Reset streak on failure
+    const newStreak = 0;
+
+    // Save SRS result
+    srsStore.update((s) => ({
+      ...s,
+      [currentCard.original_sentence]: {
+        ...currentSRS,
+        interval,
+        ease_factor,
+        stability,
+        difficulty,
+        streak: newStreak,
+        last_review_date: new Date().toISOString(),
+        review_count: currentSRS.review_count + 1,
+        next_review: new Date(
+          Date.now() + interval * 24 * 60 * 60 * 1000
+        ).toISOString(),
+      },
+    }));
+
+    // Reset session streak
+    sessionStreak = 0;
 
     currentResult = {
       card_id: currentCard.card_id,
       time_taken: timer,
-      mistakes: 1,
+      mistakes,
       rating,
-      new_interval: 1,
-      new_ease_factor: Math.max(1.3, currentCard.srs_data.ease_factor - 0.2),
+      new_interval: interval,
+      new_ease_factor: ease_factor,
       item_created: {
         type: "dagger", // Broken dagger
         rarity: "common",
@@ -409,7 +555,6 @@
     showResult = true;
     feedbackMessage = "鍛造失敗... 素材が崩れ落ちた。";
     feedbackType = "error";
-    sessionStreak = 0;
   }
 
   function onNext() {
@@ -445,7 +590,15 @@
           Combo x{sessionStreak} 🔥
         </span>
       {/if}
-      <span>{timer}s</span>
+      <span
+        class:text-red-500={timeLimit > 0 && timer >= timeLimit * 0.8}
+        class:text-orange-500={timeLimit > 0 && timer >= timeLimit * 0.6}
+      >
+        {timer}s{#if timeLimit > 0} / {timeLimit}s{/if}
+      </span>
+      {#if mistakes > 0}
+        <span class="text-red-500">ミス: {mistakes}</span>
+      {/if}
     </div>
   </div>
 
@@ -522,17 +675,26 @@
         {/if}
         {#each anvilSlots as token, i}
           {#if token}
+            {@const isCorrect = placementFeedback.correctIndices.includes(i)}
+            {@const isIncorrect = placementFeedback.incorrectIndices.includes(i)}
             <button
               in:scale={{ duration: 200 }}
               out:scale={{ duration: 150 }}
-              class="bg-amber-100 text-gray-800 px-4 py-3 sm:px-5 sm:py-3 rounded-lg shadow-sm border border-amber-200 font-bold text-base sm:text-lg active:scale-95 transition-all touch-manipulation min-h-[44px] hover:bg-amber-50 relative z-10 animate-token-place"
+              class="px-4 py-3 sm:px-5 sm:py-3 rounded-lg shadow-sm border font-bold text-base sm:text-lg active:scale-95 transition-all touch-manipulation min-h-[44px] hover:bg-amber-50 relative z-10 animate-token-place {isCorrect
+                ? 'bg-green-100 text-green-800 border-green-300'
+                : isIncorrect
+                  ? 'bg-red-100 text-red-800 border-red-300'
+                  : 'bg-amber-100 text-gray-800 border-amber-200'}"
               onclick={() => handleTokenClick(token, "anvil")}
             >
               {token.text}
             </button>
           {:else}
+            {@const shouldHint = showHint && hintIndex === i}
             <div
-              class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 touch-manipulation"
+              class="w-14 h-14 sm:w-16 sm:h-16 rounded-lg border-2 border-dashed touch-manipulation transition-all {shouldHint
+                ? 'border-yellow-400 bg-yellow-50 animate-pulse'
+                : 'border-gray-300 bg-gray-50'}"
             ></div>
           {/if}
         {/each}
@@ -540,10 +702,20 @@
     </div>
 
     <!-- Action Button -->
-    <div class="py-4 flex justify-center mb-4">
+    <div class="py-4 flex justify-center mb-4 gap-2">
       {#if !showResult}
+        {#if $gameSession.settings.enable_hints}
+          <button
+            class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-4 px-6 rounded-full shadow-md transform active:scale-95 transition-all flex items-center gap-2 touch-manipulation min-h-[48px]"
+            onclick={showNextHint}
+            title="ヒントを表示"
+          >
+            <i class="fas fa-lightbulb"></i>
+            <span class="hidden sm:inline">ヒント</span>
+          </button>
+        {/if}
         <button
-          class="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-10 rounded-full shadow-lg shadow-orange-200 transform active:scale-95 transition-all flex items-center gap-2 touch-manipulation min-h-[48px] w-full max-w-xs hover:shadow-xl hover:scale-105 animate-pulse-slow"
+          class="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-10 rounded-full shadow-lg shadow-orange-200 transform active:scale-95 transition-all flex items-center gap-2 touch-manipulation min-h-[48px] flex-1 max-w-xs hover:shadow-xl hover:scale-105 animate-pulse-slow"
           onclick={forge}
         >
           <i class="fas fa-hammer animate-hammer"></i>
@@ -725,7 +897,47 @@
           >
             <span>Time: {currentResult.time_taken}s</span>
             <span>Score: {currentResult.item_created.quality_score}</span>
+            {#if currentResult.mistakes > 0}
+              <span class="text-red-500">Mistakes: {currentResult.mistakes}</span>
+            {/if}
           </div>
+          {#if currentResult.rating !== "broken"}
+            {@const srsData = $srsStore[currentCard.original_sentence]}
+            {#if srsData}
+              <div
+                class="mt-4 p-3 bg-gray-50 rounded-lg text-xs space-y-1 border border-gray-200"
+              >
+                <div class="flex justify-between">
+                  <span class="text-gray-600">次回復習:</span>
+                  <span class="font-mono text-gray-800">
+                    {new Date(srsData.next_review).toLocaleDateString("ja-JP")}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">間隔:</span>
+                  <span class="font-mono text-gray-800">{srsData.interval}日</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">安定性 (S):</span>
+                  <span class="font-mono text-gray-800">
+                    {srsData.stability?.toFixed(1) ?? "N/A"}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">難易度 (D):</span>
+                  <span class="font-mono text-gray-800">
+                    {srsData.difficulty?.toFixed(1) ?? "N/A"}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">連続正解:</span>
+                  <span class="font-mono text-orange-600 font-bold">
+                    {srsData.streak}回
+                  </span>
+                </div>
+              </div>
+            {/if}
+          {/if}
         </div>
 
         <button

@@ -65,7 +65,8 @@ type TokenType =
 interface SRSData {
   next_review: string; // ISO 8601形式の日付
   interval: number; // 現在の間隔（日）
-  ease_factor: number; // 難易度係数（初期値: 2.5）
+  stability: number; // 記憶の安定性 (FSRS Stability)
+  difficulty: number; // 難易度 (FSRS Difficulty 1-10)
   streak: number; // 連続正解数
   last_review_date?: string; // 最終復習日
   review_count: number; // 総復習回数
@@ -205,34 +206,42 @@ function calculateRating(
   }
 }
 
+#### 3.1.4 SRS判定アルゴリズム (FSRS準拠)
+
+FSRS (Free Spaced Repetition Scheduler) の理論に基づき、記憶の安定性(S)と難易度(D)を更新します。
+
+```typescript
 function updateSRS(
   currentSRS: SRSData,
   rating: Rating
-): { interval: number; ease_factor: number } {
-  let newInterval: number;
-  let newEaseFactor: number;
-
+): { interval: number; stability: number; difficulty: number } {
+  let { stability, difficulty } = currentSRS;
+  
   switch (rating) {
-    case "legendary":
-      newInterval = currentSRS.interval * 2.5;
-      newEaseFactor = Math.min(currentSRS.ease_factor + 0.15, 3.0);
+    case "legendary": // Easy (4)
+      difficulty = Math.max(1, difficulty - 1);
+      stability = stability * Math.exp(1.2) * (1 - (difficulty - 1) / 15);
       break;
-    case "epic":
-      newInterval = currentSRS.interval * 1.8;
-      newEaseFactor = currentSRS.ease_factor;
+    case "epic": // Good (3)
+      stability = stability * Math.exp(0.8) * (1 - (difficulty - 1) / 15);
       break;
-    case "rare":
-      newInterval = currentSRS.interval * 1.2;
-      newEaseFactor = Math.max(currentSRS.ease_factor - 0.15, 1.3);
+    case "rare": // Hard (2)
+      difficulty = Math.min(10, difficulty + 0.5);
+      stability = stability * Math.exp(0.3) * (1 - (difficulty - 1) / 15);
       break;
-    case "broken":
-      newInterval = 1; // 翌日
-      newEaseFactor = Math.max(currentSRS.ease_factor - 0.2, 1.3);
+    case "broken": // Again (1)
+      difficulty = Math.min(10, difficulty + 1);
+      stability = Math.max(1, stability * 0.5); // 罰則付き再学習
       break;
   }
 
-  return { interval: newInterval, ease_factor: newEaseFactor };
+  return { 
+    interval: Math.round(stability), 
+    stability, 
+    difficulty 
+  };
 }
+```
 
 function calculateQualityScore(
   rating: Rating,

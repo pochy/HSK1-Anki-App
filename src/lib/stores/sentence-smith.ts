@@ -30,13 +30,43 @@ export const isPlaying = writable<boolean>(false);
 
 // Actions
 export const startGame = (settings?: Partial<GameSession["settings"]>) => {
-  const cards = generateGameCards(5); // Start with 5 cards for a quick session
+  // Load existing SRS data first
+  const currentSRS = get(srsStore);
+  
+  // Generate cards with SRS-aware prioritization
+  const cards = generateGameCards(5, [1, 5], currentSRS);
+
+  // Cards already have SRS data merged from generateGameCards
+  // But ensure backward compatibility for any missing fields
+  const cardsWithSRS = cards.map((card) => {
+    const existingSRS = currentSRS[card.original_sentence];
+    if (existingSRS) {
+      // Merge existing SRS data, ensuring backward compatibility
+      return {
+        ...card,
+        srs_data: {
+          ...card.srs_data,
+          ...existingSRS,
+          // Ensure stability and difficulty exist
+          stability:
+            existingSRS.stability ??
+            card.srs_data.stability ??
+            Math.max(1, 4 - ((existingSRS.difficulty ?? 5) - 1) * 0.5),
+          difficulty:
+            existingSRS.difficulty ??
+            card.srs_data.difficulty ??
+            5,
+        },
+      };
+    }
+    return card;
+  });
 
   gameSession.set({
     ...initialState,
     session_id: Date.now().toString(),
     start_time: Date.now(),
-    cards: cards,
+    cards: cardsWithSRS,
     settings: { ...initialState.settings, ...settings },
   });
   isPlaying.set(true);

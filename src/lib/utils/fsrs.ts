@@ -24,42 +24,104 @@ export function calculateRating(
 }
 
 /**
- * Update SRS data based on rating
- * Implementation based on SM-2 but adapted for the game mechanics described in FSRS.md / Spec
+ * Calculate Retrievability (R) - probability of recalling at time t
+ * Based on FSRS theory: R(t) = (1 + factor * t/S)^(-decay)
+ * Where R=0.9 when t=S
+ */
+export function calculateRetrievability(
+  stability: number,
+  daysSinceReview: number
+): number {
+  if (stability <= 0) return 0;
+  if (daysSinceReview <= 0) return 1;
+
+  // FSRS parameters (simplified version)
+  const factor = 0.9;
+  const decay = 1.0;
+
+  const ratio = daysSinceReview / stability;
+  return Math.pow(1 + factor * ratio, -decay);
+}
+
+/**
+ * Get initial stability for new cards
+ */
+function getInitialStability(difficulty: number): number {
+  // Base stability decreases with difficulty
+  // Easy cards start with ~3 days, hard cards start with ~1 day
+  return Math.max(1, 4 - (difficulty - 1) * 0.5);
+}
+
+/**
+ * Update SRS data based on rating using FSRS algorithm
+ * Based on FSRS theory from docs/FSRS.md
  */
 export function updateSRS(
   currentSRS: SRSData,
   rating: Rating
-): { interval: number; ease_factor: number } {
-  let newInterval: number;
-  let newEaseFactor: number = currentSRS.ease_factor;
+): {
+  interval: number;
+  ease_factor: number;
+  stability: number;
+  difficulty: number;
+} {
+  // Initialize stability and difficulty if not present (backward compatibility)
+  let stability =
+    currentSRS.stability ?? getInitialStability(currentSRS.difficulty ?? 5);
+  let difficulty = currentSRS.difficulty ?? 5;
+  let newEaseFactor = currentSRS.ease_factor ?? 2.5;
 
+  // FSRS update logic based on rating
   switch (rating) {
-    case "legendary": // Like "Easy"
-      newInterval = Math.round(currentSRS.interval * 2.5);
-      newEaseFactor = Math.min(currentSRS.ease_factor + 0.15, 3.0);
+    case "legendary": // Easy (4) - FSRS equivalent
+      // Decrease difficulty, increase stability significantly
+      difficulty = Math.max(1, difficulty - 1);
+      stability =
+        stability *
+        Math.exp(1.2) *
+        (1 - (difficulty - 1) / 15); // FSRS formula approximation
+      newEaseFactor = Math.min(newEaseFactor + 0.15, 3.0);
       break;
-    case "epic": // Like "Good"
-      newInterval = Math.round(currentSRS.interval * 1.8);
+
+    case "epic": // Good (3) - FSRS equivalent
+      // Maintain difficulty, increase stability moderately
+      stability =
+        stability *
+        Math.exp(0.8) *
+        (1 - (difficulty - 1) / 15); // FSRS formula approximation
       // Ease factor stays same
       break;
-    case "rare": // Like "Hard"
-      newInterval = Math.round(currentSRS.interval * 1.2);
-      newEaseFactor = Math.max(currentSRS.ease_factor - 0.15, 1.3);
+
+    case "rare": // Hard (2) - FSRS equivalent
+      // Increase difficulty slightly, increase stability slightly
+      difficulty = Math.min(10, difficulty + 0.5);
+      stability =
+        stability *
+        Math.exp(0.3) *
+        (1 - (difficulty - 1) / 15); // FSRS formula approximation
+      newEaseFactor = Math.max(newEaseFactor - 0.15, 1.3);
       break;
-    case "broken": // Like "Again"
-      newInterval = 1; // Reset to 1 day
-      newEaseFactor = Math.max(currentSRS.ease_factor - 0.2, 1.3);
-      break;
-    default:
-      newInterval = 1;
+
+    case "broken": // Again (1) - FSRS equivalent
+      // Increase difficulty, reset stability with penalty
+      difficulty = Math.min(10, difficulty + 1);
+      stability = Math.max(1, stability * 0.5); // Penalty for forgetting
+      newEaseFactor = Math.max(newEaseFactor - 0.2, 1.3);
       break;
   }
 
-  // Ensure interval is at least 1
-  newInterval = Math.max(1, newInterval);
+  // Ensure stability is at least 1 day
+  stability = Math.max(1, Math.round(stability * 10) / 10); // Round to 1 decimal
 
-  return { interval: newInterval, ease_factor: newEaseFactor };
+  // Calculate new interval based on stability
+  const newInterval = Math.max(1, Math.round(stability));
+
+  return {
+    interval: newInterval,
+    ease_factor: newEaseFactor,
+    stability: stability,
+    difficulty: difficulty,
+  };
 }
 
 /**
@@ -95,6 +157,17 @@ export function determineRarity(qualityScore: number, streak: number): Rarity {
   if (qualityScore >= 60) return "rare";
   if (qualityScore >= 40) return "uncommon";
   return "common";
+}
+
+/**
+ * Get days since last review
+ */
+export function getDaysSinceReview(lastReviewDate?: string): number {
+  if (!lastReviewDate) return 0;
+  const lastReview = new Date(lastReviewDate);
+  const now = new Date();
+  const diffTime = now.getTime() - lastReview.getTime();
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24));
 }
 
 /**
