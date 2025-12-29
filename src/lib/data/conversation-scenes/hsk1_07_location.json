@@ -1,0 +1,98 @@
+{
+  "scene_id": 7,
+  "title": "場所を尋ねる",
+  "description": "道で火車駅の位置を尋ねるシーン。",
+  "category": "asking_directions",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "街角",
+    "participants": [
+      { "role": "路人A" },
+      { "role": "路人B", "name": "あなた" }
+    ],
+    "relationship": "stranger",
+    "formality_level": "polite",
+    "emotional_tone": "neutral"
+  },
+  "dialogue": [
+    {
+      "speaker": "路人B",
+      "text": "你好，火车站在哪儿？",
+      "pinyin": "nǐ hǎo, huǒchēzhàn zài nǎr?",
+      "translation": "こんにちは、駅はどこですか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "在前面，在那儿。",
+      "pinyin": "zài qiánmiàn, zài nàr.",
+      "translation": "前の方、あそこにあります。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "位置を示す「在＋場所」で短く答え、指さしを想起させる自然な返答です。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我想喝水。",
+      "pinyin": "wǒ xiǎng hē shuǐ.",
+      "translation": "私は水を飲みたいです。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "道案内とは関係ない話題で、質問に答えていません。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "喂，你去前面看。",
+      "pinyin": "wèi, nǐ qù qiánmiàn kàn.",
+      "translation": "おい、自分で前に行って見て。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "呼びかけがぶっきらぼうで命令形になっており、丁寧さに欠けます。",
+      "distractor_type": "too_casual"
+    },
+    {
+      "response_id": "r4",
+      "text": "火车站在前面是。",
+      "pinyin": "huǒchēzhàn zài qiánmiàn shì.",
+      "translation": "駅は前面ですは。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "述語に不要な「是」を置いており、中国語の語順として誤りです。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_07",
+      "title": "在 + 場所で場所を示す",
+      "description": "「在前面」「在后面」「在那儿」のように在+場所で位置を答えます。",
+      "examples": [
+        {
+          "chinese": "火车站在前面。",
+          "pinyin": "huǒchēzhàn zài qiánmiàn.",
+          "japanese": "駅は前にあります。",
+          "explanation": "「在+場所」でシンプルに位置を伝えます。"
+        }
+      ],
+      "related_scenes": [7]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#6366f1",
+    "estimated_time": 30
+  }
+}

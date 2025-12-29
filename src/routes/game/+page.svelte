@@ -50,6 +50,14 @@
       color: "bg-indigo-100 text-indigo-600",
       route: `${base}/game/civ-maintenance`,
     },
+    {
+      id: "conversation-simulator",
+      title: "実践会話マスター",
+      description: "会話シミュレーション",
+      icon: "fa-comments",
+      color: "bg-pink-100 text-pink-600",
+      route: `${base}/game/conversation-simulator`,
+    },
   ];
 </script>
 

@@ -1,0 +1,98 @@
+{
+  "scene_id": 8,
+  "title": "カフェでの注文",
+  "description": "カウンターで飲み物を一つ注文するシーン。",
+  "category": "restaurant",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "カフェカウンター",
+    "participants": [
+      { "role": "小姐" },
+      { "role": "顾客", "name": "あなた" }
+    ],
+    "relationship": "stranger",
+    "formality_level": "polite",
+    "emotional_tone": "neutral"
+  },
+  "dialogue": [
+    {
+      "speaker": "小姐",
+      "text": "你好！你喝什么？",
+      "pinyin": "nǐ hǎo! nǐ hē shénme?",
+      "translation": "こんにちは！何を飲みますか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "我想喝茶，谢谢。",
+      "pinyin": "wǒ xiǎng hē chá, xièxie.",
+      "translation": "お茶を飲みたいです、お願いします。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "「想喝+飲み物」で丁寧に希望を伝えています。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我想买衣服。",
+      "pinyin": "wǒ xiǎng mǎi yīfu.",
+      "translation": "服を買いたいです。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "飲み物の注文ではなく買い物の話になっており、文脈が違います。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "茶，现在。",
+      "pinyin": "chá, xiànzài.",
+      "translation": "茶、今すぐ。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "命令調でぶっきらぼうな言い方になっており、丁寧さに欠けます。",
+      "distractor_type": "too_casual"
+    },
+    {
+      "response_id": "r4",
+      "text": "我想茶喝。",
+      "pinyin": "wǒ xiǎng chá hē.",
+      "translation": "私は茶したい飲む。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "動詞と目的語の語順が逆で、自然な中国語になっていません。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_08",
+      "title": "想 + 動詞で希望を言う",
+      "description": "「想喝茶」「想吃米饭」のように想+動詞で控えめな希望を表します。",
+      "examples": [
+        {
+          "chinese": "我想喝水，谢谢。",
+          "pinyin": "wǒ xiǎng hē shuǐ, xièxie.",
+          "japanese": "水を飲みたいです、お願いします。",
+          "explanation": "丁寧に希望を述べる基本形です。"
+        }
+      ],
+      "related_scenes": [8, 9]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#f59e0b",
+    "estimated_time": 30
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "scene_id": 1,
+  "title": "基本的な挨拶",
+  "description": "初対面で挨拶を交わし、調子を尋ねるシーン。",
+  "category": "greeting",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "学校の前",
+    "participants": [
+      { "role": "学生A", "name": "小王" },
+      { "role": "学生B", "name": "あなた" }
+    ],
+    "relationship": "stranger",
+    "formality_level": "polite",
+    "emotional_tone": "friendly"
+  },
+  "dialogue": [
+    {
+      "speaker": "学生A",
+      "text": "你好！你是学生吗？",
+      "pinyin": "nǐ hǎo! nǐ shì xuésheng ma?",
+      "translation": "こんにちは！あなたは学生ですか？",
+      "order": 1
+    },
+    {
+      "speaker": "学生A",
+      "text": "认识你很高兴。你好吗？",
+      "pinyin": "rènshi nǐ hěn gāoxìng. nǐ hǎo ma?",
+      "translation": "あなたに会えてうれしいです。元気ですか？",
+      "order": 2
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "我很好，谢谢。你呢？",
+      "pinyin": "wǒ hěn hǎo, xièxie. nǐ ne?",
+      "translation": "とても元気です、ありがとう。あなたは？",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "挨拶に対して丁寧に返し、相手にも聞き返す自然な表現です。"
+    },
+    {
+      "response_id": "r2",
+      "text": "你在哪儿工作？",
+      "pinyin": "nǐ zài nǎr gōngzuò?",
+      "translation": "あなたはどこで働いていますか？",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "挨拶にまず答えず話題を変えており、文脈に合いません。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "喂，我很好。",
+      "pinyin": "wèi, wǒ hěn hǎo.",
+      "translation": "もしもし、私は元気です。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "対面の挨拶で電話の呼びかけ「喂」を使うのはくだけすぎて不自然です。",
+      "distractor_type": "too_casual"
+    },
+    {
+      "response_id": "r4",
+      "text": "我很好吗？谢谢你。",
+      "pinyin": "wǒ hěn hǎo ma? xièxie nǐ.",
+      "translation": "私は元気ですか？ありがとう。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "自分の状態を質問形にしており意味が通りにくい不自然な返しです。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_01",
+      "title": "你好吗？の返答",
+      "description": "「你好吗？」と聞かれたら「我很好，谢谢。你呢？」のようにまず自分の状態を述べてから聞き返すと丁寧です。",
+      "examples": [
+        {
+          "chinese": "你好吗？我很好，谢谢。你呢？",
+          "pinyin": "nǐ hǎo ma? wǒ hěn hǎo, xièxie. nǐ ne?",
+          "japanese": "元気ですか？私は元気です、ありがとう。あなたは？",
+          "explanation": "「呢」で相手にも同じ質問を返す基本パターンです。"
+        }
+      ],
+      "related_scenes": [1, 2]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#22c55e",
+    "estimated_time": 30
+  }
+}

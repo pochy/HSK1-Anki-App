@@ -1,0 +1,98 @@
+{
+  "scene_id": 9,
+  "title": "市場での買い物",
+  "description": "果物の値段を聞いて買うシーン。",
+  "category": "shopping",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "市場の果物売り場",
+    "participants": [
+      { "role": "老板" },
+      { "role": "顾客", "name": "あなた" }
+    ],
+    "relationship": "stranger",
+    "formality_level": "polite",
+    "emotional_tone": "neutral"
+  },
+  "dialogue": [
+    {
+      "speaker": "老板",
+      "text": "你好，你想买什么？",
+      "pinyin": "nǐ hǎo, nǐ xiǎng mǎi shénme?",
+      "translation": "こんにちは、何を買いたいですか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "我想买三个苹果。",
+      "pinyin": "wǒ xiǎng mǎi sān ge píngguǒ.",
+      "translation": "リンゴを3つ買いたいです。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "数量詞「三+个」を入れて具体的に希望を伝えています。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我想喝水。",
+      "pinyin": "wǒ xiǎng hē shuǐ.",
+      "translation": "水を飲みたいです。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "飲み物の話になっており、買い物の質問と合っていません。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "苹果，现在。",
+      "pinyin": "píngguǒ, xiànzài.",
+      "translation": "リンゴ、今すぐ。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "ぶっきらぼうな命令調で、丁寧さに欠けます。",
+      "distractor_type": "too_casual"
+    },
+    {
+      "response_id": "r4",
+      "text": "我买想三个苹果。",
+      "pinyin": "wǒ mǎi xiǎng sān ge píngguǒ.",
+      "translation": "私は買うたいリンゴ3つ。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "動詞の順序が逆で、語順の誤りになっています。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_09",
+      "title": "想买 + 数量 + 名词",
+      "description": "買いたいものを言うときは「想买+数量+个+名詞」。",
+      "examples": [
+        {
+          "chinese": "我想买三个苹果。",
+          "pinyin": "wǒ xiǎng mǎi sān ge píngguǒ.",
+          "japanese": "リンゴを3つ買いたいです。",
+          "explanation": "「想买」の後に数量と量詞を置いて具体的に伝えます。"
+        }
+      ],
+      "related_scenes": [9]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#ef4444",
+    "estimated_time": 35
+  }
+}

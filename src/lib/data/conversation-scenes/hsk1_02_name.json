@@ -1,0 +1,98 @@
+{
+  "scene_id": 2,
+  "title": "名前を尋ねる",
+  "description": "初対面でお互いの名前を交換するシーン。",
+  "category": "greeting",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "学校の入口",
+    "participants": [
+      { "role": "学生A", "name": "李华" },
+      { "role": "学生B", "name": "あなた" }
+    ],
+    "relationship": "stranger",
+    "formality_level": "polite",
+    "emotional_tone": "friendly"
+  },
+  "dialogue": [
+    {
+      "speaker": "学生A",
+      "text": "你好！我叫李华。你叫什么名字？",
+      "pinyin": "nǐ hǎo! wǒ jiào lǐ huá. nǐ jiào shénme míngzi?",
+      "translation": "こんにちは！私は李華です。あなたの名前は何ですか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "我叫田中，很高兴认识你。",
+      "pinyin": "wǒ jiào tiánzhōng, hěn gāoxìng rènshi nǐ.",
+      "translation": "田中です。あなたに会えてうれしいです。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "名前を伝えた上で挨拶を添える丁寧な返答です。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我喜欢喝茶。",
+      "pinyin": "wǒ xǐhuan hē chá.",
+      "translation": "私はお茶を飲むのが好きです。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "名前を聞かれているのに趣味を話しており、文脈に合いません。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "叫我老师。",
+      "pinyin": "jiào wǒ lǎoshī.",
+      "translation": "私を先生と呼んでください。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "初対面で役職呼びを求めるのは不自然で丁寧さを欠きます。",
+      "distractor_type": "too_casual"
+    },
+    {
+      "response_id": "r4",
+      "text": "我叫名字田中。",
+      "pinyin": "wǒ jiào míngzi tiánzhōng.",
+      "translation": "私は名前田中です。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "語順が不自然で、名詞「名字」を重ねてしまっています。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_02",
+      "title": "我叫 + 名前",
+      "description": "自分の名前を言う基本形は「我叫〜」。その後に軽い挨拶を添えると丁寧です。",
+      "examples": [
+        {
+          "chinese": "我叫王明，很高兴认识你。",
+          "pinyin": "wǒ jiào wáng míng, hěn gāoxìng rènshi nǐ.",
+          "japanese": "王明です。お会いできてうれしいです。",
+          "explanation": "「我叫〜」で名乗り、感想を続けるシンプルな型です。"
+        }
+      ],
+      "related_scenes": [1, 2, 3]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#22c55e",
+    "estimated_time": 30
+  }
+}

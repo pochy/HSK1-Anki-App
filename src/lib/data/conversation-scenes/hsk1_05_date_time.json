@@ -1,0 +1,98 @@
+{
+  "scene_id": 5,
+  "title": "日時を尋ねる",
+  "description": "今日の日付と曜日を尋ねるシーン。",
+  "category": "daily_life",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "学校の教室",
+    "participants": [
+      { "role": "同学A" },
+      { "role": "同学B", "name": "あなた" }
+    ],
+    "relationship": "friend",
+    "formality_level": "casual",
+    "emotional_tone": "neutral"
+  },
+  "dialogue": [
+    {
+      "speaker": "同学A",
+      "text": "今天几月几号？星期几？",
+      "pinyin": "jīntiān jǐ yuè jǐ hào? xīngqī jǐ?",
+      "translation": "今日は何月何日？何曜日？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "今天十二月二十九号，星期一。",
+      "pinyin": "jīntiān shí'èr yuè èrshíjiǔ hào, xīngqī yī.",
+      "translation": "今日は12月29日、月曜日です。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "数字を並べて日付と曜日を簡潔に伝えています。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我七岁。",
+      "pinyin": "wǒ qī suì.",
+      "translation": "私は七歳です。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "年齢の答えになっており、質問に合っていません。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "对不起，我不说。",
+      "pinyin": "duìbuqǐ, wǒ bù shuō.",
+      "translation": "すみません、言いません。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "友達同士で日付を聞かれて黙るのはよそよそしく、不自然です。",
+      "distractor_type": "too_formal"
+    },
+    {
+      "response_id": "r4",
+      "text": "今天几号月几？",
+      "pinyin": "jīntiān jǐ hào yuè jǐ?",
+      "translation": "今日は何日月何ですか？",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "語順が崩れており、意味が取りにくい誤りです。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_05",
+      "title": "几月几号・星期几",
+      "description": "日付は「数字+月+数字+号」、曜日は「星期+数字」で答えます。",
+      "examples": [
+        {
+          "chinese": "今天三月五号，星期二。",
+          "pinyin": "jīntiān sān yuè wǔ hào, xīngqī èr.",
+          "japanese": "今日は3月5日、火曜日です。",
+          "explanation": "月→号→曜日の順で並べます。"
+        }
+      ],
+      "related_scenes": [5]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#3b82f6",
+    "estimated_time": 35
+  }
+}

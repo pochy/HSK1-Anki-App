@@ -1,0 +1,98 @@
+{
+  "scene_id": 4,
+  "title": "数字と年齢",
+  "description": "子どもに年齢を聞く簡単なやりとり。",
+  "category": "daily_life",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "公園",
+    "participants": [
+      { "role": "妈妈" },
+      { "role": "孩子", "name": "あなた" }
+    ],
+    "relationship": "family",
+    "formality_level": "casual",
+    "emotional_tone": "friendly"
+  },
+  "dialogue": [
+    {
+      "speaker": "妈妈",
+      "text": "你好！你几岁？",
+      "pinyin": "nǐ hǎo! nǐ jǐ suì?",
+      "translation": "こんにちは！何歳ですか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "我七岁。",
+      "pinyin": "wǒ qī suì.",
+      "translation": "私は七歳です。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "「我+数字+岁」の基本形で年齢を答えています。"
+    },
+    {
+      "response_id": "r2",
+      "text": "现在八点。",
+      "pinyin": "xiànzài bā diǎn.",
+      "translation": "今は8時です。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "時間の答えになっており、年齢の質問と合っていません。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "对不起，我不说。",
+      "pinyin": "duìbuqǐ, wǒ bù shuō.",
+      "translation": "すみません、言いません。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "家族との会話で答えないのはよそよそしく、不自然です。",
+      "distractor_type": "too_formal"
+    },
+    {
+      "response_id": "r4",
+      "text": "我岁七。",
+      "pinyin": "wǒ suì qī.",
+      "translation": "私は歳七です。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "語順が逆になっており、正しい年齢表現になっていません。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_04",
+      "title": "几岁？の答え方",
+      "description": "年齢を聞く「你几岁？」には「我+数字+岁」で答えます。",
+      "examples": [
+        {
+          "chinese": "你几岁？我六岁。",
+          "pinyin": "nǐ jǐ suì? wǒ liù suì.",
+          "japanese": "何歳？6歳です。",
+          "explanation": "数字の位置を変えないシンプルな型です。"
+        }
+      ],
+      "related_scenes": [4]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#3b82f6",
+    "estimated_time": 25
+  }
+}

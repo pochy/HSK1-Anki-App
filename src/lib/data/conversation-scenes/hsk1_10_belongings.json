@@ -1,0 +1,98 @@
+{
+  "scene_id": 10,
+  "title": "持ち物の確認",
+  "description": "机の上の物が自分のものか確かめるシーン。",
+  "category": "daily_life",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "教室の机",
+    "participants": [
+      { "role": "同学A" },
+      { "role": "同学B", "name": "あなた" }
+    ],
+    "relationship": "friend",
+    "formality_level": "casual",
+    "emotional_tone": "neutral"
+  },
+  "dialogue": [
+    {
+      "speaker": "同学A",
+      "text": "这是你的杯子吗？",
+      "pinyin": "zhè shì nǐ de bēizi ma?",
+      "translation": "これはあなたのコップですか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "是的，这是我的杯子，谢谢。",
+      "pinyin": "shì de, zhè shì wǒ de bēizi, xièxie.",
+      "translation": "はい、私のコップです。ありがとう。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "肯定して所有を示し、感謝も添えた丁寧な答えです。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我在学汉语。",
+      "pinyin": "wǒ zài xué hànyǔ.",
+      "translation": "私は中国語を勉強しています。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "質問と関係のない話題で、文脈から外れています。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "喂，不是我的。",
+      "pinyin": "wèi, bú shì wǒ de.",
+      "translation": "おい、私のではないよ。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "ぶっきらぼうな呼びかけで断っており、丁寧さに欠けます。",
+      "distractor_type": "too_casual"
+    },
+    {
+      "response_id": "r4",
+      "text": "这是杯子我的。",
+      "pinyin": "zhè shì bēizi wǒ de.",
+      "translation": "これはコップ私のです。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "所有を表す「的」の位置が間違っており、不自然な語順です。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_10",
+      "title": "这是 + 名词 + 的",
+      "description": "持ち物を示すときは「这是我的杯子」のように所有を「的」でつなぎます。",
+      "examples": [
+        {
+          "chinese": "这是我的桌子。",
+          "pinyin": "zhè shì wǒ de zhuōzi.",
+          "japanese": "これは私の机です。",
+          "explanation": "所有を示す「的」が名詞の前に入ります。"
+        }
+      ],
+      "related_scenes": [6, 10]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#3b82f6",
+    "estimated_time": 25
+  }
+}

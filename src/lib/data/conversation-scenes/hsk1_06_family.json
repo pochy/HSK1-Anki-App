@@ -1,0 +1,105 @@
+{
+  "scene_id": 6,
+  "title": "家族の紹介",
+  "description": "写真を見せながら家族を紹介するシーン。",
+  "category": "daily_life",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "家のリビング",
+    "participants": [
+      { "role": "朋友" },
+      { "role": "你" }
+    ],
+    "relationship": "friend",
+    "formality_level": "casual",
+    "emotional_tone": "friendly"
+  },
+  "dialogue": [
+    {
+      "speaker": "朋友",
+      "text": "你看，这是我爸爸，这是我妈妈。",
+      "pinyin": "nǐ kàn, zhè shì wǒ bàba, zhè shì wǒ māma.",
+      "translation": "見て、これが私の父で、これが母です。",
+      "order": 1
+    },
+    {
+      "speaker": "朋友",
+      "text": "这个人是谁？",
+      "pinyin": "zhè ge rén shì shuí?",
+      "translation": "この人は誰？",
+      "order": 2
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "这是我儿子。",
+      "pinyin": "zhè shì wǒ érzi.",
+      "translation": "これは私の息子です。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "「这是+家族」の基本形で、シンプルに紹介しています。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我喜欢吃苹果。",
+      "pinyin": "wǒ xǐhuan chī píngguǒ.",
+      "translation": "私はリンゴを食べるのが好きです。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "家族紹介の質問と関係ない話題に変えてしまっています。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "请坐。",
+      "pinyin": "qǐng zuò.",
+      "translation": "おかけください。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "人物紹介の質問に対して着席を促すのは文脈も丁寧さもずれて不自然です。",
+      "distractor_type": "too_formal"
+    },
+    {
+      "response_id": "r4",
+      "text": "我儿子是这是。",
+      "pinyin": "wǒ érzi shì zhè shì.",
+      "translation": "私の息子はこれですはです。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "語順が乱れており、主語と述語の位置が間違っています。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_06",
+      "title": "这是 + 人/物",
+      "description": "写真を指し示すときは「这是〜」。家族紹介でも同じ形が使えます。",
+      "examples": [
+        {
+          "chinese": "这是我妈妈。",
+          "pinyin": "zhè shì wǒ māma.",
+          "japanese": "これは私の母です。",
+          "explanation": "指さしながら紹介する定型表現です。"
+        }
+      ],
+      "related_scenes": [6, 10]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#3b82f6",
+    "estimated_time": 35
+  }
+}

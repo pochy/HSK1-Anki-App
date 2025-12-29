@@ -1,0 +1,98 @@
+{
+  "scene_id": 3,
+  "title": "国籍と出身",
+  "description": "相手がどこの国の人か尋ね、自分の出身を伝えるシーン。",
+  "category": "greeting",
+  "difficulty_level": 1,
+  "context": {
+    "setting": "語学交流会",
+    "participants": [
+      { "role": "参加者A", "name": "小李" },
+      { "role": "参加者B", "name": "あなた" }
+    ],
+    "relationship": "stranger",
+    "formality_level": "polite",
+    "emotional_tone": "neutral"
+  },
+  "dialogue": [
+    {
+      "speaker": "参加者A",
+      "text": "你好！你是中国人吗？",
+      "pinyin": "nǐ hǎo! nǐ shì zhōngguó rén ma?",
+      "translation": "こんにちは！あなたは中国の人ですか？",
+      "order": 1
+    }
+  ],
+  "options": [
+    {
+      "response_id": "r1",
+      "text": "不是，我是日本人。",
+      "pinyin": "bú shì, wǒ shì rìběn rén.",
+      "translation": "いいえ、日本人です。",
+      "is_correct": true,
+      "rating": "perfect",
+      "explanation": "否定してから自分の出身を簡潔に伝える標準的な答え方です。"
+    },
+    {
+      "response_id": "r2",
+      "text": "我在学校工作。",
+      "pinyin": "wǒ zài xuéxiào gōngzuò.",
+      "translation": "私は学校で働いています。",
+      "is_correct": false,
+      "rating": "ok",
+      "explanation": "出身を聞かれているのに仕事の話をしており、文脈から外れています。",
+      "distractor_type": "wrong_context"
+    },
+    {
+      "response_id": "r3",
+      "text": "对不起，我不说。",
+      "pinyin": "duìbuqǐ, wǒ bù shuō.",
+      "translation": "すみません、言いません。",
+      "is_correct": false,
+      "rating": "good",
+      "explanation": "丁寧ではありますが、自己紹介の場面で答えないのは不自然です。",
+      "distractor_type": "too_formal"
+    },
+    {
+      "response_id": "r4",
+      "text": "我不中国人。",
+      "pinyin": "wǒ bù zhōngguó rén.",
+      "translation": "私は中国の人ではない。",
+      "is_correct": false,
+      "rating": "poor",
+      "explanation": "「是」を抜いた誤りで、文として不自然です。",
+      "distractor_type": "grammar_error"
+    }
+  ],
+  "grammar_points": [
+    {
+      "point_id": "grammar_hsk1_03",
+      "title": "是/不是 の使い分け",
+      "description": "出身や属性を言うときは「我是〜」。否定は「我不是〜」。",
+      "examples": [
+        {
+          "chinese": "我是中国人，不是老师。",
+          "pinyin": "wǒ shì zhōngguó rén, bú shì lǎoshī.",
+          "japanese": "私は中国人で、先生ではありません。",
+          "explanation": "肯定と否定を並べて、属性をはっきり示しています。"
+        }
+      ],
+      "related_scenes": [3]
+    }
+  ],
+  "srs_data": {
+    "next_review": "2025-12-29T08:12:47.000Z",
+    "interval": 0,
+    "stability": 0,
+    "difficulty": 0,
+    "streak": 0,
+    "review_count": 0
+  },
+  "metadata": {
+    "created_date": "2025-12-29T08:12:47.000Z",
+    "total_plays": 0,
+    "perfect_count": 0,
+    "category_color": "#22c55e",
+    "estimated_time": 35
+  }
+}
