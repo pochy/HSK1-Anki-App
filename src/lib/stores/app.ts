@@ -7,10 +7,17 @@ const storedMasteredIds: number[] = browser
   : [];
 
 export const masteredIds = writable<number[]>(storedMasteredIds);
+const storedDifficultIds: number[] = browser
+  ? JSON.parse(localStorage.getItem("hsk1_difficult_ids") || "[]")
+  : [];
+export const difficultIds = writable<number[]>(storedDifficultIds);
 
 if (browser) {
   masteredIds.subscribe((value) => {
     localStorage.setItem("hsk1_mastered_ids", JSON.stringify(value));
+  });
+  difficultIds.subscribe((value) => {
+    localStorage.setItem("hsk1_difficult_ids", JSON.stringify(value));
   });
 }
 

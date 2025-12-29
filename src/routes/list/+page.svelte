@@ -4,6 +4,7 @@
     headerTitle,
     showBottomNav,
     masteredIds,
+    difficultIds,
     searchQuery,
   } from "$lib/stores/app";
   import { hsk1 } from "$lib/data/hsk1.js";
@@ -12,8 +13,13 @@
   import type { WordItem } from "$lib/types/word";
 
   let items = $state<WordItem[]>([]);
+  let difficultyFilter =
+    $state<"all" | "difficult" | "not_difficult">("all");
   let filteredItems = $derived(
     items.filter((item) => {
+      const isDifficult = $difficultIds.includes(item.id);
+      if (difficultyFilter === "difficult" && !isDifficult) return false;
+      if (difficultyFilter === "not_difficult" && isDifficult) return false;
       if (!$searchQuery) return true;
       const q = $searchQuery.toLowerCase();
       return (
@@ -70,6 +76,32 @@
         </button>
       {/if}
     </div>
+    <div class="flex gap-2 mt-3">
+      <button
+        class="px-3 py-2 rounded-full text-sm font-semibold border {difficultyFilter === 'all'
+          ? 'bg-primary text-white border-primary shadow-sm'
+          : 'bg-white text-gray-600 border-gray-200'}"
+        onclick={() => (difficultyFilter = "all")}
+      >
+        すべて
+      </button>
+      <button
+        class="px-3 py-2 rounded-full text-sm font-semibold border {difficultyFilter === 'difficult'
+          ? 'bg-red-500 text-white border-red-500 shadow-sm'
+          : 'bg-white text-gray-600 border-gray-200'}"
+        onclick={() => (difficultyFilter = "difficult")}
+      >
+        苦手のみ
+      </button>
+      <button
+        class="px-3 py-2 rounded-full text-sm font-semibold border {difficultyFilter === 'not_difficult'
+          ? 'bg-gray-900 text-white border-gray-900 shadow-sm'
+          : 'bg-white text-gray-600 border-gray-200'}"
+        onclick={() => (difficultyFilter = "not_difficult")}
+      >
+        苦手以外
+      </button>
+    </div>
   </div>
 
   {#each Object.entries(groupedItems) as [category, group]}
@@ -93,6 +125,7 @@
       >
         {#each group as item, idx}
           {@const isMastered = $masteredIds.includes(item.id)}
+          {@const isDifficult = $difficultIds.includes(item.id)}
           <div
             class="flex items-center justify-between p-4 {idx < group.length - 1
               ? 'border-b border-gray-100'
@@ -110,6 +143,13 @@
                 </span>
                 {#if isMastered}
                   <i class="fas fa-check-circle text-green-500 ml-2"></i>
+                {/if}
+                {#if isDifficult}
+                  <span
+                    class="ml-2 text-[11px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100"
+                  >
+                    苦手
+                  </span>
                 {/if}
               </div>
               <div class="text-sm text-gray-600">

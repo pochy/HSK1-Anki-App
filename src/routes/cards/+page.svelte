@@ -5,6 +5,7 @@
     showBottomNav,
     currentCategory,
     masteredIds,
+    difficultIds,
     totalWords,
     learnedWords,
     muted,
@@ -31,6 +32,9 @@
   let currentItem = $derived(items[currentIndex]);
   let isMastered = $derived(
     currentItem ? $masteredIds.includes(currentItem.id) : false
+  );
+  let isDifficult = $derived(
+    currentItem ? $difficultIds.includes(currentItem.id) : false
   );
 
   // カスタム戻るハンドラを更新する関数
@@ -92,13 +96,15 @@
   }
 
   function startReview() {
-    const unmastered = rawData.filter((i) => !$masteredIds.includes(i.id));
-    if (unmastered.length === 0) {
-      alert("素晴らしい！全ての単語を学習済みです。");
+    const difficultItems = rawData.filter((i) =>
+      $difficultIds.includes(i.id)
+    );
+    if (difficultItems.length === 0) {
+      alert("苦手な単語がありません。カードで苦手マークを付けてください。");
       return;
     }
     // ランダムに10語選択
-    items = shuffle([...unmastered]).slice(0, 10);
+    items = shuffle([...difficultItems]).slice(0, 10);
     $currentCategory = "review";
     currentIndex = 0;
     uniqueKey = 0;
@@ -187,6 +193,17 @@
       }
     });
     updateLearnedCount();
+  }
+
+  function toggleDifficult() {
+    if (!currentItem) return;
+
+    difficultIds.update((ids) => {
+      if (ids.includes(currentItem.id)) {
+        return ids.filter((id) => id !== currentItem.id);
+      }
+      return [...ids, currentItem.id];
+    });
   }
 
   function speak(text: string) {
@@ -403,6 +420,20 @@
                   </div>
                 {/if}
               </div>
+
+              <!-- Difficult Button -->
+              <button
+                class="absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center transition-all {isDifficult
+                  ? 'bg-red-100 text-red-500'
+                  : 'bg-gray-100 text-gray-300 hover:bg-gray-200'}"
+                onclick={(e) => {
+                  e.stopPropagation();
+                  toggleDifficult();
+                }}
+                aria-label={isDifficult ? "苦手を解除" : "苦手に登録"}
+              >
+                <i class="fas fa-flag"></i>
+              </button>
 
               <!-- Master Button -->
               <button
