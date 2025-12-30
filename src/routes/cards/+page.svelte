@@ -18,6 +18,10 @@
   import { goto } from "$app/navigation";
   import { base } from "$app/paths";
   import type { WordItem } from "$lib/types/word";
+  import { SPECIFIC_HINTS } from "$lib/data/hints";
+
+  // モジュールレベルの定数: パフォーマンス最適化
+  const TONE_PATTERN = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g;
 
   let rawData = $state<WordItem[]>([]);
   let items = $state<WordItem[]>([]);
@@ -36,6 +40,7 @@
   let isDifficult = $derived(
     currentItem ? $difficultIds.includes(currentItem.id) : false
   );
+  let showHint = $state(false);
 
   // カスタム戻るハンドラを更新する関数
   function updateBackHandler() {
@@ -148,6 +153,7 @@
   function nextCard() {
     direction = 1;
     showingMeaning = false;
+    showHint = false;
     if (currentIndex < items.length - 1) {
       currentIndex++;
     } else {
@@ -162,6 +168,7 @@
   function prevCard() {
     direction = -1;
     showingMeaning = false;
+    showHint = false;
     if (currentIndex > 0) {
       currentIndex--;
     } else {
@@ -237,6 +244,67 @@
       return [{ chinese: item.example, japanese: item.exampleMeaning }];
     }
     return [];
+  }
+
+  // ヒント情報を生成（$derivedでメモ化してパフォーマンス改善）
+  let currentHints = $derived.by(() => {
+    if (!currentItem) return [];
+
+    const hints: string[] = [];
+    const char = currentItem.char;
+    const pinyin = currentItem.pinyin;
+
+    // 文字数に基づいたヒント
+    if (char.length === 1) {
+      hints.push(`💡 これは一文字の単語です。基本的な概念を表します。`);
+    } else if (char.length === 2) {
+      hints.push(`💡 二文字の単語です。各文字の意味を理解すると覚えやすくなります。`);
+    }
+
+    // カテゴリー別のヒント
+    if (currentItem.category.includes("動詞")) {
+      hints.push(
+        `🎯 動詞なので、主に動作や行為を表します。文中では「〜する」という形で使われます。`
+      );
+    } else if (currentItem.category.includes("名詞")) {
+      hints.push(`🎯 名詞なので、人・物・場所などを表します。`);
+    } else if (currentItem.category.includes("形容詞")) {
+      hints.push(
+        `🎯 形容詞なので、状態や性質を表します。「很 + 形容詞」の形でよく使われます。`
+      );
+    }
+
+    // 特定の単語に対する個別ヒント（モジュールレベルの定数を使用）
+    if (SPECIFIC_HINTS[char]) {
+      hints.push(SPECIFIC_HINTS[char]);
+    }
+
+    // ピンインに関するヒント
+    if (pinyin) {
+      const tones = pinyin.match(TONE_PATTERN);
+      if (tones && tones.length > 0) {
+        hints.push(
+          `🎵 ピンイン "${pinyin}" に注意。声調を正しく発音することが重要です。`
+        );
+      }
+    }
+
+    // 一般的な学習アドバイス
+    hints.push(`✍️ 何度も書いて、声に出して読むことで記憶に定着しやすくなります。`);
+
+    // 例文がある場合のヒント
+    const examples = getExamples(currentItem);
+    if (examples.length > 0) {
+      hints.push(
+        `📚 例文を使って実際の使い方を確認しましょう。文脈で覚えると忘れにくくなります。`
+      );
+    }
+
+    return hints;
+  });
+
+  function toggleHint() {
+    showHint = !showHint;
   }
 </script>
 
@@ -450,10 +518,56 @@
               >
                 <i class="fas fa-check"></i>
               </button>
+
+              <!-- Hint Button -->
+              {#if showingMeaning}
+                <button
+                  class="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-2 rounded-full flex items-center gap-2 transition-all {showHint
+                    ? 'bg-yellow-100 text-yellow-600'
+                    : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}"
+                  onclick={(e) => {
+                    e.stopPropagation();
+                    toggleHint();
+                  }}
+                  onkeydown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleHint();
+                    }
+                  }}
+                  aria-label={showHint ? "ヒントを閉じる" : "ヒントを表示"}
+                >
+                  <i class="fas fa-lightbulb"></i>
+                  <span class="text-sm font-bold"
+                    >{showHint ? "閉じる" : "ヒント"}</span
+                  >
+                </button>
+              {/if}
             </div>
           {/key}
         {/if}
       </div>
+
+      <!-- Hint Panel -->
+      {#if showHint && currentItem}
+        <div
+          class="absolute bottom-24 left-4 right-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-2xl border-2 border-yellow-200 p-4 z-20 max-h-64 overflow-y-auto"
+          transition:fly={{ y: 50, duration: 300 }}
+        >
+          <div class="flex items-start gap-2 mb-3">
+            <i class="fas fa-lightbulb text-yellow-500 text-xl mt-1"></i>
+            <h3 class="font-bold text-gray-800 text-lg">学習のヒント</h3>
+          </div>
+          <div class="space-y-2">
+            {#each currentHints as hint}
+              <div class="bg-white bg-opacity-60 rounded-lg p-3 text-sm text-gray-700 leading-relaxed">
+                {hint}
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
 
       <!-- Controls -->
       <div
